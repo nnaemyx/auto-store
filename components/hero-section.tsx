@@ -31,7 +31,7 @@ const HeroSection = () => {
             </p>
           </div>
           <div>
-            <Button size="lg" className="bg-white text-black hover:bg-gray-200">
+            <Button size="lg" className="bg-white w-[186px] text-black hover:bg-gray-200">
               Shop Now
             </Button>
           </div>
