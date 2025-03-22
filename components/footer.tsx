@@ -1,103 +1,96 @@
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-100">
-      <div className="container px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <Link href="/" className="inline-block mb-6">
-              <Image src="/images/logo.png" alt="Auto Store" width={200} height={80} className="dark:hidden" />
-            </Link>
-            <p className="text-sm text-gray-600 mb-4">Your one-stop shop for quality auto parts and accessories.</p>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-gray-600 hover:text-brand-red">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-600 hover:text-brand-red">
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-600 hover:text-brand-red">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-600 hover:text-brand-red">
-                <Youtube className="h-5 w-5" />
-              </Link>
-            </div>
+    <footer className="md:p-[60px]">
+      <div className="bg-[#F5F5F5] md:p-[60px] rounded-[40px]">
+        {/* Desktop and Mobile Layout */}
+        <div className="w-full flex justify-between md:flex-row flex-col items-center text-center md:text-left">
+          <div className="flex justify-center md:justify-start">
+            <Image
+              src="/images/footer logo.png"
+              alt="Auto Store"
+              width={243.23}
+              height={93}
+              className="h-16 w-auto"
+            />
           </div>
-
-          <div>
-            <h3 className="text-lg font-medium mb-6">Quick Links</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/" className="text-sm text-gray-600 hover:text-brand-red">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-brand-red">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/brands" className="text-sm text-gray-600 hover:text-brand-red">
-                  Car Brands
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-sm text-gray-600 hover:text-brand-red">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium mb-6">Categories</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/category/interior" className="text-sm text-gray-600 hover:text-brand-red">
-                  Interior Accessories
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/exterior" className="text-sm text-gray-600 hover:text-brand-red">
-                  Exterior Accessories
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/engine" className="text-sm text-gray-600 hover:text-brand-red">
-                  Engine Parts
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/tires" className="text-sm text-gray-600 hover:text-brand-red">
-                  Tires & Wheels
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium mb-6">Contact Us</h3>
-            <address className="not-italic">
-              <p className="text-sm text-gray-600 mb-2">123 Auto Avenue</p>
-              <p className="text-sm text-gray-600 mb-2">Auto City, AU 12345</p>
-              <p className="text-sm text-gray-600 mb-2">Email: info@autostore.com</p>
-              <p className="text-sm text-gray-600">Phone: (123) 456-7890</p>
-            </address>
-          </div>
+          <p className="text-sm text-gray-700 max-w-[478px]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis
+          </p>
         </div>
+        <div className="flex flex-col items-center md:mt-[120px] md:items-start md:flex-row md:justify-between">
 
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-center text-gray-600">Copyright 2025 Auto Store. All rights reserved.</p>
+          {/* Categories */}
+          <div>
+            <h3 className="font-medium mb-3">Categories</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/category/interior"
+                  className="hover:text-brand-red"
+                >
+                  Interior accessories
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/category/exterior"
+                  className="hover:text-brand-red"
+                >
+                  Exterior accessories
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Information - Center on mobile, middle on desktop */}
+          <div className="text-center md:text-center mb-8 md:mb-0">
+            <h3 className="font-medium mb-3">Contact Us</h3>
+            <a
+              href="mailto:contactadmintobuy@autostore.com"
+              className="block underline mb-2 hover:text-brand-red"
+            >
+              contactadmintobuy@autostore.com
+            </a>
+            <p>+234 70 6878 9878</p>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h3 className="font-medium mb-3 md:whitespace-nowrap">
+              Terms of agreement
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/cookies" className="hover:text-brand-red">
+                  Cookies
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy-policy" className="hover:text-brand-red">
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
+      {/* Auto-Store Text Logo */}
+      <div className="mt-12 mb-4 text-center">
+        <Image
+          src="/images/footer img.png"
+          alt="Auto Store"
+          width={1320}
+          height={381}
+          priority
+        />
+      </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
-
+export default Footer;

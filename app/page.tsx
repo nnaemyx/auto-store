@@ -1,10 +1,7 @@
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import BrandSlider from "@/components/brand-slider"
-import ProductCard from "@/components/product-card"
 import HeroSection from "@/components/hero-section"
 
 export default function Home() {
@@ -127,44 +124,6 @@ export default function Home() {
                 </CardContent>
               </Card>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Best Selling Products */}
-      <section className="py-12 px-4">
-        <div className="container mx-auto">
-          <h2 className="text-2xl font-bold mb-8">Best Selling Items</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <ProductCard
-              name="High Performance Alternator"
-              price={129.99}
-              image="/placeholder.svg?height=200&width=200"
-              tags={["Camry", "Interior", "Salon"]}
-            />
-            <ProductCard
-              name="Heavy Duty Differential"
-              price={249.99}
-              image="/placeholder.svg?height=200&width=200"
-              tags={["Camry", "Interior", "Salon"]}
-            />
-            <ProductCard
-              name="Premium Clutch Kit"
-              price={189.99}
-              image="/placeholder.svg?height=200&width=200"
-              tags={["Camry", "Interior", "Salon"]}
-            />
-            <ProductCard
-              name="Performance Brake Rotors"
-              price={99.99}
-              image="/placeholder.svg?height=200&width=200"
-              tags={["Camry", "Interior", "Salon"]}
-            />
-          </div>
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" className="gap-2">
-              See more <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </section>
