@@ -39,7 +39,7 @@ export default function SecuritySetupForm({ initialData, onSubmit }: SecuritySet
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 mx-auto max-w-[445px]">
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
 
       <div className="space-y-2">

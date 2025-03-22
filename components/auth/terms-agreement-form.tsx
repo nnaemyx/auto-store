@@ -16,7 +16,7 @@ export default function TermsAgreementForm({ isLoading, onSubmit }: TermsAgreeme
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[800px] mx-auto">
       <div className="text-gray-700 space-y-4">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore

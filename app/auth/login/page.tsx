@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,16 +37,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center">
-            <Image src="/images/logo-icon.png" alt="Auto Store" width={50} height={38} priority />
-          </Link>
-          <Link href="/auth/signup" className="text-sm font-medium">
-            Create account
-          </Link>
-        </div>
-      </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-8">

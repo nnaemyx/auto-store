@@ -14,7 +14,7 @@ export default function Home() {
       <HeroSection />
 
       {/* Car Brands */}
-      <section className="py-20 px-10">
+      <section className="md:py-20 py-25 md:px-10 px-4">
         
           <BrandSlider />
        

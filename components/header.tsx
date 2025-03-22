@@ -41,7 +41,7 @@ const Header = () => {
         isScrolled ? "bg-white shadow-md" : "bg-white"
       }`}
     >
-      <div className="container flex items-center justify-between px-5 md:px-5">
+      <div className="flex items-center w-full justify-between px-5 md:px-5">
         <div className="flex items-center gap-6 py-[13.18px]">
           <Link href="/" className="flex items-center">
             <Image
@@ -53,7 +53,7 @@ const Header = () => {
             />
           </Link>
         </div>
-        <nav className="hidden md:flex items-center gap-3">
+        <nav className="hidden md:flex items-center justify-center text-center gap-3">
           <Link
             href="/brands"
             className={`text-sm font-[400] px-[8px] py-[21.5px] tracking-[-2.5%] transition-colors hover:text-primary ${
@@ -119,7 +119,7 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle className="text-[18px] font-medium">Menu</SheetTitle>
               </SheetHeader>
               <NavMenu />
             </SheetContent>

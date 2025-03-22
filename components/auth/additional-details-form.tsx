@@ -1,20 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { SignupFormData } from "@/app/auth/signup/page"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { SignupFormData } from "@/app/auth/signup/page";
+import { Textarea } from "@/components/ui/textarea";
 
 type AdditionalDetailsFormProps = {
-  initialData: SignupFormData
-  onSubmit: (data: Partial<SignupFormData>) => void
-}
+  initialData: SignupFormData;
+  onSubmit: (data: Partial<SignupFormData>) => void;
+};
 
-export default function AdditionalDetailsForm({ initialData, onSubmit }: AdditionalDetailsFormProps) {
+export default function AdditionalDetailsForm({
+  initialData,
+  onSubmit,
+}: AdditionalDetailsFormProps) {
   const [formData, setFormData] = useState({
     phone: initialData.phone || "",
     dateOfBirth: initialData.dateOfBirth || { day: "", month: "", year: "" },
@@ -26,24 +35,25 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
       postalCode: "",
       address: "",
     },
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   const handleSkip = () => {
-    onSubmit(formData)
-  }
+    onSubmit(formData);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8 md:px-[108px]">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
           <h3 className="text-lg font-medium">Personal details</h3>
+        <div className="flex gap-[32px] md:flex-row flex-col">
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <label htmlFor="phone" className="block text-sm font-medium">
               Phone number
             </label>
@@ -51,11 +61,14 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
               id="phone"
               placeholder="+234 - 000 0000 000"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              className="border"
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <label className="block text-sm font-medium">Date of birth</label>
             <div className="grid grid-cols-3 gap-2">
               <Input
@@ -64,9 +77,13 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, day: e.target.value },
+                    dateOfBirth: {
+                      ...formData.dateOfBirth,
+                      day: e.target.value,
+                    },
                   })
                 }
+                className="border"
               />
               <Input
                 placeholder="MM"
@@ -74,9 +91,13 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, month: e.target.value },
+                    dateOfBirth: {
+                      ...formData.dateOfBirth,
+                      month: e.target.value,
+                    },
                   })
                 }
+                className="border"
               />
               <Input
                 placeholder="YYYY"
@@ -84,20 +105,27 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, year: e.target.value },
+                    dateOfBirth: {
+                      ...formData.dateOfBirth,
+                      year: e.target.value,
+                    },
                   })
                 }
+                className="border"
               />
             </div>
           </div>
+        </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium">Gender</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 max-w-[264px]">
               <Button
                 type="button"
                 variant={formData.gender === "male" ? "default" : "outline"}
-                className={formData.gender === "male" ? "bg-black text-white" : ""}
+                className={
+                  formData.gender === "male" ? "bg-black text-white" : ""
+                }
                 onClick={() => setFormData({ ...formData, gender: "male" })}
               >
                 Male
@@ -105,7 +133,9 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
               <Button
                 type="button"
                 variant={formData.gender === "female" ? "default" : "outline"}
-                className={formData.gender === "female" ? "bg-black text-white" : ""}
+                className={
+                  formData.gender === "female" ? "bg-black text-white" : ""
+                }
                 onClick={() => setFormData({ ...formData, gender: "female" })}
               >
                 Female
@@ -116,91 +146,112 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
 
         <div className="space-y-6">
           <h3 className="text-lg font-medium">Shipping details</h3>
+          <div className="flex gap-[32px]">
+            <div className="space-y-2 w-full">
+              <label htmlFor="state" className="block text-sm font-medium">
+                State of residence
+              </label>
+              <Select
+                value={formData.shippingDetails.state}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    shippingDetails: {
+                      ...formData.shippingDetails,
+                      state: value,
+                    },
+                  })
+                }
+              >
+                <SelectTrigger id="state" className="w-full">
+                  <SelectValue placeholder="State" />
+                </SelectTrigger>
+                <SelectContent className="bg-white w-full">
+                  <SelectItem value="lagos">Lagos</SelectItem>
+                  <SelectItem value="abuja">Abuja</SelectItem>
+                  <SelectItem value="port-harcourt">Port Harcourt</SelectItem>
+                  <SelectItem value="kano">Kano</SelectItem>
+                  <SelectItem value="ibadan">Ibadan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="state" className="block text-sm font-medium">
-              State of residence
-            </label>
-            <Select
-              value={formData.shippingDetails.state}
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, state: value },
-                })
-              }
-            >
-              <SelectTrigger id="state">
-                <SelectValue placeholder="State" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lagos">Lagos</SelectItem>
-                <SelectItem value="abuja">Abuja</SelectItem>
-                <SelectItem value="port-harcourt">Port Harcourt</SelectItem>
-                <SelectItem value="kano">Kano</SelectItem>
-                <SelectItem value="ibadan">Ibadan</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2 w-full">
+              <label htmlFor="city" className="block text-sm font-medium">
+                Town/City
+              </label>
+              <Select
+                value={formData.shippingDetails.city}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    shippingDetails: {
+                      ...formData.shippingDetails,
+                      city: value,
+                    },
+                  })
+                }
+              >
+                <SelectTrigger id="city" className="w-full">
+                  <SelectValue placeholder="Town or city" />
+                </SelectTrigger>
+                <SelectContent className="bg-white w-full">
+                  <SelectItem value="ikeja">Ikeja</SelectItem>
+                  <SelectItem value="lekki">Lekki</SelectItem>
+                  <SelectItem value="victoria-island">
+                    Victoria Island
+                  </SelectItem>
+                  <SelectItem value="ikoyi">Ikoyi</SelectItem>
+                  <SelectItem value="yaba">Yaba</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+          <div className="flex gap-[32px]">
+            <div className="space-y-2 w-full">
+              <label
+                htmlFor="shippingPhone"
+                className="block text-sm font-medium"
+              >
+                Phone number
+              </label>
+              <Input
+                id="shippingPhone"
+                placeholder="+234 - 000 0000 000"
+                value={formData.shippingDetails.phone}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    shippingDetails: {
+                      ...formData.shippingDetails,
+                      phone: e.target.value,
+                    },
+                  })
+                }
+                className="w-full border"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="city" className="block text-sm font-medium">
-              Town/City
-            </label>
-            <Select
-              value={formData.shippingDetails.city}
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, city: value },
-                })
-              }
-            >
-              <SelectTrigger id="city">
-                <SelectValue placeholder="Town or city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ikeja">Ikeja</SelectItem>
-                <SelectItem value="lekki">Lekki</SelectItem>
-                <SelectItem value="victoria-island">Victoria Island</SelectItem>
-                <SelectItem value="ikoyi">Ikoyi</SelectItem>
-                <SelectItem value="yaba">Yaba</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="shippingPhone" className="block text-sm font-medium">
-              Phone number
-            </label>
-            <Input
-              id="shippingPhone"
-              placeholder="+234 - 000 0000 000"
-              value={formData.shippingDetails.phone}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, phone: e.target.value },
-                })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="postalCode" className="block text-sm font-medium">
-              Postal code
-            </label>
-            <Input
-              id="postalCode"
-              placeholder="000000"
-              value={formData.shippingDetails.postalCode}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, postalCode: e.target.value },
-                })
-              }
-            />
+            <div className="space-y-2 w-full">
+              <label htmlFor="postalCode" className="block text-sm font-medium">
+                Postal code
+              </label>
+              <Input
+                id="postalCode"
+                placeholder="000000"
+                value={formData.shippingDetails.postalCode}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    shippingDetails: {
+                      ...formData.shippingDetails,
+                      postalCode: e.target.value,
+                    },
+                  })
+                }
+                 className="w-full border"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -214,7 +265,10 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  shippingDetails: { ...formData.shippingDetails, address: e.target.value },
+                  shippingDetails: {
+                    ...formData.shippingDetails,
+                    address: e.target.value,
+                  },
                 })
               }
             />
@@ -231,6 +285,5 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
         </Button>
       </div>
     </form>
-  )
+  );
 }
-

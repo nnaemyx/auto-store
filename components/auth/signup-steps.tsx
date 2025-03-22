@@ -27,10 +27,10 @@ export default function SignupSteps({ currentStep }: SignupStepsProps) {
   const currentStepIndex = getCurrentStepIndex()
 
   return (
-    <div className="flex justify-center items-center space-x-4 py-6">
+    <div className="md:flex md:justify-center md:items-center md:space-x-4 py-6">
       {steps.map((step, index) => (
-        <div key={step.id} className="flex items-center">
-          {index > 0 && <div className={cn("h-px w-8 mx-2", index <= currentStepIndex ? "bg-black" : "bg-gray-300")} />}
+        <div key={step.id} className="md:flex items-center justify-center">
+          {index > 0 && <div className={cn("md:h-px w-8 mx-2", index <= currentStepIndex ? "bg-black" : "bg-gray-300")} />}
           <div className="flex flex-col items-center">
             <div
               className={cn(
@@ -38,11 +38,11 @@ export default function SignupSteps({ currentStep }: SignupStepsProps) {
                 currentStep === step.id
                   ? "bg-white border-2 border-black ring-4 ring-gray-100"
                   : index < currentStepIndex
-                    ? "bg-black"
-                    : "bg-gray-300",
+                    ? "bg-black hidden md:flex"
+                    : "bg-gray-300 hidden md:flex",
               )}
             />
-            <span className={cn("text-xs mt-2", currentStep === step.id ? "font-medium" : "text-gray-500")}>
+            <span className={cn("text-xs mt-2", currentStep === step.id ? "font-medium" : "text-gray-500 hidden  md:flex")}>
               {step.label}
             </span>
           </div>

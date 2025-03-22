@@ -47,7 +47,7 @@ export default function VerificationForm({ initialData, onSubmit }: Verification
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 mx-auto max-w-[445px]">
       <div className="space-y-2">
         <label htmlFor="verificationCode" className="block text-sm font-medium">
           Verification code

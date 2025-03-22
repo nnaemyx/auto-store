@@ -7,25 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { SignupFormData } from "@/app/auth/signup/page"
-import { Textarea } from "@/components/ui/textarea"
 
-type AdditionalDetailsFormProps = {
+type BasicDetailsFormProps = {
   initialData: SignupFormData
   onSubmit: (data: Partial<SignupFormData>) => void
 }
 
-export default function AdditionalDetailsForm({ initialData, onSubmit }: AdditionalDetailsFormProps) {
+export default function BasicDetailsForm({ initialData, onSubmit }: BasicDetailsFormProps) {
   const [formData, setFormData] = useState({
-    phone: initialData.phone || "",
-    dateOfBirth: initialData.dateOfBirth || { day: "", month: "", year: "" },
-    gender: initialData.gender || "",
-    shippingDetails: initialData.shippingDetails || {
-      state: "",
-      city: "",
-      phone: "",
-      postalCode: "",
-      address: "",
-    },
+    fullName: initialData.fullName || "",
+    email: initialData.email || "",
+    location: initialData.location || "",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,202 +25,71 @@ export default function AdditionalDetailsForm({ initialData, onSubmit }: Additio
     onSubmit(formData)
   }
 
-  const handleSkip = () => {
-    onSubmit(formData)
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium">Personal details</h3>
-
-          <div className="space-y-2">
-            <label htmlFor="phone" className="block text-sm font-medium">
-              Phone number
-            </label>
-            <Input
-              id="phone"
-              placeholder="+234 - 000 0000 000"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Date of birth</label>
-            <div className="grid grid-cols-3 gap-2">
-              <Input
-                placeholder="DD"
-                value={formData.dateOfBirth.day}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, day: e.target.value },
-                  })
-                }
-              />
-              <Input
-                placeholder="MM"
-                value={formData.dateOfBirth.month}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, month: e.target.value },
-                  })
-                }
-              />
-              <Input
-                placeholder="YYYY"
-                value={formData.dateOfBirth.year}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    dateOfBirth: { ...formData.dateOfBirth, year: e.target.value },
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Gender</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant={formData.gender === "male" ? "default" : "outline"}
-                className={formData.gender === "male" ? "bg-black text-white" : ""}
-                onClick={() => setFormData({ ...formData, gender: "male" })}
-              >
-                Male
-              </Button>
-              <Button
-                type="button"
-                variant={formData.gender === "female" ? "default" : "outline"}
-                className={formData.gender === "female" ? "bg-black text-white" : ""}
-                onClick={() => setFormData({ ...formData, gender: "female" })}
-              >
-                Female
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium">Shipping details</h3>
-
-          <div className="space-y-2">
-            <label htmlFor="state" className="block text-sm font-medium">
-              State of residence
-            </label>
-            <Select
-              value={formData.shippingDetails.state}
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, state: value },
-                })
-              }
-            >
-              <SelectTrigger id="state">
-                <SelectValue placeholder="State" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lagos">Lagos</SelectItem>
-                <SelectItem value="abuja">Abuja</SelectItem>
-                <SelectItem value="port-harcourt">Port Harcourt</SelectItem>
-                <SelectItem value="kano">Kano</SelectItem>
-                <SelectItem value="ibadan">Ibadan</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="city" className="block text-sm font-medium">
-              Town/City
-            </label>
-            <Select
-              value={formData.shippingDetails.city}
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, city: value },
-                })
-              }
-            >
-              <SelectTrigger id="city">
-                <SelectValue placeholder="Town or city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ikeja">Ikeja</SelectItem>
-                <SelectItem value="lekki">Lekki</SelectItem>
-                <SelectItem value="victoria-island">Victoria Island</SelectItem>
-                <SelectItem value="ikoyi">Ikoyi</SelectItem>
-                <SelectItem value="yaba">Yaba</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="shippingPhone" className="block text-sm font-medium">
-              Phone number
-            </label>
-            <Input
-              id="shippingPhone"
-              placeholder="+234 - 000 0000 000"
-              value={formData.shippingDetails.phone}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, phone: e.target.value },
-                })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="postalCode" className="block text-sm font-medium">
-              Postal code
-            </label>
-            <Input
-              id="postalCode"
-              placeholder="000000"
-              value={formData.shippingDetails.postalCode}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, postalCode: e.target.value },
-                })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="address" className="block text-sm font-medium">
-              House address
-            </label>
-            <Textarea
-              id="address"
-              placeholder="Enter your house address"
-              value={formData.shippingDetails.address}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  shippingDetails: { ...formData.shippingDetails, address: e.target.value },
-                })
-              }
-            />
-          </div>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-[445px] mx-auto flex flex-col justify-center px-[22.5px]">
+      <div className="space-y-2">
+        <label htmlFor="fullName" className="block text-sm font-medium">
+          Full name
+        </label>
+        <Input
+          id="fullName"
+          placeholder="Enter your full name (surname first)"
+          value={formData.fullName}
+          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          required
+          className="mx-auto border"
+        />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-        <Button type="submit" className="bg-black hover:bg-gray-800 text-white">
+      <div className="space-y-2">
+        <label htmlFor="email" className="block text-sm font-medium">
+          Email address
+        </label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email address"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+          className="mx-auto border"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="location" className="block text-sm font-medium">
+          Location
+        </label>
+        <Select
+          value={formData.location}
+          onValueChange={(value) => setFormData({ ...formData, location: value })}
+          required
+        >
+          <SelectTrigger id="location" className="w-full">
+            <SelectValue placeholder="State of Residence" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="lagos">Lagos</SelectItem>
+            <SelectItem value="abuja">Abuja</SelectItem>
+            <SelectItem value="port-harcourt">Port Harcourt</SelectItem>
+            <SelectItem value="kano">Kano</SelectItem>
+            <SelectItem value="ibadan">Ibadan</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="pt-4">
+        <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white">
           Proceed
         </Button>
-        <Button type="button" variant="outline" onClick={handleSkip}>
-          Skip, I&apos;ll do it later
-        </Button>
+      </div>
+
+      <div className="text-xs text-gray-500 text-center">
+        By clicking &quot;Proceed&quot;, you acknowledge that you have read and understood the{" "}
+        <a href="/terms" className="underline">
+          Terms of agreement and Privacy policy
+        </a>{" "}
+        of &quot;E-commerce&quot;
       </div>
     </form>
   )
