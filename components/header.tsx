@@ -53,7 +53,7 @@ const Header = () => {
             />
           </Link>
         </div>
-        <nav className="hidden md:flex items-center justify-center text-center gap-3">
+        <nav className="hidden lg:flex items-center justify-center text-center gap-3">
           <Link
             href="/brands"
             className={`text-sm font-[400] px-[8px] py-[21.5px] tracking-[-2.5%] transition-colors hover:text-primary ${
