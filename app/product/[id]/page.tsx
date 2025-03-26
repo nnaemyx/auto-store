@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -142,11 +140,22 @@ const popularItems = [
   },
 ]
 
-export default function ProductPage({  }: { params: { id: string } }) {
-  const [mainImage, setMainImage] = useState(productData.images[0])
-  const [quantity, setQuantity] = useState(1)
-  const [selectedSize, setSelectedSize] = useState("")
-  const [selectedColor, setSelectedColor] = useState("")
+export default function ProductPage({
+    params,
+  }: {
+    params: Promise<{ id: string }>
+  }) {
+    const [mainImage, setMainImage] = useState(productData.images[0])
+    const [quantity, setQuantity] = useState(1)
+    const [selectedSize, setSelectedSize] = useState("")
+    const [selectedColor, setSelectedColor] = useState("")
+
+    const fetchParams = async () => {
+      const { id } = await params
+      console.log(id) // Use the id as needed
+    }
+
+    fetchParams()
 
   const incrementQuantity = () => {
     setQuantity((prev) => prev + 1)

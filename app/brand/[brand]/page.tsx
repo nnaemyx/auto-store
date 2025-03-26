@@ -86,11 +86,17 @@ const popularItems = [
   },
 ]
 
-export default function BrandPage({ params }: { params: { brand: string } }) {
-  const brand = params.brand.toLowerCase()
+export default async function BrandPage({
+    params,
+  }: {
+    params: Promise<{ brand: string }>
+  }) {
+    const { brand } = await params
 
+  // Convert brand to lowercase for consistent lookup
+  const normalizedBrand = brand.toLowerCase()
   // Get categories for this brand or use a default set
-  const categories = categoriesByBrand[brand] || categoriesByBrand.lexus
+  const categories = categoriesByBrand[normalizedBrand] || categoriesByBrand.lexus
 
   // If no categories found, return 404
   if (!categories) {
