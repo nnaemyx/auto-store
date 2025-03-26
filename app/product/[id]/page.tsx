@@ -142,7 +142,7 @@ const popularItems = [
   },
 ]
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export default function ProductPage({  }: { params: { id: string } }) {
   const [mainImage, setMainImage] = useState(productData.images[0])
   const [quantity, setQuantity] = useState(1)
   const [selectedSize, setSelectedSize] = useState("")
