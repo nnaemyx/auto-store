@@ -9,25 +9,27 @@ export const metadata: Metadata = {
 export default async function CategoryPage({
   params,
 }: {
-  params: { brand: string; category: string }
+  params: Promise<{ brand: string; category: string }>
 }) {
+  // Await the params to resolve the promise
+  const { brand, category } = await params
+
   // Format brand and category names for display
-  const brand = params.brand.charAt(0).toUpperCase() + params.brand.slice(1)
-  const category = params.category
+  const brandDisplay = brand.charAt(0).toUpperCase() + brand.slice(1)
+  const categoryDisplay = category
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
   // Here you could fetch data based on the params if needed
-  // const products = await fetchProductsByCategory(params.brand, params.category)
+  // const products = await fetchProductsByCategory(brand, category)
 
   return (
     <ProductCategoryPage
-      brand={params.brand}
-      brandDisplay={brand}
-      category={params.category}
-      categoryDisplay={category}
+      brand={brand}
+      brandDisplay={brandDisplay}
+      category={category}
+      categoryDisplay={categoryDisplay}
     />
   )
 }
-
