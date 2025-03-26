@@ -39,27 +39,27 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         {/* Categories */}
         <div className="px-4 py-3">
           <h3 className="text-base font-medium mb-3">Categories</h3>
-          <div className="space-y-3">
-            <Link href="/category/interior" className="block text-gray-700 hover:text-brand-red" onClick={onClose}>
+          <div className="space-y-4">
+            <Link href="/category/interior" className="block py-4 text-gray-700 hover:text-brand-red" onClick={onClose}>
               Interior Accessories
             </Link>
-            <Link href="/category/exterior" className="block text-gray-700 hover:text-brand-red" onClick={onClose}>
+            <Link href="/category/exterior" className="block py-4 text-gray-700 hover:text-brand-red" onClick={onClose}>
               Exteriors
             </Link>
           </div>
         </div>
 
         {/* Main Menu */}
-        <div className="px-4 py-3">
+        <div className="px-4 mt-[58px]">
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
               <span className="text-base font-medium">Main menu</span>
               <ChevronDown className="h-5 w-5 transition-transform duration-200 transform ui-open:rotate-180" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-3 mt-3">
+            <CollapsibleContent className="space-y-4 mt-4">
               <Link
                 href="/cart"
-                className="flex items-center gap-3 text-gray-700 hover:text-brand-red"
+                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
                 onClick={onClose}
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -68,7 +68,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
 
               <Link
                 href="/favorites"
-                className="flex items-center gap-3 text-gray-700 hover:text-brand-red"
+                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
                 onClick={onClose}
               >
                 <Heart className="h-5 w-5" />
@@ -76,17 +76,17 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
               </Link>
 
               <Link
-                href="/profile"
-                className="flex items-center gap-3 text-gray-700 hover:text-brand-red"
+                href="/auth/signup"
+                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
                 onClick={onClose}
               >
                 <User className="h-5 w-5" />
-                <span>My profile</span>
+                <span>Register</span>
               </Link>
 
               <Link
                 href="/support"
-                className="flex items-center gap-3 text-gray-700 hover:text-brand-red"
+                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
                 onClick={onClose}
               >
                 <HelpCircle className="h-5 w-5" />
