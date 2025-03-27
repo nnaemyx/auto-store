@@ -70,7 +70,7 @@ export default function ProductHighlights() {
 
   return (
     <section className="">
-      <div className="container mx-auto">
+      <div className=" mx-auto">
         <div className="flex flex-col  md:grid md:grid-cols-1 gap-6">
           {highlights.map((highlight, index) => (
             <HighlightCard
