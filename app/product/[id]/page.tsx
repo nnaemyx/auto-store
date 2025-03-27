@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "View detailed information about this product",
 }
 
-export  async function ProductPage({
+export default async function ProductPage({
     params,
   }: {
     params: Promise<{ id:string }>
