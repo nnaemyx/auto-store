@@ -139,7 +139,7 @@ export default function BestSellingItems() {
       {/* See more button */}
       <div className="flex justify-center mt-8">
         <Link 
-          href="/products" 
+          href="/product" 
           className="bg-black text-white px-6 py-3 rounded-md flex items-center"
         >
           See more 

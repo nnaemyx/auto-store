@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import ProductCategoryPage from "@/components/product-category-page"
+import ProductCategoryPage from "@/components/products/product-category-page"
 
 export const metadata: Metadata = {
   title: "Product Category | Auto Store",

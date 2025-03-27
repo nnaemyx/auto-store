@@ -1,6 +1,8 @@
-import BrandSlider from "@/components/brand-slider";
+import BrandSlider from "@/components/homepage/brand-slider";
 import HeroSection from "@/components/hero-section";
 import BestSellingItems from "@/components/homepage/bestSellingItems";
+import CarSearch from "@/components/homepage/car-search";
+import ProductHighlights from "@/components/homepage/product-highlights";
 
 export default function Home() {
   return (
@@ -18,6 +20,15 @@ export default function Home() {
         <div className="md:container md:mx-auto">
           <BestSellingItems />
         </div>
+      </section>
+
+      <section className="md:py-15 py-25 md:px-10 px-4">
+        <CarSearch/>
+      </section>
+
+      
+      <section className="md:py-15 py-25 md:px-3">
+        <ProductHighlights/>
       </section>
     </div>
   );
