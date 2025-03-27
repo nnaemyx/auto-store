@@ -7,10 +7,15 @@ export const metadata: Metadata = {
   description: "View detailed information about this product",
 }
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export  async function ProductPage({
+    params,
+  }: {
+    params: Promise<{ id:string }>
+  })  {
+    const {id} = await params
   return (
     <Suspense fallback={<ProductDetailsSkeleton />}>
-      <ProductDetails id={Number.parseInt(params.id)} />
+      <ProductDetails id={Number.parseInt(id)} />
     </Suspense>
   )
 }
