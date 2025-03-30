@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Browse products by brand",
 }
 
-export default async function BrandPage({ params }: { params: { id: string } }) {
+export default async function BrandPage({ params }: { params: Promise<{ id:string }> }) {
     const { id } = await params
   const brandId = Number.parseInt(id)
 

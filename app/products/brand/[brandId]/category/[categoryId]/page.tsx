@@ -8,13 +8,14 @@ export const metadata: Metadata = {
   description: "Browse products by brand and category",
 }
 
-export default function BrandCategoryPage({ params }: { params: { brandId: string; categoryId: string } }) {
-  const brandId = Number.parseInt(params.brandId)
-  const categoryId = Number.parseInt(params.categoryId)
+export default async function BrandCategoryPage({ params }: { params: Promise<{  brandId: string; categoryId: string  }> }) {
+    const {brandId, categoryId} = await params
+  const brandid = Number.parseInt(brandId)
+  const categoryid = Number.parseInt(categoryId)
 
   return (
     <Suspense fallback={<ProductsGridSkeleton />}>
-      <BrandCategoryProducts brandId={brandId} categoryId={categoryId} />
+      <BrandCategoryProducts brandId={brandid} categoryId={categoryid} />
     </Suspense>
   )
 }
