@@ -35,7 +35,7 @@ async function fetchProductsByBrandCategory(brandId: number, categoryId: number)
   const response = await apiClient.get<Product[]>(`/product/product-brand-category/${brandId}/${categoryId}`)
 
   // Filter out deleted products (delete_status = "1")
-  const filteredProducts = response.filter((product) => product.delete_status === "2")
+  const filteredProducts = response
 
   // Process images to get full URLs
   return filteredProducts.map((product) => ({

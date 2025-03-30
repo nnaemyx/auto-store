@@ -1,41 +1,49 @@
-"use client"
+import { createContext, useContext } from "react"
 
-import { createContext } from "react"
-
-// Types
-export interface User {
-  id: string
-  email: string
+// User type
+export type User = {
+  id: number
   username: string
-  phone_number: string;
+  email: string
+  phone_number: string
+  image: string
+  role_id: string
 }
 
-export interface AuthContextType {
+// Registration data type
+export type RegisterData = {
+  username: string
+  email: string
+  password: string
+  phone_number: string
+  confirm_password: string
+}
+
+// Auth response type from API
+export type AuthResponse = {
+  status: string
+  message?: string
+  access_token?: string
+  user?: User[]
+}
+
+// Auth context type with added API methods
+export type AuthContextType = {
   user: User | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
+  // Add authenticated API methods
+  api: {
+    get: <T>(endpoint: string, options?: RequestInit) => Promise<T>
+    post: <T, TData = unknown>(endpoint: string, data: TData, options?: RequestInit) => Promise<T>
+    put: <T, TData = unknown>(endpoint: string, data: TData, options?: RequestInit) => Promise<T>
+    delete: <T>(endpoint: string, options?: RequestInit) => Promise<T>
+  }
+  // Example specific API methods
+  fetchUserProfile: () => Promise<User>
 }
-
-export interface LoginData {
-  email: string
-  password: string
-}
-
-export interface RegisterData {
-  email: string
-  phone_number: string
-  username: string
-  password: string
-  confirm_password: string
-}
-
-export type AuthResponse = {
-    status: string;
-    user: User[];
-    message?: string;
-  };
 
 // Create context with default values
 export const AuthContext = createContext<AuthContextType>({
@@ -44,5 +52,14 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: () => {},
+  api: {
+    get: async () => { throw new Error("Not implemented") },
+    post: async () => { throw new Error("Not implemented") },
+    put: async () => { throw new Error("Not implemented") },
+    delete: async () => { throw new Error("Not implemented") }
+  },
+  fetchUserProfile: async () => { throw new Error("Not implemented") }
 })
 
+// Custom hook for using auth context
+export const useAuth = () => useContext(AuthContext)

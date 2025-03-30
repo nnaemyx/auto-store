@@ -34,7 +34,7 @@ export function useManufacturer(id: number) {
 async function fetchManufacturers(): Promise<Manufacturer[]> {
   const response = await apiClient.get<Manufacturer[]>("/manufacturer/all")
   // Filter out deleted manufacturers (delete_status = "1")
-  return response.filter((manufacturer) => manufacturer.delete_status === "2")
+  return response
 }
 
 async function fetchManufacturerById(id: number): Promise<Manufacturer> {

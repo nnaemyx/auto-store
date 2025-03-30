@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const HeroSection = () => {
   return (
@@ -30,11 +31,11 @@ const HeroSection = () => {
               track and off road needs.
             </p>
           </div>
-          <div className="mx-auto lg:mx-0 mt-[24px] lg:mt-0">
+          <Link href="/product" className="mx-auto lg:mx-0 mt-[24px] lg:mt-0">
             <Button size="lg" className="bg-white lg:w-[186px] w-[167px]  text-black hover:bg-gray-200">
               Shop Now
             </Button>
-          </div>
+          </Link>
         </div>
       </div>
     </div>

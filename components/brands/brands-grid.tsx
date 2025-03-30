@@ -31,8 +31,6 @@ export default function BrandsGrid() {
               <Image
                 src={
                   brand.logo
-                    ? `${process.env.NEXT_PUBLIC_API_URL}/${brand.logo}`
-                    : "/placeholder.svg?height=100&width=100"
                 }
                 alt={brand.name}
                 fill

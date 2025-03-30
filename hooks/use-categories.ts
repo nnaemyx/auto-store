@@ -34,7 +34,7 @@ export function useCategory(id: number) {
 async function fetchCategories(): Promise<Category[]> {
   const response = await apiClient.get<Category[]>("/category/all")
   // Filter out deleted categories (delete_status = "1")
-  return response.filter((category) => category.delete_status === "2")
+  return response
 }
 
 async function fetchCategoryById(id: number): Promise<Category> {

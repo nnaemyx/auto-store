@@ -82,8 +82,7 @@ function getImageUrl(imagePath: string): string {
 async function fetchProducts(filters: ProductFilters = {}): Promise<Product[]> {
   const response = await apiClient.get<Product[]>("/product/all")
 
-  // Filter out deleted products (delete_status = "1")
-  let filteredProducts = response.filter((product) => product.delete_status === "2")
+  let filteredProducts = response
 
   // Apply filters on the client side if needed
   if (filters.category_id) {
