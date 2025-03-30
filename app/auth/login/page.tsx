@@ -4,32 +4,33 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
+import { useAuth } from "@/api/use-auth"
+import { useToast } from "@/hooks/use-toast"
+
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-
+  const { login } = useAuth()
+const { toast, ToastVariant } = useToast();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
 
     try {
-      // In a real app, you would call your authentication API here
-      // For demo purposes, we'll just simulate a successful login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Redirect to home page after successful login
-      router.push("/")
-    } catch {
-      setError("Invalid email or password. Please try again.")
+      await login(email, password)
+      toast({
+        title: "Success",
+        description: "Login successful!",
+        variant: ToastVariant.Success,
+      });
+    } catch (err) {
+      console.log(err)
+      toast({ title: "Error", variant: ToastVariant.Error});
     } finally {
       setIsLoading(false)
     }
@@ -38,14 +39,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col">
 
+
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold">Log Into Your Account</h1>
             <p className="mt-2 text-gray-600">Please enter your details to gain access to your account.</p>
           </div>
-
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <Separator className="my-4" />
-            <p className="text-sm text-gray-500">New to e-commerce?</p>
+            <p className="text-sm text-gray-500">New to Auto Store?</p>
             <Button variant="outline" className="mt-2 w-full" asChild>
               <Link href="/auth/signup">Create account</Link>
             </Button>

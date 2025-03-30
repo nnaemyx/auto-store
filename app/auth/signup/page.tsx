@@ -1,206 +1,172 @@
 "use client";
 
+import type React from "react";
+
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-import SignupSteps from "@/components/auth/signup-steps";
-import BasicDetailsForm from "@/components/auth/basic-details-form";
-import SecuritySetupForm from "@/components/auth/security-setup-form";
-import VerificationForm from "@/components/auth/verification-form";
-import AdditionalDetailsForm from "@/components/auth/additional-details-form";
-import TermsAgreementForm from "@/components/auth/terms-agreement-form";
-
-export type SignupFormData = {
-  fullName: string;
-  email: string;
-  location: string;
-  password: string;
-  confirmPassword: string;
-  verificationCode: string;
-  phone: string;
-  dateOfBirth: {
-    day: string;
-    month: string;
-    year: string;
-  };
-  gender: string;
-  shippingDetails: {
-    state: string;
-    city: string;
-    phone: string;
-    postalCode: string;
-    address: string;
-  };
-  agreedToTerms: boolean;
-};
-
-const initialFormData: SignupFormData = {
-  fullName: "",
-  email: "",
-  location: "",
-  password: "",
-  confirmPassword: "",
-  verificationCode: "",
-  phone: "",
-  dateOfBirth: {
-    day: "",
-    month: "",
-    year: "",
-  },
-  gender: "",
-  shippingDetails: {
-    state: "",
-    city: "",
-    phone: "",
-    postalCode: "",
-    address: "",
-  },
-  agreedToTerms: false,
-};
-
-type SignupStep =
-  | "basicDetails"
-  | "securitySetup"
-  | "verification"
-  | "additionalDetails"
-  | "termsAgreement";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/api/use-auth";
+import { toast } from "sonner";
+import type { RegisterData } from "@/api/auth-context";
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<SignupStep>("basicDetails");
-  const [formData, setFormData] = useState<SignupFormData>(initialFormData);
+  const [formData, setFormData] = useState<RegisterData>({
+    email: "",
+    phone_number: "",
+    username: "",
+    password: "",
+    confirm_password: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const { register } = useAuth();
 
-  const updateFormData = (data: Partial<SignupFormData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleBasicDetailsSubmit = (data: Partial<SignupFormData>) => {
-    updateFormData(data);
-    setCurrentStep("securitySetup");
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSecuritySetupSubmit = (data: Partial<SignupFormData>) => {
-    updateFormData(data);
-    setCurrentStep("verification");
-  };
+    // Basic validation
+    if (formData.password !== formData.confirm_password) {
+      toast("Passwords don't match");
+      return;
+    }
 
-  const handleVerificationSubmit = (data: Partial<SignupFormData>) => {
-    updateFormData(data);
-    setCurrentStep("additionalDetails");
-  };
-
-  const handleAdditionalDetailsSubmit = (data: Partial<SignupFormData>) => {
-    updateFormData(data);
-    setCurrentStep("termsAgreement");
-  };
-
-  const handleTermsAgreementSubmit = async (agreed: boolean) => {
     setIsLoading(true);
-    updateFormData({ agreedToTerms: agreed });
 
     try {
-      // In a real app, you would call your registration API here
-      // For demo purposes, we'll just simulate a successful registration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Redirect to home page or login page after successful registration
-      router.push("/auth/login?registered=true");
-    } catch (error) {
-      console.error("Registration failed:", error);
+      await register(formData);
+      toast("Registration successful");
+    } catch (err) {
+      toast(
+        err instanceof Error
+          ? err.message
+          : "Failed to create account. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="md:min-h-screen mt-[52px] md:mt-0 flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center px-4 md:py-12">
-        <div className="w-full  space-y-8">
+    <div className="min-h-screen flex flex-col">
+
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            {currentStep === "basicDetails" && (
-              <>
-                <h1 className="text-3xl font-bold">Create Your Account</h1>
-                <p className="mt-2 text-gray-600">
-                  Please enter the correct details to create your ecommerce
-                  account
-                </p>
-              </>
-            )}
-
-            {currentStep === "securitySetup" && (
-              <>
-                <h1 className="text-3xl font-bold">Create Your Account</h1>
-                <p className="mt-2 text-gray-600">
-                  Please set your password to continue to your e-commerce
-                  account
-                </p>
-              </>
-            )}
-
-            {currentStep === "verification" && (
-              <>
-                <h1 className="text-3xl font-bold">Create Your Account</h1>
-                <p className="mt-2 text-gray-600">
-                  Please set your password to continue to your e-commerce
-                  account
-                </p>
-              </>
-            )}
-
-            {currentStep === "additionalDetails" && (
-              <>
-                <h1 className="text-3xl font-bold">Set Your Profile</h1>
-                <p className="mt-2 text-gray-600">
-                  Please enter the correct profile details as this would be used
-                  to process your orders in Auto-Store
-                </p>
-              </>
-            )}
-
-            {currentStep === "termsAgreement" && (
-              <>
-                <h1 className="text-3xl font-bold">Terms of Agreement</h1>
-              </>
-            )}
+            <h1 className="text-3xl font-bold">Create Your Account</h1>
+            <p className="mt-2 text-gray-600">
+              Please enter your details to create an account.
+            </p>
           </div>
 
-          <SignupSteps currentStep={currentStep} />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="username" className="block text-sm font-medium">
+                Username
+              </label>
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {currentStep === "basicDetails" && (
-            <BasicDetailsForm
-              initialData={formData}
-              onSubmit={handleBasicDetailsSubmit}
-            />
-          )}
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium">
+                Email address
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email address"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {currentStep === "securitySetup" && (
-            <SecuritySetupForm
-              initialData={formData}
-              onSubmit={handleSecuritySetupSubmit}
-            />
-          )}
+            <div className="space-y-2">
+              <label
+                htmlFor="phone_number"
+                className="block text-sm font-medium"
+              >
+                Phone number
+              </label>
+              <Input
+                id="phone_number"
+                name="phone_number"
+                type="tel"
+                placeholder="Enter your phone number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {currentStep === "verification" && (
-            <VerificationForm
-              initialData={formData}
-              onSubmit={handleVerificationSubmit}
-            />
-          )}
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium">
+                Password
+              </label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength={6}
+              />
+            </div>
 
-          {currentStep === "additionalDetails" && (
-            <AdditionalDetailsForm
-              initialData={formData}
-              onSubmit={handleAdditionalDetailsSubmit}
-            />
-          )}
+            <div className="space-y-2">
+              <label
+                htmlFor="confirm_password"
+                className="block text-sm font-medium"
+              >
+                Confirm password
+              </label>
+              <Input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                placeholder="Confirm your password"
+                value={formData.confirm_password}
+                onChange={handleChange}
+                required
+                minLength={6}
+              />
+            </div>
 
-          {currentStep === "termsAgreement" && (
-            <TermsAgreementForm
-              isLoading={isLoading}
-              onSubmit={handleTermsAgreementSubmit}
-            />
-          )}
+            <Button
+              type="submit"
+              className="w-full bg-black hover:bg-gray-800 text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating Account..." : "Create Account"}
+            </Button>
+          </form>
+
+          <div className="text-center">
+            <Separator className="my-4" />
+            <p className="text-sm text-gray-500">Already have an account?</p>
+            <Button variant="outline" className="mt-2 w-full" asChild>
+              <Link href="/auth/login">Sign in</Link>
+            </Button>
+          </div>
         </div>
       </main>
     </div>

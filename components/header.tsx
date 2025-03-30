@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { ShoppingCart, Search, Menu } from "lucide-react"
+import { ShoppingCart, Search, Menu} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -11,12 +11,15 @@ import { usePathname } from "next/navigation"
 import NavMenu from "@/components/nav-menu"
 import DesktopNavMenu from "@/components/desktop-nav-menu"
 import SearchDialog from "@/components/search-dialog"
+import { useAuth } from "@/api/use-auth"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { user } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +38,11 @@ const Header = () => {
     setIsMenuOpen(false)
   }
 
+  // Get first letter of username for avatar
+  const getUserInitial = () => {
+    return user?.username ? user.username.charAt(0).toUpperCase() : 'U'
+  }
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -48,32 +56,32 @@ const Header = () => {
           </Link>
 
         </div>
-          <nav className="hidden lg:flex items-center justify-center gap-6">
-            <Link
-              href="/brands"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname.includes("/brands") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Car Brands
-            </Link>
-            <Link
-              href="/interior"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname.includes("/interior") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Interior Accessories
-            </Link>
-            <Link
-              href="/exterior"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname.includes("/exterior") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              Exterior Accessories
-            </Link>
-          </nav>
+        <nav className="hidden lg:flex items-center justify-center gap-6">
+          <Link
+            href="/brands"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/brands") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Car Brands
+          </Link>
+          <Link
+            href="/interior"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/interior") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Interior Accessories
+          </Link>
+          <Link
+            href="/exterior"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/exterior") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Exterior Accessories
+          </Link>
+        </nav>
 
         <div className="flex items-center gap-2 lg:gap-4">
           <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
@@ -110,13 +118,22 @@ const Header = () => {
           {/* Desktop Menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="hidden lg:flex">
-                Menu
-              </Button>
+              {user ? (
+                <Button variant="outline" className="hidden lg:flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarFallback>{getUserInitial()}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.username}</span>
+                </Button>
+              ) : (
+                <Button variant="outline" className="hidden lg:flex">
+                  Menu
+                </Button>
+              )}
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+                <SheetTitle>{user ? `Hello, ${user.username}` : 'Menu'}</SheetTitle>
               </SheetHeader>
               <DesktopNavMenu />
             </SheetContent>
@@ -130,4 +147,3 @@ const Header = () => {
 }
 
 export default Header
-
