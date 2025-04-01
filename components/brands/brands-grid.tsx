@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react"
 
 export default function BrandsGrid() {
   const { data: brands, isLoading, isError } = useManufacturers()
-
+console.log(brands)
   // Loading state
   if (isLoading) {
     return (
@@ -29,9 +29,7 @@ export default function BrandsGrid() {
           <div className="bg-gray-50 rounded-full p-4 w-[80px] h-[80px] flex items-center justify-center mb-2 transition-all group-hover:shadow-md">
             <div className="relative h-12 w-12">
               <Image
-                src={
-                  brand.logo
-                }
+                src={brand.logo}
                 alt={brand.name}
                 fill
                 className="object-contain"

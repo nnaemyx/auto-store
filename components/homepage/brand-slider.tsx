@@ -39,11 +39,7 @@ console.log(brands)
             <div className="bg-gray-50 rounded-full p-4 w-[80px] h-[80px] flex items-center justify-center mb-2">
               <div className="relative h-12 w-12">
                 <Image
-                  src={
-                    brand.logo
-                      ? `${process.env.NEXT_PUBLIC_API_URL}/${brand.logo}`
-                      : "/placeholder.svg?height=80&width=80"
-                  }
+                  src={brand.logo}
                   alt={brand.name}
                   fill
                   className="object-contain"

@@ -13,6 +13,7 @@ import DesktopNavMenu from "@/components/desktop-nav-menu"
 import SearchDialog from "@/components/search-dialog"
 import { useAuth } from "@/api/use-auth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useCart } from "@/hooks/use-cart"
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -20,6 +21,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const { user } = useAuth()
+  const { cart } = useCart()
+
+   // Calculate the total number of items in the cart
+   const cartItemCount = cart?.cart_items?.reduce((total, item) => total + Number.parseInt(item.quantity || "0"), 0) || 0
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,13 +96,15 @@ const Header = () => {
 
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-8 w-[44px]" />
-              <Badge
-                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-brand-red text-white"
-                variant="outline"
-              >
-                0
-              </Badge>
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <Badge
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-800 text-white"
+                  variant="outline"
+                >
+                  {cartItemCount}
+                </Badge>
+              )}
               <span className="sr-only">Cart</span>
             </Button>
           </Link>

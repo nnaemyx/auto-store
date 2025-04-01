@@ -7,6 +7,7 @@ import Footer from "@/components/footer"
 import { Providers } from "@/api/provider"
 import ClientOnly from "@/api/client-only"
 import { AuthProvider } from "@/api/auth-provider"
+import { Toaster } from "sonner"
 
 
 const inter = Inter({ subsets: ["latin"] })
@@ -29,6 +30,7 @@ export default function RootLayout({
             <AuthProvider>
               <Header />
               <main className="min-h-screen">{children}</main>
+              <Toaster />
               <Footer />
             </AuthProvider>
           </ClientOnly>

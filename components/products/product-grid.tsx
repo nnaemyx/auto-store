@@ -182,7 +182,7 @@ export default function ProductsGrid({ categoryId, manufacturerId }: ProductsGri
                   <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
                     <div className="relative h-40 md:h-48 bg-gray-50">
                       <Image
-                        src={product.images[0]?.image || "/placeholder-image.jpg"}
+                        src={product.images[0]?.image}
                         alt={product.name}
                         fill
                         className="object-contain p-4"

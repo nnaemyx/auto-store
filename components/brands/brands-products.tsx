@@ -59,7 +59,7 @@ export default function BrandProducts({ brandId }: BrandProductsProps) {
         <div className="relative w-24 h-24 bg-gray-50 rounded-full overflow-hidden">
           <Image
             src={
-              brand.logo ? `${process.env.NEXT_PUBLIC_API_URL}/${brand.logo}` : "/placeholder.svg?height=100&width=100"
+              brand.logo 
             }
             alt={brand.name}
             fill
@@ -88,8 +88,7 @@ export default function BrandProducts({ brandId }: BrandProductsProps) {
                     <Image
                       src={
                         category.image
-                          ? `${process.env.NEXT_PUBLIC_API_URL}/${category.image}`
-                          : "/placeholder.svg?height=100&width=100"
+                         
                       }
                       alt={category.name}
                       fill
