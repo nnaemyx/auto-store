@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -9,14 +9,18 @@ import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { useOrder, formatDate, getOrderStatusColor } from "@/hooks/use-orders"
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
-  const orderId = params.id
+export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const [orderId, setOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    params.then(({ id }) => setOrderId(id));
+  }, [params]);
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
 
   // Fetch order details
-  const { data: order, isLoading, isError, error } = useOrder(orderId)
+  const { data: order, isLoading, isError, error } = useOrder(orderId ?? "")
 
   // Breadcrumb for desktop
   const breadcrumb = (

@@ -43,11 +43,12 @@ export default function ConfirmPage() {
   }, [router])
 
   interface CheckoutData {
-    email: string
-    amount: number
-    order_code: string
-    check_out_id: string
-    delivery_fee?: number
+    email?: string
+    amount?: number
+    order_code?: string
+    check_out_id?: string
+    delivery_fee?: string | number
+    [key: string]: unknown
   }
 
   const handleConfirmOrder = (checkoutData?: CheckoutData) => {
