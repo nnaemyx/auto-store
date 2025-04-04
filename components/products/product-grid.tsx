@@ -128,30 +128,30 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
       </div>
 
       {/* Desktop layout with sidebar filters */}
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8 border-t border-[#00000012]">
         {/* Desktop Filters Sidebar */}
-        <div className="hidden md:block w-64 flex-shrink-0">
-          <div className="sticky top-24">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-4 w-4" />
-              <h2 className="font-medium">Filters</h2>
+        <div className="hidden md:block w-[240px] pt-[28px] px-[20px] flex-shrink-0 border-r border-[#00000012]">
+          <div className="sticky">
+            <div className="flex items-center gap-2 py-[7px] px-3 rounded-[4px] w-[92px] bg-[#00000008]">
+              <h2 className="font-medium text-[15px]">Filters</h2>
+              <Filter className="size-[18px]" />
             </div>
             <DesktopFilters onApplyFilter={handleApplyFilter} />
           </div>
         </div>
 
         {/* Product Grid */}
-        <div className="flex-1">
+        <div className="flex-1 px-[20px] pt-[28px]">
           {/* Desktop sort controls */}
-          <div className="hidden md:flex justify-end mb-4">
+          <div className="hidden md:flex justify-between items-center">
+            <h2 className="text-[18px] font-medium">All Products</h2>
             <div className="flex items-center gap-2">
-              <span className="text-sm">Sort by</span>
               <select
-                className="text-sm border rounded-md px-2 py-1"
+                className="text-sm bg-[#00000008] rounded-md px-2 w-[92px] border-none py-1"
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
               >
-                <option value="relevance">Relevance</option>
+                <option value="relevance">Sort by</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="newest">Newest</option>
@@ -178,11 +178,11 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
 
           {/* Products */}
           {!isLoading && !isError && products && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-[28px] gap-4">
               {products.map((product) => (
-                <Link key={product.id} href={`/product/${product.id}`} className="group">
+                <Link key={product.id} href={`/product/${product.id}`} className="group ">
                   <div className="bg-white rounded-md overflow-hidden  transition-all group-hover:shadow-md">
-                    <div className="relative h-40 md:h-[408px] md:w-[278px] bg-gray-50">
+                    <div className="relative h-40 md:h-[408px] md:max-w-[278px] w-full bg-gray-50">
                       <Image
                         src={
                           product.images && product.images.length > 0
@@ -194,7 +194,7 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
                         className="object-cover rounded-[8px]"
                       />
                       {product.promotion && product.promotion.discount !== "0" && (
-                        <div className="absolute top-2 left-2 bg-brand-red text-white rounded-full px-3 py-1 text-xs">
+                        <div className="absolute top-2 left-2 bg-white text-red-500 z-10 rounded-full px-3 py-1 text-xs">
                           Sale
                         </div>
                       )}
@@ -263,7 +263,7 @@ function MobileFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, 
 // Desktop Filters Component
 function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, values: string[]) => void }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       {Object.entries(filterOptions).map(([category, options], index) => (
         <div key={category}>
           <Collapsible defaultOpen={index < 3}>
@@ -323,7 +323,7 @@ function FilterOptions({
           </label>
         </div>
       ))}
-      <Button variant="outline" size="sm" className="w-full mt-2" onClick={handleApply}>
+      <Button variant="outline" size="sm" className="w-full mt-2 bg-black text-white" onClick={handleApply}>
         Apply
       </Button>
     </>

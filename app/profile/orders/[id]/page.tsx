@@ -1,32 +1,22 @@
 "use client"
-import { useEffect, useState } from "react"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useOrder, formatDate, getOrderStatusColor } from "@/hooks/use-orders"
 
-export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
-
-  useEffect(() => {
-    params.then(setResolvedParams);
-  }, [params]);
+export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+  const orderId = params.id
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
 
-  const [orderDetails] = useState({
-    id: resolvedParams?.id || "",
-    name: "Name of Product",
-    description: "Description",
-    price: "40,500.00",
-    date: "12/12/2024",
-    dateDelivered: "05/01/2025",
-    status: "Delivered",
-    reference: "#329388",
-  })
+  // Fetch order details
+  const { data: order, isLoading, isError, error } = useOrder(orderId)
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -39,7 +29,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         Order history
       </Link>
       {" / "}
-      <span className="font-medium text-gray-700">Order #{orderDetails.id}</span>
+      <span className="font-medium text-gray-700">Order #{orderId}</span>
     </div>
   )
 
@@ -49,7 +39,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   const handleConfirmReturn = () => {
     // In a real app, you would submit the return request to your backend
-    console.log("Return requested for order:", orderDetails.id, "Reason:", returnReason)
+    console.log("Return requested for order:", orderId, "Reason:", returnReason)
     setShowReturnModal(false)
     setReturnReason("")
   }
@@ -72,8 +62,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           </div>
 
           <p className="mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-            dolore magna aliqua. Ut enim ad minim fghf fhfus skaks
+            Please provide details about why you want to return this item. We&#39;ll review your request and get back to you
+            within 24-48 hours.
           </p>
 
           <div className="mb-4">
@@ -140,6 +130,64 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     </div>
   )
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={isMobile ? "min-h-screen bg-white p-4" : ""}>
+        {isMobile ? (
+          <div className="bg-white py-4 px-4 flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Link href="/profile/orders" className="mr-4">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <h1 className="text-lg font-medium">Order #{orderId}</h1>
+            </div>
+          </div>
+        ) : (
+          <ProfileLayout title={`Order #${orderId}`}>{breadcrumb}</ProfileLayout>
+        )}
+
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-red mr-2" />
+          <span>Loading order details...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (isError || !order) {
+    return (
+      <div className={isMobile ? "min-h-screen bg-white p-4" : ""}>
+        {isMobile ? (
+          <div className="bg-white py-4 px-4 flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Link href="/profile/orders" className="mr-4">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <h1 className="text-lg font-medium">Order #{orderId}</h1>
+            </div>
+          </div>
+        ) : (
+          <ProfileLayout title={`Order #${orderId}`}>{breadcrumb}</ProfileLayout>
+        )}
+
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-red-500 mb-2">Failed to load order details</p>
+          <p className="text-sm text-gray-500 mb-4">
+            {error instanceof Error ? error.message : "An unexpected error occurred"}
+          </p>
+          <Button onClick={() => window.location.reload()} className="mr-2">
+            Try Again
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/profile/orders">Back to Orders</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   // Mobile view has a simpler layout with a back button
   if (isMobile) {
     return (
@@ -149,52 +197,104 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <Link href="/profile/orders" className="mr-4">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-lg font-medium">Order #{orderDetails.id}</h1>
+            <h1 className="text-lg font-medium">Order #{order.reference}</h1>
           </div>
         </div>
 
         <div className="p-4">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-              <Image
-                src="/placeholder.svg?height=64&width=64"
-                alt={orderDetails.name}
-                fill
-                className="object-contain p-2"
-              />
-            </div>
-            <div>
-              <h3 className="font-medium">{orderDetails.name}</h3>
-              <p className="text-sm text-gray-500">{orderDetails.description}</p>
-              <p className="font-bold mt-1">₦{orderDetails.price}</p>
-            </div>
+          {/* Order Items */}
+          <div className="mb-6">
+            <h2 className="text-lg font-medium mb-4">Order Items</h2>
+            {order.items &&
+              order.items.map((item) => (
+                <div key={item.id} className="flex gap-4 mb-4 border-b pb-4">
+                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                    <Image
+                      src={
+                        item.product.images && item.product.images.length > 0
+                          ? item.product.images[0].image
+                          : "/placeholder.svg?height=64&width=64"
+                      }
+                      alt={item.product.name}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{item.product.name}</h3>
+                    <p className="text-sm text-gray-500">{item.product.description}</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="font-bold">₦{Number(item.amount).toLocaleString()}</p>
+                      <p className="text-sm">Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <p className="text-sm text-gray-500">Date of order</p>
-              <p className="font-medium">{orderDetails.date}</p>
+              <p className="font-medium">{formatDate(order.created_at)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">{orderDetails.reference}</p>
+              <p className="font-medium">{order.reference}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Date delivered</p>
-              <p className="font-medium">{orderDetails.dateDelivered}</p>
+              <p className="font-medium">{order.delivery_date ? formatDate(order.delivery_date) : "Pending"}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Status</p>
-              <p className="text-green-500">{orderDetails.status}</p>
+              <p className={getOrderStatusColor(order.status)}>{order.status}</p>
             </div>
           </div>
 
+          {/* Order Summary */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="font-medium mb-3">Order Summary</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₦{(Number(order.amount) * 0.925).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tax (7.5%)</span>
+                <span>₦{(Number(order.amount) * 0.075).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>Included</span>
+              </div>
+              <div className="flex justify-between font-bold pt-2 border-t">
+                <span>Total</span>
+                <span>₦{Number(order.amount).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping Address */}
+          {order.shipping && (
+            <div className="mb-6">
+              <h3 className="font-medium mb-3">Shipping Address</h3>
+              <p className="text-sm">
+                {order.shipping.address}, {order.shipping.city}, {order.shipping.state} {order.shipping.postal_code}
+              </p>
+            </div>
+          )}
+
           <div className="flex gap-4">
-            <Button variant="outline" className="flex-1" onClick={handleRequestReturn}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={handleRequestReturn}
+              disabled={order.status.toLowerCase() !== "delivered"}
+            >
               Return order
             </Button>
             <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
-              <Link href="/profile/orders">Back</Link>
+              <Link href="/profile/orders">Back to Orders</Link>
             </Button>
           </div>
         </div>
@@ -207,52 +307,109 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   // Desktop view with sidebar
   return (
-    <ProfileLayout title={`Order #${orderDetails.id}`}>
+    <ProfileLayout title={`Order #${order.reference}`}>
       {breadcrumb}
 
       <div className="bg-white rounded-lg border overflow-hidden">
         <div className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-              <Image
-                src="/placeholder.svg?height=64&width=64"
-                alt={orderDetails.name}
-                fill
-                className="object-contain p-2"
-              />
-            </div>
+          {/* Order header */}
+          <div className="flex justify-between mb-6">
             <div>
-              <h3 className="font-medium">{orderDetails.name}</h3>
-              <p className="text-sm text-gray-500">{orderDetails.description}</p>
-              <p className="font-bold mt-1">₦{orderDetails.price}</p>
+              <h2 className="text-xl font-bold">Order #{order.reference}</h2>
+              <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">Status</p>
+              <p className={`font-medium ${getOrderStatusColor(order.status)}`}>{order.status}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          {/* Order Items */}
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-4">Order Items</h3>
+            {order.items &&
+              order.items.map((item) => (
+                <div key={item.id} className="flex gap-4 mb-4 border-b pb-4">
+                  <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden">
+                    <Image
+                      src={
+                        item.product.images && item.product.images.length > 0
+                          ? item.product.images[0].image
+                          : "/placeholder.svg?height=80&width=80"
+                      }
+                      alt={item.product.name}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{item.product.name}</h3>
+                    <p className="text-sm text-gray-500">{item.product.description}</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="font-bold">₦{Number(item.amount).toLocaleString()}</p>
+                      <p className="text-sm">Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Order details in two columns */}
+          <div className="grid grid-cols-2 gap-8 mb-6">
+            {/* Left column - Order summary */}
             <div>
-              <p className="text-sm text-gray-500">Date of order</p>
-              <p className="font-medium">{orderDetails.date}</p>
+              <h3 className="text-lg font-medium mb-4">Order Summary</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>₦{(Number(order.amount) * 0.925).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax (7.5%)</span>
+                    <span>₦{(Number(order.amount) * 0.075).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>Included</span>
+                  </div>
+                  <div className="flex justify-between font-bold pt-2 border-t">
+                    <span>Total</span>
+                    <span>₦{Number(order.amount).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Right column - Shipping details */}
             <div>
-              <p className="text-sm text-gray-500">Reference number</p>
-              <p className="font-medium">{orderDetails.reference}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Date delivered</p>
-              <p className="font-medium">{orderDetails.dateDelivered}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Status</p>
-              <p className="text-green-500">{orderDetails.status}</p>
+              <h3 className="text-lg font-medium mb-4">Shipping Details</h3>
+              {order.shipping ? (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="mb-2">{order.shipping.address}</p>
+                  <p>
+                    {order.shipping.city}, {order.shipping.state} {order.shipping.postal_code}
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-gray-500">Shipping information not available</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex gap-4">
-            <Button variant="outline" className="flex-1" onClick={handleRequestReturn}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={handleRequestReturn}
+              disabled={order.status.toLowerCase() !== "delivered"}
+            >
               Request return
             </Button>
             <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
-              <Link href="/profile/orders">View details</Link>
+              <Link href="/profile/orders">Back to Orders</Link>
             </Button>
           </div>
         </div>

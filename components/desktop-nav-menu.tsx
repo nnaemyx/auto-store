@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { ShoppingCart, Heart, User, LogOut, HelpCircle } from "lucide-react";
@@ -22,14 +22,16 @@ const DesktopNavMenu = () => {
             My favourites
           </span>
         </Link>
-        
+
         {user ? (
-          <div className="flex items-center gap-2 px-3 py-2.5">
-            <User className="h-4.5 w-4.5" />
-            <span className="text-[15px] font-[450] tracking-[-3%]">
-              {user.username}
-            </span>
-          </div>
+          <Link href="/profile">
+            <div className="flex items-center gap-2 px-3 py-2.5">
+              <User className="h-4.5 w-4.5" />
+              <span className="text-[15px] font-[450] tracking-[-3%]">
+                {user.username}
+              </span>
+            </div>
+          </Link>
         ) : (
           <Link
             href="/auth/signup"
@@ -41,7 +43,7 @@ const DesktopNavMenu = () => {
             </span>
           </Link>
         )}
-        
+
         <Link href="/support" className="flex items-center gap-2 px-3 py-2.5">
           <HelpCircle className="h-4.5 w-4.5" />
           <span className="text-[15px] font-[450] tracking-[-3%]">
@@ -49,7 +51,7 @@ const DesktopNavMenu = () => {
           </span>
         </Link>
         <Separator className="mt-20" />
-        
+
         {user ? (
           <Button
             variant="ghost"
@@ -57,7 +59,9 @@ const DesktopNavMenu = () => {
             onClick={logout}
           >
             <LogOut className="h-4.5 w-4.5" />
-            <span className="text-[15px] font-[450] tracking-[-3%]">Log Out</span>
+            <span className="text-[15px] font-[450] tracking-[-3%]">
+              Log Out
+            </span>
           </Button>
         ) : (
           <Link href="/auth/login">
@@ -66,7 +70,9 @@ const DesktopNavMenu = () => {
               className="flex items-center justify-start gap-3 px-2 py-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
             >
               <User className="h-4.5 w-4.5" />
-              <span className="text-[15px] font-[450] tracking-[-3%]">Log In</span>
+              <span className="text-[15px] font-[450] tracking-[-3%]">
+                Log In
+              </span>
             </Button>
           </Link>
         )}

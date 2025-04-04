@@ -15,6 +15,7 @@ export default function PaymentPage() {
     stateOfResidence: string
     townCity: string
     phoneNumber: string
+    alt_phoneNumber: string
     postalCode: string
     houseAddress: string
     email?: string

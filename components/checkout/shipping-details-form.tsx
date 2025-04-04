@@ -20,6 +20,7 @@ interface ShippingDetailsFormProps {
     stateOfResidence: string;
     townCity: string;
     phoneNumber: string;
+    alt_phoneNumber:string;
     postalCode: string;
     houseAddress: string;
     saveDetails: boolean;
@@ -46,6 +47,7 @@ export default function ShippingDetailsForm({
     stateOfResidence: "",
     townCity: "",
     phoneNumber: "",
+    alt_phoneNumber:"",
     postalCode: "",
     houseAddress: "",
     saveDetails: false,
@@ -279,6 +281,23 @@ export default function ShippingDetailsForm({
                   id="phoneNumber"
                   name="phoneNumber"
                   value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="+234 000 0000 000"
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="alt_phoneNumber"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Alt Phone number
+                </label>
+                <Input
+                  id="alt_phoneNumber"
+                  name="alt_phoneNumber"
+                  value={formData.alt_phoneNumber}
                   onChange={handleChange}
                   placeholder="+234 000 0000 000"
                   required

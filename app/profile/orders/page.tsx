@@ -4,9 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, X } from "lucide-react"
+import { ChevronRight, X, Loader2 } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useOrders, formatDate, getOrderStatusColor } from "@/hooks/use-orders"
 
 export default function OrderHistoryPage() {
   const isMobile = useMediaQuery("(max-width: 768px)")
@@ -14,68 +15,8 @@ export default function OrderHistoryPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [returnReason, setReturnReason] = useState("")
 
-  const [orders] = useState([
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-    {
-      id: "329388",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "12/12/2024",
-      dateDelivered: "05/01/2025",
-      status: "Delivered",
-      reference: "#329388",
-    },
-  ])
+  // Fetch orders using the hook
+  const { data: orders, isLoading, isError, error } = useOrders()
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -120,8 +61,8 @@ export default function OrderHistoryPage() {
           </div>
 
           <p className="mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-            dolore magna aliqua. Ut enim ad minim fghf fhfus skaks
+            Please provide details about why you want to return this item. We&#39;ll review your request and get back to you
+            within 24-48 hours.
           </p>
 
           <div className="mb-4">
@@ -188,6 +129,51 @@ export default function OrderHistoryPage() {
     </div>
   )
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <ProfileLayout title="Order history">
+        {!isMobile && breadcrumb}
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-red mr-2" />
+          <span>Loading your orders...</span>
+        </div>
+      </ProfileLayout>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <ProfileLayout title="Order history">
+        {!isMobile && breadcrumb}
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-red-500 mb-2">Failed to load orders</p>
+          <p className="text-sm text-gray-500 mb-4">
+            {error instanceof Error ? error.message : "An unexpected error occurred"}
+          </p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </ProfileLayout>
+    )
+  }
+
+  // Empty state
+  if (!orders || orders.length === 0) {
+    return (
+      <ProfileLayout title="Order history">
+        {!isMobile && breadcrumb}
+        <div className="text-center py-12">
+          <p className="text-lg font-medium mb-2">You haven&#39;t placed any orders yet</p>
+          <p className="text-sm text-gray-500 mb-4">When you place an order, it will appear here</p>
+          <Button asChild className="bg-black hover:bg-gray-800 text-white">
+            <Link href="/products">Start Shopping</Link>
+          </Button>
+        </div>
+      </ProfileLayout>
+    )
+  }
+
   return (
     <ProfileLayout title="Order history">
       {!isMobile && breadcrumb}
@@ -195,33 +181,41 @@ export default function OrderHistoryPage() {
       {/* Desktop layout - grid of orders */}
       {!isMobile && (
         <div className="grid grid-cols-2 gap-4">
-          {orders.map((order, index) => (
-            <div key={index} className="bg-white border rounded-lg overflow-hidden">
+          {orders.map((order) => (
+            <div key={order.id} className="bg-white border rounded-lg overflow-hidden">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-medium">Name of item</h3>
+                <h3 className="font-medium">Order #{order.reference}</h3>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
               <div className="p-4">
-                <div className="flex gap-4 mb-4">
-                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                    <Image
-                      src="/placeholder.svg?height=64&width=64"
-                      alt={order.name}
-                      fill
-                      className="object-contain p-2"
-                    />
+                {order.items && order.items.length > 0 && (
+                  <div className="flex gap-4 mb-4">
+                    <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                      <Image
+                        src={
+                          order.items[0].product.images && order.items[0].product.images.length > 0
+                            ? order.items[0].product.images[0].image
+                            : "/placeholder.svg?height=64&width=64"
+                        }
+                        alt={order.items[0].product.name}
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{order.items[0].product.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {order.items.length > 1 ? `+${order.items.length - 1} more items` : ""}
+                      </p>
+                      <p className="font-bold mt-1">₦{Number(order.amount).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium">{order.name}</h4>
-                    <p className="text-sm text-gray-500">{order.description}</p>
-                    <p className="font-bold mt-1">₦{order.price}</p>
-                  </div>
-                </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Date of order</p>
-                    <p>{order.date}</p>
+                    <p>{formatDate(order.created_at)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Reference number</p>
@@ -229,19 +223,26 @@ export default function OrderHistoryPage() {
                   </div>
                   <div>
                     <p className="text-gray-500">Date delivered</p>
-                    <p>{order.dateDelivered}</p>
+                    <p>{order.delivery_date ? formatDate(order.delivery_date) : "Pending"}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="text-green-500">{order.status}</p>
+                    <p className={getOrderStatusColor(order.status)}>{order.status}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4 mt-4">
-                  <Button variant="outline" className="flex-1" onClick={() => handleRequestReturn(order.id)}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleRequestReturn(order.id.toString())}
+                    disabled={order.status.toLowerCase() !== "delivered"}
+                  >
                     Request return
                   </Button>
-                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white">View details</Button>
+                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
+                    <Link href={`/profile/orders/${order.id}`}>View details</Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -252,33 +253,41 @@ export default function OrderHistoryPage() {
       {/* Mobile layout - list of orders */}
       {isMobile && (
         <div className="space-y-4">
-          {orders.map((order, index) => (
-            <div key={index} className="bg-white border rounded-lg overflow-hidden">
+          {orders.map((order) => (
+            <div key={order.id} className="bg-white border rounded-lg overflow-hidden">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-medium">Name of item</h3>
+                <h3 className="font-medium">Order #{order.reference}</h3>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
               <div className="p-4">
-                <div className="flex gap-4 mb-4">
-                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                    <Image
-                      src="/placeholder.svg?height=64&width=64"
-                      alt={order.name}
-                      fill
-                      className="object-contain p-2"
-                    />
+                {order.items && order.items.length > 0 && (
+                  <div className="flex gap-4 mb-4">
+                    <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                      <Image
+                        src={
+                          order.items[0].product.images && order.items[0].product.images.length > 0
+                            ? order.items[0].product.images[0].image
+                            : "/placeholder.svg?height=64&width=64"
+                        }
+                        alt={order.items[0].product.name}
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{order.items[0].product.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {order.items.length > 1 ? `+${order.items.length - 1} more items` : ""}
+                      </p>
+                      <p className="font-bold mt-1">₦{Number(order.amount).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium">{order.name}</h4>
-                    <p className="text-sm text-gray-500">{order.description}</p>
-                    <p className="font-bold mt-1">₦{order.price}</p>
-                  </div>
-                </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Date of order</p>
-                    <p>{order.date}</p>
+                    <p>{formatDate(order.created_at)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Order ID</p>
@@ -286,19 +295,26 @@ export default function OrderHistoryPage() {
                   </div>
                   <div>
                     <p className="text-gray-500">Date delivered</p>
-                    <p>{order.dateDelivered}</p>
+                    <p>{order.delivery_date ? formatDate(order.delivery_date) : "Pending"}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="text-green-500">{order.status}</p>
+                    <p className={getOrderStatusColor(order.status)}>{order.status}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4 mt-4">
-                  <Button variant="outline" className="flex-1" onClick={() => handleRequestReturn(order.id)}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleRequestReturn(order.id.toString())}
+                    disabled={order.status.toLowerCase() !== "delivered"}
+                  >
                     Return order
                   </Button>
-                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white">View details</Button>
+                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
+                    <Link href={`/profile/orders/${order.id}`}>View details</Link>
+                  </Button>
                 </div>
               </div>
             </div>

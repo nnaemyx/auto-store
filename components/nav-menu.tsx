@@ -1,19 +1,31 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { ShoppingCart, Heart, User, LogOut, HelpCircle, ChevronDown, Search } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { useAuth } from "@/api/use-auth"
+import Link from "next/link";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  ShoppingCart,
+  Heart,
+  User,
+  LogOut,
+  HelpCircle,
+  ChevronDown,
+  Search,
+} from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useAuth } from "@/api/use-auth";
 
 // This is specifically the mobile navigation menu
 const NavMenu = ({ onClose }: { onClose?: () => void }) => {
   const { user, logout } = useAuth();
-  
+
   const handleLogout = () => {
     logout();
     if (onClose) onClose();
@@ -29,7 +41,12 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
 
         <div className="flex items-center justify-between p-4">
           <Link href="/" className="flex items-center" onClick={onClose}>
-            <Image src="/images/1000021435-removebg-preview 1.png" alt="Auto Store" width={120} height={40} />
+            <Image
+              src="/images/1000021435-removebg-preview 1.png"
+              alt="Auto Store"
+              width={120}
+              height={40}
+            />
           </Link>
         </div>
 
@@ -46,27 +63,37 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
       <div className="flex-1 overflow-y-auto">
         {/* User Info (if logged in) */}
         {user && (
-          <div className="px-4 py-3 bg-gray-50">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="h-5 w-5 text-gray-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-medium">{user.username}</h3>
-                <p className="text-sm text-gray-500">{user.email}</p>
+          <Link href="/profile" onClick={onClose}>
+            <div className="px-4 py-3 bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-medium">{user.username}</h3>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         )}
 
         {/* Categories */}
         <div className="px-4 py-3">
           <h3 className="text-base font-medium mb-3">Categories</h3>
           <div className="space-y-4">
-            <Link href="/category/interior" className="block py-4 text-gray-700 hover:text-brand-red" onClick={onClose}>
+            <Link
+              href="/category/interior"
+              className="block py-4 text-gray-700 hover:text-brand-red"
+              onClick={onClose}
+            >
               Interior Accessories
             </Link>
-            <Link href="/category/exterior" className="block py-4 text-gray-700 hover:text-brand-red" onClick={onClose}>
+            <Link
+              href="/category/exterior"
+              className="block py-4 text-gray-700 hover:text-brand-red"
+              onClick={onClose}
+            >
               Exteriors
             </Link>
           </div>
@@ -152,7 +179,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default NavMenu
+export default NavMenu;
