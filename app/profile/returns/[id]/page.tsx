@@ -1,6 +1,5 @@
 "use client"
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -8,26 +7,58 @@ import { ArrowLeft } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
-export default function ReturnRequestDetailsPage({ params }: { params: { id: string } }) {
-  const isMobile = useMediaQuery("(max-width: 768px)")
-  const [returnDetails] = useState({
-    id: params.id,
-    productName: "Name of product",
-    productPrice: "50,687.90",
-    status: "Processing",
-    item: "Toyota Camry Interior Seats",
-    trackingId: "9675 6456 3454",
-    dateOrdered: "03/12/2024",
-    dateDelivered: "12/12/2025",
-    reason:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim fghf fhfus skaks",
-    images: [
-      "/placeholder.svg?height=100&width=100",
-      "/placeholder.svg?height=100&width=100",
-      "/placeholder.svg?height=100&width=100",
-      "/placeholder.svg?height=100&width=100",
-    ],
-  })
+export default function ReturnRequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    const fetchParams = async () => {
+      const resolved = await params;
+      setResolvedParams(resolved);
+    };
+    fetchParams();
+  }, [params]);
+
+  const [returnDetails, setReturnDetails] = useState<{
+    id: string;
+    productName: string;
+    productPrice: string;
+    status: string;
+    item: string;
+    trackingId: string;
+    dateOrdered: string;
+    dateDelivered: string;
+    reason: string;
+    images: string[];
+  } | null>(null);
+
+  useEffect(() => {
+    if (resolvedParams) {
+      setReturnDetails({
+        id: resolvedParams.id,
+        productName: "Name of product",
+        productPrice: "50,687.90",
+        status: "Processing",
+        item: "Toyota Camry Interior Seats",
+        trackingId: "9675 6456 3454",
+        dateOrdered: "03/12/2024",
+        dateDelivered: "12/12/2025",
+        reason:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim fghf fhfus skaks",
+        images: [
+          "/placeholder.svg?height=100&width=100",
+          "/placeholder.svg?height=100&width=100",
+          "/placeholder.svg?height=100&width=100",
+          "/placeholder.svg?height=100&width=100",
+        ],
+      });
+    }
+  }, [resolvedParams]);
+
+  if (!resolvedParams || !returnDetails) {
+    return <div>Loading...</div>;
+  }
 
   // Breadcrumb for desktop
   const breadcrumb = (
