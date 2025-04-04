@@ -9,19 +9,18 @@ export const metadata: Metadata = {
   description: "Browse our complete collection of auto parts and accessories",
 }
 
-export default function ProductsPage({
+export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: {
-    category_id?: string
-    manufacturer_id?: string
-    car_model_id?: string
-  }
+  searchParams: Promise<{ category_id?: string, manufacturer_id?: string, car_model_id?: string }>
 }) {
+  // Resolve the searchParams promise
+  const resolvedSearchParams = await searchParams;
+
   // Extract filter parameters from the URL
-  const categoryId = searchParams.category_id ? Number.parseInt(searchParams.category_id) : undefined
-  const manufacturerId = searchParams.manufacturer_id ? Number.parseInt(searchParams.manufacturer_id) : undefined
-  const carModelId = searchParams.car_model_id ? Number.parseInt(searchParams.car_model_id) : undefined
+  const categoryId = resolvedSearchParams.category_id ? Number.parseInt(resolvedSearchParams.category_id) : undefined;
+  const manufacturerId = resolvedSearchParams.manufacturer_id ? Number.parseInt(resolvedSearchParams.manufacturer_id) : undefined;
+  const carModelId = resolvedSearchParams.car_model_id ? Number.parseInt(resolvedSearchParams.car_model_id) : undefined;
 
   return (
     <div className="container mx-auto px-4 py-8">
