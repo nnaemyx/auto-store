@@ -1,6 +1,5 @@
 "use client"
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -8,13 +7,18 @@ import { ArrowLeft } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    params.then(setResolvedParams);
+  }, [params]);
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
 
   const [orderDetails] = useState({
-    id: params.id,
+    id: resolvedParams?.id || "",
     name: "Name of Product",
     description: "Description",
     price: "40,500.00",
