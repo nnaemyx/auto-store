@@ -14,7 +14,7 @@ export default function OrderHistoryPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [returnReason, setReturnReason] = useState("")
 
-  const [orders, setOrders] = useState([
+  const [orders] = useState([
     {
       id: "329388",
       name: "Name of Product",

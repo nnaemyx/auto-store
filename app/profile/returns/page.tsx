@@ -11,9 +11,26 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 export default function ReturnRequestsPage() {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [showReturnDetails, setShowReturnDetails] = useState(false)
-  const [selectedReturn, setSelectedReturn] = useState<any>(null)
+  interface ReturnItem {
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+    date: string;
+    dateDelivered: string;
+    status: string;
+    orderId: string;
+    productName: string;
+    productPrice: string;
+    item: string;
+    trackingId: string;
+    reason: string;
+    images: string[];
+  }
 
-  const [returns, setReturns] = useState([
+  const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null)
+
+  const [returns] = useState([
     {
       id: "3200",
       name: "Name of Product",
@@ -71,7 +88,7 @@ export default function ReturnRequestsPage() {
     </div>
   )
 
-  const handleViewDetails = (returnItem: any) => {
+  const handleViewDetails = (returnItem: ReturnItem) => {
     setSelectedReturn(returnItem)
     setShowReturnDetails(true)
   }

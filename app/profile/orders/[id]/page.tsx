@@ -13,7 +13,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
 
-  const [orderDetails, setOrderDetails] = useState({
+  const [orderDetails] = useState({
     id: params.id,
     name: "Name of Product",
     description: "Description",

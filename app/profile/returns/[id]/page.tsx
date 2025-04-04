@@ -10,7 +10,7 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 
 export default function ReturnRequestDetailsPage({ params }: { params: { id: string } }) {
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const [returnDetails, setReturnDetails] = useState({
+  const [returnDetails] = useState({
     id: params.id,
     productName: "Name of product",
     productPrice: "50,687.90",

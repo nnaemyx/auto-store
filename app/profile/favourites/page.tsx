@@ -99,6 +99,7 @@ export default function FavouritesPage() {
   }
 
   const handleAddToCart = (id: string) => {
+    console.log(id)
     // In a real app, you would add the item to the cart
     toast({
       title: "Added to cart",
