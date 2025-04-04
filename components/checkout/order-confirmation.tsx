@@ -11,11 +11,12 @@ import PaystackPayment from "./paystack-payment"
 import { useToast } from "@/hooks/use-toast"
 
 interface CheckoutData {
-  email: string
-  amount: number
-  order_code: string
-  check_out_id: string
-  delivery_fee?: number
+  email?: string
+  amount?: number
+  order_code?: string
+  check_out_id?: string
+  delivery_fee?: string | number
+  [key: string]: unknown
 }
 
 interface OrderConfirmationProps {
@@ -68,11 +69,12 @@ export default function OrderConfirmation({
   }
 
   interface CheckoutData {
-    email: string
-    amount: number
-    order_code: string
-    check_out_id: string
-    delivery_fee?: number
+    email?: string
+    amount?: number
+    order_code?: string
+    check_out_id?: string
+    delivery_fee?: string | number
+    [key: string]: unknown
   }
 
   const handlePaystackSuccess = (reference: string, checkoutData?: CheckoutData) => {
