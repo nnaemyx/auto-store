@@ -8,6 +8,7 @@ import { useCart } from "@/hooks/use-cart"
 export default function PaymentPage() {
   const router = useRouter()
   const { cart } = useCart()
+
   interface ShippingDetails {
     firstName: string
     lastName: string
@@ -16,10 +17,12 @@ export default function PaymentPage() {
     phoneNumber: string
     postalCode: string
     houseAddress: string
+    email?: string
+    alternatePhone?: string
   }
-
+  
   const [shippingDetails, setShippingDetails] = useState<ShippingDetails | null>(null)
-
+  
   useEffect(() => {
     // Get shipping details from localStorage
     const storedDetails = localStorage.getItem("shippingDetails")
@@ -31,18 +34,12 @@ export default function PaymentPage() {
     }
   }, [router])
 
-  interface PaymentDetails {
-    cardNumber: string;
-    expiryDate: string;
-    cvv: string;
-    nameOnCard: string;
-    saveCardDetails: boolean;
-  }
-
-  const handleSubmit = (formData: PaymentDetails) => {
-    // In a real app, you would process the payment
-    // For now, we'll just store in localStorage for the confirmation
-    localStorage.setItem("paymentDetails", JSON.stringify(formData))
+  // Update this function to match the expected type from PaymentDetailsForm
+  const handleSubmit = (data: { checkoutResponse: Record<string, unknown>; deliveryFee: string }) => {
+    // Store checkout data for the confirmation page
+    localStorage.setItem("checkoutData", JSON.stringify(data))
+    
+    // Navigate to the confirmation page
     router.push("/checkout/confirm")
   }
 
@@ -66,4 +63,3 @@ export default function PaymentPage() {
     </div>
   )
 }
-

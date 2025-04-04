@@ -23,16 +23,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="md:py-15 py-25 md:px-10 px-4">
+      <section className="md:py-15 py-20 md:px-10 px-4">
         <CarSearch/>
       </section>
 
       
-      <section className="md:py-15 py-25 md:px-3">
+      <section className="md:py-15  md:px-3">
         <ProductHighlights/>
       </section>
 
-      <section className="md:py-[48px] pl-4 py-25 md:pl-10">
+      <section className="md:py-[48px] pl-4 py-20 md:pl-10">
         <CategorySlider/>
       </section>
     </div>

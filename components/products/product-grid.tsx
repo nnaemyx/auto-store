@@ -22,14 +22,16 @@ const filterOptions = {
 interface ProductsGridProps {
   categoryId?: number
   manufacturerId?: number
+  carModelId?: number
 }
 
-export default function ProductsGrid({ categoryId, manufacturerId }: ProductsGridProps) {
+export default function ProductsGrid({ categoryId, manufacturerId, carModelId }: ProductsGridProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortBy, setSortBy] = useState("relevance")
   const [filters, setFilters] = useState<ProductFilters>({
     category_id: categoryId,
     manufacturer_id: manufacturerId,
+    car_model_id: carModelId,
   })
 
   // Fetch products using TanStack Query
@@ -179,13 +181,17 @@ export default function ProductsGrid({ categoryId, manufacturerId }: ProductsGri
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map((product) => (
                 <Link key={product.id} href={`/product/${product.id}`} className="group">
-                  <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
-                    <div className="relative h-40 md:h-48 bg-gray-50">
+                  <div className="bg-white rounded-md overflow-hidden  transition-all group-hover:shadow-md">
+                    <div className="relative h-40 md:h-[408px] md:w-[278px] bg-gray-50">
                       <Image
-                        src={product.images[0]?.image}
+                        src={
+                          product.images && product.images.length > 0
+                            ? product.images[0].image
+                            : ""
+                        }
                         alt={product.name}
                         fill
-                        className="object-contain p-4"
+                        className="object-cover rounded-[8px]"
                       />
                       {product.promotion && product.promotion.discount !== "0" && (
                         <div className="absolute top-2 left-2 bg-brand-red text-white rounded-full px-3 py-1 text-xs">

@@ -167,10 +167,10 @@ export default function BestSellingItems() {
       </div>
 
       {/* See more button */}
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center mt-8 px-4">
         <Link
           href="/product"
-          className="bg-black text-white px-6 py-3 rounded-md flex items-center"
+          className="bg-black text-white text-center mx-auto justify-center lg:w-auto px-6 py-3 w-full rounded-md flex items-center"
         >
           See more
           <svg

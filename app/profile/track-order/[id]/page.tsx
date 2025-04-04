@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,9 +6,18 @@ import { X } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default function OrderDetailsPage({ params }: { params: Promise<{ id:string }> }) {
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const [orderDetails, setOrderDetails] = useState({
+
+  const fetchParams = async () => {
+    const { id } = await params
+    console.log(id)
+    return id
+  }
+
+  const id = fetchParams()
+  console.log(id)
+  const [orderDetails] = useState({
     id: "3200",
     productName: "Name of product",
     productPrice: "50,687.90",

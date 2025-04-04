@@ -10,7 +10,7 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 
 export default function TrackOrderPage() {
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const [orders, setOrders] = useState([
+  const [orders] = useState([
     {
       id: "329388",
       name: "Name of Product",

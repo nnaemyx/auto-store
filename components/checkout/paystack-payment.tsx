@@ -9,17 +9,43 @@ import { PAYSTACK_PUBLIC_KEY, generateReference } from "@/lib/paystack"
 interface PaystackPaymentProps {
   email: string
   amount: number // in Naira
-  onSuccess: (reference: string, checkoutData?: any) => void
+  onSuccess: (reference: string, checkoutData?: CheckoutData) => void
   onClose: () => void
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean | object>
   className?: string
   text?: string
-  checkoutData?: any
+  checkoutData?: CheckoutData
+}
+
+// Add the CheckoutData interface to this file
+interface CheckoutData {
+  email: string
+  amount: number
+  order_code: string
+  check_out_id: string
+  delivery_fee?: number
+  [key: string]: unknown // Add this to maintain compatibility with other properties
 }
 
 declare global {
   interface Window {
-    PaystackPop: any
+    PaystackPop: {
+      setup: (config: {
+        key: string
+        email: string
+        amount: number
+        ref: string
+        metadata: {
+          custom_fields: Array<{
+            display_name: string
+            variable_name: string
+            value: string | number
+          }>
+        }
+        onClose: () => void
+        callback: (response: { reference: string }) => void
+      }) => { openIframe: () => void }
+    }
   }
 }
 
@@ -93,7 +119,7 @@ export default function PaystackPayment({
           setIsLoading(false)
           onClose()
         },
-        callback: (response: any) => {
+        callback: (response: { reference: string }) => {
           setIsLoading(false)
           onSuccess(response.reference, checkoutResponse)
         },

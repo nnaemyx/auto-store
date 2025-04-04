@@ -8,8 +8,25 @@ import { useCart } from "@/hooks/use-cart"
 export default function ConfirmPage() {
   const router = useRouter()
   const { cart } = useCart()
-  const [shippingDetails, setShippingDetails] = useState<any>(null)
-  const [paymentDetails, setPaymentDetails] = useState<any>(null)
+  interface ShippingDetails {
+    firstName: string
+    lastName: string
+    stateOfResidence: string
+    townCity: string
+    phoneNumber: string
+    postalCode: string
+    houseAddress: string
+    email?: string
+  }
+
+  const [shippingDetails, setShippingDetails] = useState<ShippingDetails | null>(null)
+  interface PaymentDetails {
+    method: string
+    provider: string
+    transactionId?: string
+  }
+
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null)
 
   useEffect(() => {
     // Get stored details from localStorage
@@ -25,7 +42,15 @@ export default function ConfirmPage() {
     }
   }, [router])
 
-  const handleConfirmOrder = (checkoutData?: any) => {
+  interface CheckoutData {
+    email: string
+    amount: number
+    order_code: string
+    check_out_id: string
+    delivery_fee?: number
+  }
+
+  const handleConfirmOrder = (checkoutData?: CheckoutData) => {
     // In a real app, you would submit the order to your backend
     // For now, we'll just simulate a successful order
     localStorage.setItem("orderConfirmed", "true")

@@ -9,9 +9,21 @@ import type { CartItem } from "@/hooks/use-cart"
 
 interface OrderSuccessProps {
   orderDetails: {
-    shipping: any
-    payment: any
-    checkout?: any
+    shipping: {
+      email: string
+      address: string
+      city: string
+      state: string
+      zipCode: string
+    }
+    payment: {
+      method: string
+      amount: number
+      transactionId: string
+    }
+    checkout?: {
+      email?: string
+    }
     orderDate: Date
     estimatedDelivery: Date
     orderNumber: string
@@ -70,8 +82,9 @@ export default function OrderSuccess({ orderDetails, cartItems }: OrderSuccessPr
           <p className="text-center text-xl mb-6">Your order is on the way!!!</p>
 
           <p className="text-center text-gray-600 mb-8">
-            Thank you for your order! Your order number is <strong>#{orderDetails.orderNumber}</strong>. We&apos;ve sent a
-            confirmation email to {orderDetails.shipping.email || orderDetails.checkout?.email || "your email address"}.
+            Thank you for your order! Your order number is <strong>#{orderDetails.orderNumber}</strong>. We&apos;ve sent
+            a confirmation email to{" "}
+            {orderDetails.shipping.email || orderDetails.checkout?.email || "your email address"}.
           </p>
 
           <div className="space-y-4 mb-8">

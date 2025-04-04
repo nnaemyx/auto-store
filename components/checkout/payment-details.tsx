@@ -17,8 +17,18 @@ const getToken = (): string | null => {
   }
 
 interface PaymentDetailsFormProps {
-  onSubmit: (data: any) => void;
-  shippingDetails: any;
+  onSubmit: (data: { checkoutResponse: Record<string, unknown>; deliveryFee: string }) => void;
+  shippingDetails: {
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phoneNumber: string;
+    houseAddress: string;
+    stateOfResidence: string;
+    postalCode: string;
+    townCity: string;
+    alternatePhone?: string;
+  };
   cartItems: CartItem[];
   cartSummary: {
     subtotal: number;
@@ -74,7 +84,7 @@ export default function PaymentDetailsForm({
       };
 
       // Call the checkout API
-      const checkoutResponse = await apiClient.post(
+      const checkoutResponse = await apiClient.post<Record<string, unknown>>(
         "/cart/check-out",
         checkoutData,
         {
@@ -111,26 +121,20 @@ export default function PaymentDetailsForm({
     }
   };
 
-  const handlePaystackSuccess = (reference: string, checkoutData?: any) => {
-    toast({
-      title: "Payment Successful",
-      description: `Your payment was successful. Reference: ${reference}`,
-      variant: ToastVariant.Success,
-    });
+  // const handlePaystackSuccess = (reference: string, checkoutData?: any) => {
+  //   toast({
+  //     title: "Payment Successful",
+  //     description: `Your payment was successful. Reference: ${reference}`,
+  //     variant: ToastVariant.Success,
+  //   });
 
-    onSubmit({
-      paymentReference: reference,
-      checkoutData,
-    });
-  };
+  //   onSubmit({
+  //     paymentReference: reference,
+  //     checkoutData,
+  //   });
+  // };
 
-  const handlePaystackClose = () => {
-    toast({
-      title: "Payment Cancelled",
-      description: "You cancelled the payment process",
-      variant: ToastVariant.Error,
-    });
-  };
+  // Removed unused handlePaystackClose function
 
   return (
     <div>

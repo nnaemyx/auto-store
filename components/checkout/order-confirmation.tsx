@@ -10,10 +10,31 @@ import type { CartItem } from "@/hooks/use-cart"
 import PaystackPayment from "./paystack-payment"
 import { useToast } from "@/hooks/use-toast"
 
+interface CheckoutData {
+  email: string
+  amount: number
+  order_code: string
+  check_out_id: string
+  delivery_fee?: number
+}
+
 interface OrderConfirmationProps {
-  onConfirm: (checkoutData?: any) => void
-  shippingDetails: any
-  paymentDetails: any
+  onConfirm: (checkoutData?: CheckoutData) => void
+  shippingDetails: {
+    firstName: string
+    lastName: string
+    stateOfResidence: string
+    townCity: string
+    phoneNumber: string
+    postalCode: string
+    houseAddress: string
+    email?: string
+  }
+  paymentDetails: {
+    method: string
+    provider: string
+    transactionId?: string
+  }
   cartItems: CartItem[]
   cartSummary: {
     subtotal: number
@@ -26,7 +47,6 @@ interface OrderConfirmationProps {
 export default function OrderConfirmation({
   onConfirm,
   shippingDetails,
-  paymentDetails,
   cartItems,
   cartSummary,
 }: OrderConfirmationProps) {
@@ -34,7 +54,6 @@ export default function OrderConfirmation({
   const { toast, ToastVariant } = useToast()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [discountCode, setDiscountCode] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
 
   // Get checkout data from localStorage
   const checkoutData = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("checkoutResponse") || "{}") : {}
@@ -48,7 +67,15 @@ export default function OrderConfirmation({
     setShowConfirmModal(false)
   }
 
-  const handlePaystackSuccess = (reference: string, checkoutData?: any) => {
+  interface CheckoutData {
+    email: string
+    amount: number
+    order_code: string
+    check_out_id: string
+    delivery_fee?: number
+  }
+
+  const handlePaystackSuccess = (reference: string, checkoutData?: CheckoutData) => {
     toast({
       title: "Payment Successful",
       description: `Your payment was successful. Reference: ${reference}`,
