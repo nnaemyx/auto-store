@@ -20,9 +20,10 @@ export default function PaymentPage() {
     email?: string
     alternatePhone?: string
   }
-  
+
   const [shippingDetails, setShippingDetails] = useState<ShippingDetails | null>(null)
-  
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
     // Get shipping details from localStorage
     const storedDetails = localStorage.getItem("shippingDetails")
@@ -32,24 +33,33 @@ export default function PaymentPage() {
       // If no shipping details, redirect back to checkout
       router.push("/checkout")
     }
+    setIsLoading(false)
   }, [router])
+
+  // Check if cart is empty and redirect if needed
+  useEffect(() => {
+    if (cart && (!cart.cart_items || cart.cart_items.length === 0)) {
+      router.push("/cart")
+    }
+  }, [cart, router])
 
   // Update this function to match the expected type from PaymentDetailsForm
   const handleSubmit = (data: { checkoutResponse: Record<string, unknown>; deliveryFee: string }) => {
     // Store checkout data for the confirmation page
     localStorage.setItem("checkoutData", JSON.stringify(data))
-    
+
     // Navigate to the confirmation page
     router.push("/checkout/confirm")
   }
 
-  if (!cart?.cart_items || cart.cart_items.length === 0) {
-    router.push("/cart")
-    return null
+  // Show loading state while checking conditions
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>
   }
 
+  // Don't render the form if shipping details are missing
   if (!shippingDetails) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    return <div className="container mx-auto px-4 py-8">Loading shipping details...</div>
   }
 
   return (
@@ -57,9 +67,10 @@ export default function PaymentPage() {
       <PaymentDetailsForm
         onSubmit={handleSubmit}
         shippingDetails={shippingDetails}
-        cartItems={cart.cart_items}
-        cartSummary={cart.summary}
+        cartItems={cart?.cart_items || []}
+        cartSummary={cart?.summary || { subtotal: 0, tax: 0, shipping_fee: 0, total: 0 }}
       />
     </div>
   )
 }
+
