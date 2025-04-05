@@ -83,14 +83,14 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
           <h3 className="text-base font-medium mb-3">Categories</h3>
           <div className="space-y-4">
             <Link
-              href="/category/interior"
+              href="/interior"
               className="block py-4 text-gray-700 hover:text-brand-red"
               onClick={onClose}
             >
               Interior Accessories
             </Link>
             <Link
-              href="/category/exterior"
+              href="/exterior"
               className="block py-4 text-gray-700 hover:text-brand-red"
               onClick={onClose}
             >
@@ -137,7 +137,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
               )}
 
               <Link
-                href="/support"
+                href="/profile/support"
                 className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
                 onClick={onClose}
               >

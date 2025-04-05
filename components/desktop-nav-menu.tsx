@@ -44,7 +44,7 @@ const DesktopNavMenu = () => {
           </Link>
         )}
 
-        <Link href="/support" className="flex items-center gap-2 px-3 py-2.5">
+        <Link href="/profile/support" className="flex items-center gap-2 px-3 py-2.5">
           <HelpCircle className="h-4.5 w-4.5" />
           <span className="text-[15px] font-[450] tracking-[-3%]">
             Contact support

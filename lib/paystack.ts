@@ -20,14 +20,14 @@ export function generateReference(): string {
  * This should be called from a server action or API route
  */
 interface PaystackTransactionResponse {
-  status: string;
-  message: string;
+  status: string
+  message: string
   data: {
-    reference: string;
-    amount: number;
-    status: string;
-    transaction_date: string;
-  };
+    reference: string
+    amount: number
+    status: string
+    transaction_date: string
+  }
 }
 
 export async function verifyPaystackTransaction(reference: string): Promise<PaystackTransactionResponse> {

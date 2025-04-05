@@ -1,14 +1,15 @@
 "use client"
 
+import { Input } from "@/components/ui/input"
+
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useMediaQuery } from "@/hooks/use-media-query"
 import type { CartItem } from "@/hooks/use-cart"
 import PaystackPayment from "./paystack-payment"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/api/use-auth"
 
 interface CheckoutData {
   email?: string
@@ -16,7 +17,7 @@ interface CheckoutData {
   order_code?: string
   check_out_id?: string
   delivery_fee?: string | number
-  [key: string]: unknown
+  [key: string]: unknown // Add this if there are additional dynamic properties
 }
 
 interface OrderConfirmationProps {
@@ -33,7 +34,7 @@ interface OrderConfirmationProps {
   }
   paymentDetails: {
     method: string
-    provider: string
+    status: string
     transactionId?: string
   }
   cartItems: CartItem[]
@@ -51,7 +52,7 @@ export default function OrderConfirmation({
   cartItems,
   cartSummary,
 }: OrderConfirmationProps) {
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const { user } = useAuth()
   const { toast, ToastVariant } = useToast()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [discountCode, setDiscountCode] = useState("")
@@ -74,7 +75,7 @@ export default function OrderConfirmation({
     order_code?: string
     check_out_id?: string
     delivery_fee?: string | number
-    [key: string]: unknown
+    [key: string]: unknown// Add this if there are additional dynamic properties
   }
 
   const handlePaystackSuccess = (reference: string, checkoutData?: CheckoutData) => {
@@ -105,6 +106,17 @@ export default function OrderConfirmation({
     }
   }
 
+  // Prepare metadata for Paystack
+  const paystackMetadata = {
+    amount: checkoutData.amount ? checkoutData.amount : cartSummary.total,
+    reference: checkoutData.reference || "",
+    email: checkoutData.email || shippingDetails.email || "customer@example.com",
+    check_out_id: checkoutData.check_out_id || "1",
+    delivery_fee: checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee,
+    order_code: checkoutData.order_code || "",
+    user_id: user?.id || "1",
+  }
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -130,7 +142,7 @@ export default function OrderConfirmation({
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Order Summary Section */}
-        <div className={isMobile ? "w-full" : "lg:w-1/2"}>
+        <div className="w-full lg:w-1/2">
           <h2 className="text-xl font-bold mb-6">Order summary</h2>
 
           <div className="space-y-4 mb-6">
@@ -150,7 +162,7 @@ export default function OrderConfirmation({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium">{item.name}</h3>
-                  <p className="text-sm text-gray-500">Description</p>
+                  <p className="text-sm text-gray-500">{item.description}</p>
                   <p className="font-bold mt-1">₦{Number(item.amount).toLocaleString()}</p>
                 </div>
                 <div className="flex items-start gap-2">
@@ -250,7 +262,7 @@ export default function OrderConfirmation({
         </div>
 
         {/* Payment Details Section */}
-        <div className={isMobile ? "w-full" : "lg:w-1/2"}>
+        <div className="w-full lg:w-1/2">
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Payment details</h2>
@@ -325,13 +337,7 @@ export default function OrderConfirmation({
               amount={checkoutData.amount ? Number(checkoutData.amount) : cartSummary.total}
               onSuccess={handlePaystackSuccess}
               onClose={handlePaystackClose}
-              checkoutData={checkoutData}
-              metadata={{
-                order_items: cartItems.length,
-                customer_name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
-                order_code: checkoutData.order_code || "",
-                check_out_id: checkoutData.check_out_id || "",
-              }}
+              checkoutData={paystackMetadata}
               className="flex-1"
               text="Complete Payment"
             />

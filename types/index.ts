@@ -56,6 +56,18 @@ export interface ProductPromotion {
   updated_at: string
 }
 
+// Add ProductType interface to existing types
+export interface ProductType {
+  id: number
+  category_id: string
+  name: string
+  delete_status: string
+  description: string
+  created_at: string
+  updated_at: string
+}
+
+// Update Product interface to include product_type
 export interface Product {
   id: number
   name: string
@@ -79,6 +91,14 @@ export interface Product {
   promotion: ProductPromotion
   images: ProductImage[]
   price: number
+  product_type?: ProductType
+  brand?: {
+    id: number
+    name: string
+    manufacturer_id: string
+    image: string
+    description: string
+  }
 }
 
 // Filter types

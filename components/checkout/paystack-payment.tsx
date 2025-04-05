@@ -188,7 +188,7 @@ export default function PaystackPayment({
         onClose()
       }
 
-      // Create the config object
+      // Create the config object with the required metadata
       const config = {
         key: PAYSTACK_PUBLIC_KEY,
         email: paymentEmail,
@@ -197,20 +197,39 @@ export default function PaystackPayment({
         metadata: {
           custom_fields: [
             {
-              display_name: "Order Reference",
-              variable_name: "order_ref",
+              display_name: "Amount",
+              variable_name: "amount",
+              value: paymentAmount / 100, // Convert back to Naira
+            },
+            {
+              display_name: "Reference",
+              variable_name: "reference",
               value: reference,
             },
-            // Include checkout ID if available
+            {
+              display_name: "Email",
+              variable_name: "email",
+              value: paymentEmail,
+            },
+            {
+              display_name: "Checkout ID",
+              variable_name: "check_out_id",
+              value: paymentData.check_out_id || "1",
+            },
+            {
+              display_name: "Delivery Fee",
+              variable_name: "delivery_fee",
+              value: paymentData.delivery_fee || "2000",
+            },
             {
               display_name: "Order Code",
               variable_name: "order_code",
               value: paymentData.order_code || "",
             },
             {
-              display_name: "Checkout ID",
-              variable_name: "checkout_id",
-              value: paymentData.check_out_id || "",
+              display_name: "User ID",
+              variable_name: "user_id",
+              value: "1", // Default user ID if not provided
             },
           ],
         },

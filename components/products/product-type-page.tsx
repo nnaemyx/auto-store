@@ -8,34 +8,30 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
-import { useProducts } from "@/hooks/use-products"
+import { useProductsByType } from "@/hooks/use-products-by-type"
 import type { ProductFilters } from "@/types"
 
 // Filter options
-const filterOptions = {
+const filterOptions: Record<string, string[]> = {
   priceRange: ["₦1,000 - ₦10,000", "₦10,000 - ₦50,000", "₦50,000 - ₦100,000", "₦100,000+"],
   condition: ["New", "Used", "Refurbished"],
   brands: ["Local brands", "International brands"],
   warranty: ["With warranty", "Without warranty"],
 }
 
-interface ProductsGridProps {
-  categoryId?: number
-  manufacturerId?: number
-  carModelId?: number
+interface ProductTypePageProps {
+  type: string
+  title: string
+  description?: string
 }
 
-export default function ProductsGrid({ categoryId, manufacturerId, carModelId }: ProductsGridProps) {
+export default function ProductTypePage({ type, title, description }: ProductTypePageProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortBy, setSortBy] = useState("relevance")
-  const [filters, setFilters] = useState<ProductFilters>({
-    category_id: categoryId,
-    manufacturer_id: manufacturerId,
-    car_model_id: carModelId,
-  })
+  const [filters, setFilters] = useState<ProductFilters>({})
 
   // Fetch products using TanStack Query
-  const { data: products, isLoading, isError, error } = useProducts(filters)
+  const { data: products, isLoading, isError, error } = useProductsByType(type, filters)
 
   const handleApplyFilter = (filterType: string, selectedValues: string[]) => {
     if (filterType === "priceRange" && selectedValues.length > 0) {
@@ -90,7 +86,13 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
   }
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">{title}</h1>
+        {description && <p className="text-gray-600">{description}</p>}
+      </div>
+
       {/* Mobile filter and sort controls */}
       <div className="flex items-center justify-between mb-4 md:hidden">
         <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -128,30 +130,30 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
       </div>
 
       {/* Desktop layout with sidebar filters */}
-      <div className="flex flex-col md:flex-row gap-8 border-t border-[#00000012]">
+      <div className="flex flex-col md:flex-row gap-8">
         {/* Desktop Filters Sidebar */}
-        <div className="hidden md:block w-[240px] pt-[28px] px-[20px] flex-shrink-0 border-r border-[#00000012]">
-          <div className="sticky">
-            <div className="flex items-center gap-2 py-[7px] px-3 rounded-[4px] w-[92px] bg-[#00000008]">
-              <h2 className="font-medium text-[15px]">Filters</h2>
-              <Filter className="size-[18px]" />
+        <div className="hidden md:block w-64 flex-shrink-0">
+          <div className="sticky top-24">
+            <div className="flex items-center gap-2 mb-4">
+              <Filter className="h-4 w-4" />
+              <h2 className="font-medium">Filters</h2>
             </div>
             <DesktopFilters onApplyFilter={handleApplyFilter} />
           </div>
         </div>
 
         {/* Product Grid */}
-        <div className="flex-1 px-[20px] pt-[28px]">
+        <div className="flex-1">
           {/* Desktop sort controls */}
-          <div className="hidden md:flex justify-between items-center">
-            <h2 className="text-[18px] font-medium">All Products</h2>
+          <div className="hidden md:flex justify-end mb-4">
             <div className="flex items-center gap-2">
+              <span className="text-sm">Sort by</span>
               <select
-                className="text-sm bg-[#00000008] rounded-md px-2 w-[92px] border-none py-1"
+                className="text-sm border rounded-md px-2 py-1"
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
               >
-                <option value="relevance">Sort by</option>
+                <option value="relevance">Relevance</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="newest">Newest</option>
@@ -178,31 +180,31 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
 
           {/* Products */}
           {!isLoading && !isError && products && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-[28px] gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map((product) => (
-                <Link key={product.id} href={`/product/${product.id}`} className="group ">
-                  <div className="bg-white rounded-md overflow-hidden  transition-all group-hover:shadow-md">
-                    <div className="relative h-40 md:h-[408px] md:max-w-[278px] w-full bg-gray-50">
+                <Link key={product.id} href={`/product/${product.id}`} className="group">
+                  <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
+                    <div className="relative h-40 md:h-48 bg-gray-50">
                       <Image
                         src={
                           product.images && product.images.length > 0
                             ? product.images[0].image
-                            : ""
+                            : "/placeholder.svg?height=200&width=200"
                         }
                         alt={product.name}
                         fill
-                        className="object-cover rounded-[8px]"
+                        className="object-contain p-4"
                       />
                       {product.promotion && product.promotion.discount !== "0" && (
-                        <div className="absolute top-2 left-2 bg-white text-red-500 z-10 rounded-full px-3 py-1 text-xs">
+                        <div className="absolute top-2 left-2 bg-brand-red text-white rounded-full px-3 py-1 text-xs">
                           Sale
                         </div>
                       )}
                     </div>
                     <div className="p-3">
-                      <h3 className="font-[450] text-[#2F2F2F] text-sm group-hover:text-brand-red">{product.name}</h3>
+                      <h3 className="font-medium text-sm group-hover:text-brand-red">{product.name}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="font-semibold text-[#212121] text-sm">₦{Number.parseInt(product.amount).toLocaleString()}</p>
+                        <p className="font-bold text-sm">₦{Number.parseInt(product.amount).toLocaleString()}</p>
                         {product.promotion && product.promotion.discount !== "0" && (
                           <p className="text-xs text-gray-500 line-through">
                             ₦
@@ -215,11 +217,11 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {product.category && (
-                          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-[4px]">{product.category.name}</span>
+                          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">{product.category.name}</span>
                         )}
-                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-[4px]">
-                          {product.status ? product.status.name : "In Stock"}
-                        </span>
+                        {product.brand && (
+                          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">{product.brand.name}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -263,7 +265,7 @@ function MobileFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, 
 // Desktop Filters Component
 function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, values: string[]) => void }) {
   return (
-    <div className="space-y-6 mt-8">
+    <div className="space-y-6">
       {Object.entries(filterOptions).map(([category, options], index) => (
         <div key={category}>
           <Collapsible defaultOpen={index < 3}>
@@ -323,7 +325,7 @@ function FilterOptions({
           </label>
         </div>
       ))}
-      <Button variant="outline" size="sm" className="w-full mt-2 bg-black text-white" onClick={handleApply}>
+      <Button variant="outline" size="sm" className="w-full mt-2" onClick={handleApply}>
         Apply
       </Button>
     </>

@@ -52,7 +52,7 @@ export default function ProfileLayout({ children, title }: ProfileLayoutProps) {
           <h1 className="text-lg font-medium">User profile</h1>
         </div>
         <div className="p-4">
-          <nav className="space-y-4">
+          <nav className="space-y-4" >
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="block py-3 border-b border-gray-200">
                 {item.label}

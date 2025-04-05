@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function BrandsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">Shop by Automobile Brand</h1>
+      <h1 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium  mb-8">Shop by Automobile Brand</h1>
 
       <Suspense
         fallback={

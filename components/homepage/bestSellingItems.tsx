@@ -25,12 +25,12 @@ export default function BestSellingItems() {
                 className="group"
               >
                 <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
-                  <div className="relative h-40 md:h-48 bg-gray-50">
+                  <div className="relative h-40 md:h-[434px] w-[325px] bg-gray-50">
                     <Image
-                      src={product.images[0]?.image || "/placeholder-image.jpg"}
+                      src={product.images[0]?.image || ""}
                       alt={product.name}
                       fill
-                      className="object-contain p-4"
+                      className="object-contain "
                     />
                     {product.promotion &&
                       product.promotion.discount !== "0" && (
@@ -44,7 +44,7 @@ export default function BestSellingItems() {
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="font-bold text-sm">
+                      <p className="font-semibold text-sm">
                         ₦{Number.parseInt(product.amount).toLocaleString()}
                       </p>
                       {product.promotion &&
@@ -62,11 +62,11 @@ export default function BestSellingItems() {
                     </div>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {product.category && (
-                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-[4px]">
                           {product.category.name}
                         </span>
                       )}
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-[4px]">
                         {product.status ? product.status.name : "In Stock"}
                       </span>
                     </div>
