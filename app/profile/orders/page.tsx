@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -14,9 +14,53 @@ export default function OrderHistoryPage() {
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [returnReason, setReturnReason] = useState("")
+  interface OrderMetadata {
+    [key: string]: string | number | boolean | null | undefined;
+  }
+
+  const [orderMetadata, setOrderMetadata] = useState<OrderMetadata>({})
 
   // Fetch orders using the hook
   const { data: orders, isLoading, isError, error } = useOrders()
+
+  // Fetch metadata from localStorage on component mount
+  useEffect(() => {
+    const fetchOrderMetadata = () => {
+      try {
+        // Get any stored payment metadata
+        const storedMetadata = localStorage.getItem("paymentMetadata")
+        const checkoutResponse = localStorage.getItem("checkoutResponse")
+        
+        // Create a metadata object combining all sources
+        const metadata = {
+          ...(storedMetadata ? JSON.parse(storedMetadata) : {}),
+          ...(checkoutResponse ? JSON.parse(checkoutResponse) : {})
+        }
+        
+        setOrderMetadata(metadata)
+        console.log("Fetched order metadata:", metadata)
+      } catch (err) {
+        console.error("Error fetching order metadata:", err)
+      }
+    }
+
+    fetchOrderMetadata()
+  }, [])
+
+  // Enhanced function to get additional order details including metadata
+  const getOrderDetails = (orderId: string) => {
+    // Find order in our list
+    const order = orders?.find(order => order.id.toString() === orderId)
+    
+    // Match with stored metadata if possible
+    // In a real app, you'd probably match via order reference, transaction ID, etc.
+    const enrichedOrder = {
+      ...order,
+      metadata: orderMetadata
+    }
+    
+    return enrichedOrder
+  }
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -36,7 +80,10 @@ export default function OrderHistoryPage() {
 
   const handleConfirmReturn = () => {
     // In a real app, you would submit the return request to your backend
-    console.log("Return requested for order:", selectedOrderId, "Reason:", returnReason)
+    // Include any relevant metadata from the enriched order
+    const orderDetails = getOrderDetails(selectedOrderId as string)
+    
+    console.log("Return requested for order:", selectedOrderId, "Reason:", returnReason, "Metadata:", orderDetails.metadata)
     setShowReturnModal(false)
     setSelectedOrderId(null)
     setReturnReason("")
@@ -46,6 +93,19 @@ export default function OrderHistoryPage() {
     setShowReturnModal(false)
     setSelectedOrderId(null)
     setReturnReason("")
+  }
+
+  // Function to handle order detail click - store metadata for detail page
+  const handleViewOrderDetails = (orderId: string) => {
+    try {
+      // Get the enriched order with metadata
+      const orderDetails = getOrderDetails(orderId)
+      
+      // Store the current order details for the detail page to access
+      localStorage.setItem("currentOrderDetails", JSON.stringify(orderDetails))
+    } catch (err) {
+      console.error("Error preparing order details:", err)
+    }
   }
 
   // Return confirmation modal
@@ -240,7 +300,11 @@ export default function OrderHistoryPage() {
                   >
                     Request return
                   </Button>
-                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
+                  <Button 
+                    className="flex-1 bg-black hover:bg-gray-800 text-white" 
+                    asChild
+                    onClick={() => handleViewOrderDetails(order.id.toString())}
+                  >
                     <Link href={`/profile/orders/${order.id}`}>View details</Link>
                   </Button>
                 </div>
@@ -312,7 +376,11 @@ export default function OrderHistoryPage() {
                   >
                     Return order
                   </Button>
-                  <Button className="flex-1 bg-black hover:bg-gray-800 text-white" asChild>
+                  <Button 
+                    className="flex-1 bg-black hover:bg-gray-800 text-white" 
+                    asChild
+                    onClick={() => handleViewOrderDetails(order.id.toString())}
+                  >
                     <Link href={`/profile/orders/${order.id}`}>View details</Link>
                   </Button>
                 </div>
@@ -327,4 +395,3 @@ export default function OrderHistoryPage() {
     </ProfileLayout>
   )
 }
-

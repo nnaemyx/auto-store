@@ -41,6 +41,51 @@ export default function SuccessPage() {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [verificationStatus, setVerificationStatus] = useState<string>("pending")
+  const [paymentMeta, setPaymentMeta] = useState<Record<string, string>>({})
+
+  // Helper function to extract metadata from Paystack response
+  interface VerificationResponse {
+    data?: {
+      reference?: string
+      amount?: number
+      status?: string
+      transaction_date?: string
+      metadata?: {
+        custom_fields?: Array<{
+          variable_name?: string
+          value?: string | number
+        }>
+      }
+    }
+  }
+
+  const extractMetadataFromVerification = (verification: VerificationResponse) => {
+    try {
+      if (!verification || !verification.data || !verification.data.metadata) {
+        return null
+      }
+
+      const { metadata } = verification.data
+      
+      // Parse the custom_fields if they exist
+      if (metadata.custom_fields && Array.isArray(metadata.custom_fields)) {
+        const extractedData: Record<string, string> = {}
+        
+        metadata.custom_fields.forEach((field: { variable_name?: string; value?: string | number }) => {
+          if (field.variable_name && field.value !== undefined) {
+            extractedData[field.variable_name] = field.value.toString()
+          }
+        })
+        
+        return extractedData
+      }
+      
+      return null
+    } catch (error) {
+      console.error("Error extracting metadata:", error)
+      return null
+    }
+  }
 
   useEffect(() => {
     // Prevent multiple executions of the initialization logic
@@ -67,6 +112,7 @@ export default function SuccessPage() {
         const storedPayment = localStorage.getItem("paymentDetails")
         const storedCheckout = localStorage.getItem("checkoutResponse")
         const paymentReference = localStorage.getItem("paymentReference")
+        const storedMetadata = localStorage.getItem("paymentMetadata")
 
         if (!storedShipping || !storedPayment) {
           router.push("/cart")
@@ -76,6 +122,7 @@ export default function SuccessPage() {
         const shippingDetails = JSON.parse(storedShipping)
         const paymentDetails = JSON.parse(storedPayment)
         const checkoutData = storedCheckout ? JSON.parse(storedCheckout) : {}
+        const metadataFromStorage = storedMetadata ? JSON.parse(storedMetadata) : null
 
         // Verify payment if reference exists
         if (paymentReference) {
@@ -84,6 +131,18 @@ export default function SuccessPage() {
             console.log("Attempting to verify payment with reference:", paymentReference)
             const verificationResult = await verifyPaystackTransaction(paymentReference)
             console.log("Verification result:", verificationResult)
+
+            // Extract metadata from verification response
+            const extractedMetadata = extractMetadataFromVerification(verificationResult)
+            console.log("Extracted metadata from verification:", extractedMetadata)
+            
+            if (extractedMetadata) {
+              setPaymentMeta(extractedMetadata)
+            } else if (metadataFromStorage) {
+              // Use metadata from localStorage as fallback
+              console.log("Using metadata from localStorage:", metadataFromStorage)
+              setPaymentMeta(metadataFromStorage)
+            }
 
             if (
               verificationResult &&
@@ -132,7 +191,7 @@ export default function SuccessPage() {
             setVerificationStatus("failed")
             toast({
               title: "Payment Verification Error",
-              description: error instanceof Error ? error.message : "An error occurred during verification",
+              description: error instanceof Error ? error.message : "Unknown error",
               variant: ToastVariant.Error,
             })
             */
@@ -151,18 +210,28 @@ export default function SuccessPage() {
           country: "Nigeria",
         }
 
+        // Find order code from metadata if available
+        const orderCode = paymentMeta.order_code || 
+                          (metadataFromStorage && metadataFromStorage.order_code) || 
+                          checkoutData.order_code ||
+                          Math.floor(Math.random() * 1000000).toString().padStart(6, "0")
+
         // Set order details
         setOrderDetails({
           shipping: formattedShipping,
-          payment: paymentDetails,
-          checkout: checkoutData,
+          payment: {
+            ...paymentDetails,
+            metadata: paymentMeta // Add metadata to payment object
+          },
+          checkout: {
+            ...checkoutData,
+            order_code: orderCode,
+            // Add metadata if available
+            ...(paymentMeta.amount ? { total_amount: parseFloat(paymentMeta.amount) } : {})
+          },
           orderDate: new Date(),
           estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-          orderNumber:
-            checkoutData.order_code ||
-            Math.floor(Math.random() * 1000000)
-              .toString()
-              .padStart(6, "0"),
+          orderNumber: orderCode,
         })
 
         // Clear stored data after successful order
@@ -172,6 +241,7 @@ export default function SuccessPage() {
         // localStorage.removeItem("orderConfirmed")
         // localStorage.removeItem("checkoutResponse")
         // localStorage.removeItem("paymentReference")
+        // localStorage.removeItem("paymentMetadata")
       } catch (error) {
         console.error("Error initializing success page:", error)
         toast({
@@ -197,6 +267,7 @@ export default function SuccessPage() {
     localStorage.removeItem("orderConfirmed")
     localStorage.removeItem("checkoutResponse")
     localStorage.removeItem("paymentReference")
+    localStorage.removeItem("paymentMetadata")
 
     // Navigate to home page
     router.push("/")
@@ -209,6 +280,7 @@ export default function SuccessPage() {
     localStorage.removeItem("orderConfirmed")
     localStorage.removeItem("checkoutResponse")
     localStorage.removeItem("paymentReference")
+    localStorage.removeItem("paymentMetadata")
 
     // Navigate to orders page
     router.push("/account/orders")
@@ -245,4 +317,3 @@ export default function SuccessPage() {
     </div>
   )
 }
-

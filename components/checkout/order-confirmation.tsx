@@ -107,15 +107,16 @@ export default function OrderConfirmation({
   }
 
   // Prepare metadata for Paystack
-  const paystackMetadata = {
-    amount: checkoutData.amount ? checkoutData.amount : cartSummary.total,
-    reference: checkoutData.reference || "",
-    email: checkoutData.email || shippingDetails.email || "customer@example.com",
-    check_out_id: checkoutData.check_out_id || "1",
-    delivery_fee: checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee,
-    order_code: checkoutData.order_code || "",
-    user_id: user?.id || "1",
-  }
+// Prepare metadata for Paystack
+const paystackMetadata = {
+  "amount": (checkoutData.amount ? checkoutData.amount : cartSummary.total).toString(),
+  "reference": checkoutData.reference || "",
+  "email": checkoutData.email || shippingDetails.email || "customer@example.com",
+  "check_out_id": checkoutData.check_out_id || "1",
+  "delivery_fee": (checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee).toString(),
+  "order_code": checkoutData.order_code || "didhdd",
+  "user_id": user?.id?.toString() || "1"
+}
 
   return (
     <div>

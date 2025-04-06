@@ -158,6 +158,22 @@ export default function PaystackPayment({
             date: new Date().toISOString(),
           })
 
+          // Store additional metadata in localStorage for access on success page
+          try {
+            // Store metadata separately for easier access on verification
+            localStorage.setItem("paymentMetadata", JSON.stringify({
+              amount: (paymentAmount / 100).toString(),
+              reference: reference,
+              email: paymentEmail,
+              check_out_id: paymentData.check_out_id || "1",
+              delivery_fee: paymentData.delivery_fee?.toString() || "2000",
+              order_code: paymentData.order_code || "didhdd",
+              user_id: "1"
+            }))
+          } catch (err) {
+            console.warn("Failed to store payment metadata:", err)
+          }
+
           // Mark order as confirmed
           confirmOrder()
 
@@ -188,50 +204,32 @@ export default function PaystackPayment({
         onClose()
       }
 
-      // Create the config object with the required metadata
-      const config = {
+      // Create metadata in the correct format with custom_fields array
+      const metadataFields = {
+        amount: (paymentAmount / 100).toString(), // Convert back to Naira as string
+        reference: reference,
+        email: paymentEmail,
+        check_out_id: paymentData.check_out_id || "1",
+        delivery_fee: paymentData.delivery_fee?.toString() || "2000",
+        order_code: paymentData.order_code || "didhdd",
+        user_id: "1"
+      }
+
+      // Convert flat metadata object to custom_fields array format
+      const custom_fields = Object.entries(metadataFields).map(([key, value]) => ({
+        display_name: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '), // Capitalize and format display name
+        variable_name: key,
+        value: value
+      }))
+
+      // Create the config object with the required metadata structure
+      const config: PaystackConfig = {
         key: PAYSTACK_PUBLIC_KEY,
         email: paymentEmail,
         amount: paymentAmount,
         ref: reference,
         metadata: {
-          custom_fields: [
-            {
-              display_name: "Amount",
-              variable_name: "amount",
-              value: paymentAmount / 100, // Convert back to Naira
-            },
-            {
-              display_name: "Reference",
-              variable_name: "reference",
-              value: reference,
-            },
-            {
-              display_name: "Email",
-              variable_name: "email",
-              value: paymentEmail,
-            },
-            {
-              display_name: "Checkout ID",
-              variable_name: "check_out_id",
-              value: paymentData.check_out_id || "1",
-            },
-            {
-              display_name: "Delivery Fee",
-              variable_name: "delivery_fee",
-              value: paymentData.delivery_fee || "2000",
-            },
-            {
-              display_name: "Order Code",
-              variable_name: "order_code",
-              value: paymentData.order_code || "",
-            },
-            {
-              display_name: "User ID",
-              variable_name: "user_id",
-              value: "1", // Default user ID if not provided
-            },
-          ],
+          custom_fields: custom_fields
         },
         onClose: onCloseFunction,
         callback: callbackFunction,
@@ -296,4 +294,3 @@ export default function PaystackPayment({
     </>
   )
 }
-
