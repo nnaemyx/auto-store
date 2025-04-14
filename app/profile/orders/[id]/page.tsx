@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -14,18 +14,27 @@ import { useOrder, formatDate, getOrderStatusColor } from "@/hooks/use-orders"
 import { useSubmitReturnRequest } from "@/hooks/use-return-requests"
 import { useRouter } from "next/navigation"
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
-  const orderId = params.id
+export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const router = useRouter()
-
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
+    // Resolve the `params` asynchronously and set the `orderId`
+    useEffect(() => {
+      const resolveParams = async () => {
+        const { id } = await params;
+        setOrderId(Number.parseInt(id));
+      };
+  
+      resolveParams();
+    }, [params]);
+
   // Fetch order details
-  const { data: order, isLoading, isError, error } = useOrder(orderId)
+  const { data: order, isLoading, isError, error } = useOrder(orderId || 0)
 
   // Return request mutation
   const { submitReturnRequest, isSubmitting } = useSubmitReturnRequest()

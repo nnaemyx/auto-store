@@ -1,4 +1,5 @@
 "use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -7,11 +8,21 @@ import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { useReturnRequest } from "@/hooks/use-return-requests"
 import { formatDate } from "@/hooks/use-orders"
+import { useEffect, useState } from "react"
 
-export default function ReturnRequestDetailsPage({ params }: { params: { id: string } }) {
+export default  function ReturnRequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const { data: returnDetails, isLoading, isError, error } = useReturnRequest(params.id)
+  const { data: returnDetails, isLoading, isError, error } = useReturnRequest(resolvedParams?.id || "")
 
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolved = await params;
+      setResolvedParams(resolved);
+    };
+
+    resolveParams();
+  }, [params]);
   // Breadcrumb for desktop
   const breadcrumb = (
     <div className="text-sm text-gray-500 mb-6">
@@ -23,14 +34,14 @@ export default function ReturnRequestDetailsPage({ params }: { params: { id: str
         Return requests
       </Link>
       {" / "}
-      <span className="font-medium text-gray-700">Return #{params.id}</span>
+      <span className="font-medium text-gray-700">Return #{resolvedParams?.id}</span>
     </div>
   )
 
   // Loading state
   if (isLoading) {
     return (
-      <ProfileLayout title={`Return #${params.id}`}>
+      <ProfileLayout title={`Return #${resolvedParams?.id}`}>
         {!isMobile && breadcrumb}
         <div className="flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-brand-red mr-2" />
@@ -43,7 +54,7 @@ export default function ReturnRequestDetailsPage({ params }: { params: { id: str
   // Error state
   if (isError || !returnDetails) {
     return (
-      <ProfileLayout title={`Return #${params.id}`}>
+      <ProfileLayout title={`Return #${resolvedParams?.id}`}>
         {!isMobile && breadcrumb}
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-red-500 mb-2">Failed to load return request details</p>
