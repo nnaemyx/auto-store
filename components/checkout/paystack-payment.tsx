@@ -16,7 +16,7 @@ import {
 } from "@/lib/paystack"
 
 // Define the CheckoutData interface
-interface CheckoutData {
+export interface CheckoutData {
   email?: string
   amount?: number
   order_code?: string
@@ -41,13 +41,7 @@ interface PaystackConfig {
   email: string
   amount: number
   ref: string
-  metadata?: {
-    custom_fields: Array<{
-      display_name: string
-      variable_name: string
-      value: string | number
-    }>
-  }
+  metadata?: Record<string, unknown>
   callback: (response: { reference: string }) => void
   onClose: () => void
 }
@@ -161,15 +155,18 @@ export default function PaystackPayment({
           // Store additional metadata in localStorage for access on success page
           try {
             // Store metadata separately for easier access on verification
-            localStorage.setItem("paymentMetadata", JSON.stringify({
-              amount: (paymentAmount / 100).toString(),
-              reference: reference,
-              email: paymentEmail,
-              check_out_id: paymentData.check_out_id || "1",
-              delivery_fee: paymentData.delivery_fee?.toString() || "2000",
-              order_code: paymentData.order_code || "didhdd",
-              user_id: "1"
-            }))
+            localStorage.setItem(
+              "paymentMetadata",
+              JSON.stringify({
+                amount: (paymentAmount / 100).toString(),
+                reference: reference,
+                email: paymentEmail,
+                check_out_id: paymentData.check_out_id || "1",
+                delivery_fee: paymentData.delivery_fee?.toString() || "2000",
+                order_code: paymentData.order_code || "didhdd",
+                user_id: "1",
+              }),
+            )
           } catch (err) {
             console.warn("Failed to store payment metadata:", err)
           }
@@ -204,7 +201,7 @@ export default function PaystackPayment({
         onClose()
       }
 
-      // Create metadata in the correct format with custom_fields array
+      // Create metadata object directly without custom_fields
       const metadataFields = {
         amount: (paymentAmount / 100).toString(), // Convert back to Naira as string
         reference: reference,
@@ -212,27 +209,20 @@ export default function PaystackPayment({
         check_out_id: paymentData.check_out_id || "1",
         delivery_fee: paymentData.delivery_fee?.toString() || "2000",
         order_code: paymentData.order_code || "didhdd",
-        user_id: "1"
+        user_id: "1",
       }
 
-      // Convert flat metadata object to custom_fields array format
-      const custom_fields = Object.entries(metadataFields).map(([key, value]) => ({
-        display_name: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '), // Capitalize and format display name
-        variable_name: key,
-        value: value
-      }))
-
-      // Create the config object with the required metadata structure
+      // Create the config object with the correct metadata structure
       const config: PaystackConfig = {
         key: PAYSTACK_PUBLIC_KEY,
         email: paymentEmail,
         amount: paymentAmount,
         ref: reference,
         metadata: {
-          custom_fields: custom_fields
+          metadata: metadataFields,
         },
-        onClose: onCloseFunction,
         callback: callbackFunction,
+        onClose: onCloseFunction,
       }
 
       console.log("Initializing Paystack with config:", {

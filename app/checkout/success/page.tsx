@@ -283,7 +283,7 @@ export default function SuccessPage() {
     localStorage.removeItem("paymentMetadata")
 
     // Navigate to orders page
-    router.push("/account/orders")
+    router.push("/profile/orders")
   }
 
   // Show loading state while performing operations

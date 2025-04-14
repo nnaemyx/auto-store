@@ -1,26 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import type React from "react"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Upload } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { useOrder, formatDate, getOrderStatusColor } from "@/hooks/use-orders"
+import { useSubmitReturnRequest } from "@/hooks/use-return-requests"
+import { useRouter } from "next/navigation"
 
-export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const [orderId, setOrderId] = useState<string | null>(null);
-
-  useEffect(() => {
-    params.then(({ id }) => setOrderId(id));
-  }, [params]);
+export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+  const orderId = params.id
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const router = useRouter()
+
   const [showReturnModal, setShowReturnModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [returnReason, setReturnReason] = useState("")
+  const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
   // Fetch order details
-  const { data: order, isLoading, isError, error } = useOrder(orderId ?? "")
+  const { data: order, isLoading, isError, error } = useOrder(orderId)
+
+  // Return request mutation
+  const { submitReturnRequest, isSubmitting } = useSubmitReturnRequest()
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -41,98 +49,55 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     setShowReturnModal(true)
   }
 
-  const handleConfirmReturn = () => {
-    // In a real app, you would submit the return request to your backend
-    console.log("Return requested for order:", orderId, "Reason:", returnReason)
-    setShowReturnModal(false)
-    setReturnReason("")
-  }
-
   const handleCancelReturn = () => {
     setShowReturnModal(false)
     setReturnReason("")
+    setUploadedImages([])
   }
 
-  // Return confirmation modal
-  const returnModal = (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium">Confirm return request?</h2>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleCancelReturn}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </div>
+  const handleProceedToConfirm = () => {
+    setShowReturnModal(false)
+    setShowConfirmModal(true)
+  }
 
-          <p className="mb-4">
-            Please provide details about why you want to return this item. We&#39;ll review your request and get back to you
-            within 24-48 hours.
-          </p>
+  const handleConfirmReturn = () => {
+    if (!order) return
 
-          <div className="mb-4">
-            <label htmlFor="returnReason" className="block text-sm font-medium mb-2">
-              What&#39;s your reason for the refund?
-            </label>
-            <textarea
-              id="returnReason"
-              className="w-full border border-gray-300 rounded-md p-2 min-h-[100px]"
-              placeholder="Leave a comment"
-              value={returnReason}
-              onChange={(e) => setReturnReason(e.target.value)}
-            />
-          </div>
+    // Get the order item ID from the first product
+    const orderItemId =
+      order.products && order.products.length > 0
+        ? order.products[0].id.toString()
+        : order.items && order.items.length > 0
+          ? order.items[0].id.toString()
+          : ""
 
-          <div className="mb-4">
-            <p className="block text-sm font-medium mb-2">Upload pictures (optional)</p>
-            <div className="grid grid-cols-2 gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="border border-gray-200 rounded-md aspect-square flex items-center justify-center bg-gray-50"
-                >
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="text-gray-300"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" stroke="currentColor" strokeWidth="2" />
-                    <path
-                      d="M3 16l5-5 5 5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M14 14l3-3 4 4"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-          </div>
+    submitReturnRequest({
+      order_id: order.id.toString(),
+      order_item: orderItemId,
+      reason: returnReason,
+    })
 
-          <div className="flex gap-4">
-            <Button variant="outline" className="flex-1" onClick={handleCancelReturn}>
-              Cancel
-            </Button>
-            <Button className="flex-1 bg-black hover:bg-gray-800 text-white" onClick={handleConfirmReturn}>
-              Confirm request
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+    setShowConfirmModal(false)
+    setReturnReason("")
+    setUploadedImages([])
+
+    // Navigate to return requests page
+    router.push("/profile/returns")
+  }
+
+  const handleCancelConfirm = () => {
+    setShowConfirmModal(false)
+    setShowReturnModal(true)
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    // Convert files to array and create URLs
+    const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
+    setUploadedImages((prev) => [...prev, ...newImages])
+  }
 
   // Loading state
   if (isLoading) {
@@ -192,6 +157,159 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     )
   }
 
+  // Return confirmation modal
+  const returnModal = (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium">Return Order #{order.reference || order.id}</h2>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleCancelReturn}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Product info */}
+          <div className="flex items-center gap-4 mb-4">
+            {order.items && order.items.length > 0 && (
+              <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                <Image
+                  src={
+                    order.items[0].product.images && order.items[0].product.images.length > 0
+                      ? order.items[0].product.images[0].image
+                      : "/placeholder.svg?height=64&width=64"
+                  }
+                  alt={order.items[0].product.name}
+                  fill
+                  className="object-contain p-2"
+                />
+              </div>
+            )}
+            {order.products && order.products.length > 0 && !order.items && (
+              <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                <Image src="/placeholder.svg?height=64&width=64" alt="Product" fill className="object-contain p-2" />
+              </div>
+            )}
+            <div>
+              <h3 className="font-medium">
+                {order.items && order.items.length > 0 ? order.items[0].product.name : "Product"}
+              </h3>
+              <p className="text-sm">
+                {order.delivery_date ? `Delivered · ${formatDate(order.delivery_date)}` : "Not delivered yet"}
+              </p>
+              <p className="font-bold">
+                ₦
+                {order.items && order.items.length > 0
+                  ? Number(order.items[0].price).toLocaleString()
+                  : Number(order.amount).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="returnReason" className="block text-sm font-medium mb-2">
+              What&apos;s your reason for the return?
+            </label>
+            <Textarea
+              id="returnReason"
+              className="w-full border border-gray-300 rounded-md p-2 min-h-[100px]"
+              placeholder="State your reason here"
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-4">
+            <p className="block text-sm font-medium mb-2">Upload pictures (optional)</p>
+            <div className="grid grid-cols-2 gap-2">
+              {uploadedImages.map((image, index) => (
+                <div key={index} className="border border-gray-200 rounded-md aspect-square relative">
+                  <Image
+                    src={image || "/placeholder.svg"}
+                    alt={`Uploaded image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <button
+                    className="absolute top-1 right-1 bg-white rounded-full p-1"
+                    onClick={() => setUploadedImages((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {uploadedImages.length < 4 && (
+                <label className="border border-dashed border-gray-200 rounded-md aspect-square flex flex-col items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100">
+                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  <span className="text-sm text-gray-500">Upload</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    multiple={uploadedImages.length < 3}
+                  />
+                </label>
+              )}
+              {/* Add empty placeholders to maintain grid */}
+              {Array.from({ length: Math.max(0, 3 - uploadedImages.length) }).map((_, index) => (
+                <div key={`empty-${index}`} className="border border-dashed border-gray-200 rounded-md aspect-square" />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1" onClick={handleCancelReturn}>
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-black hover:bg-gray-800 text-white"
+              onClick={handleProceedToConfirm}
+              disabled={!returnReason.trim()}
+            >
+              Confirm request
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Confirmation dialog
+  const confirmationModal = (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full">
+        <div className="p-6">
+          <h2 className="text-lg font-medium text-center mb-4">Confirm return request?</h2>
+
+          <p className="text-center mb-6">
+            {returnReason.length > 100 ? returnReason.substring(0, 100) + "..." : returnReason}
+          </p>
+
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1" onClick={handleCancelConfirm}>
+              No, cancel request
+            </Button>
+            <Button
+              className="flex-1 bg-black hover:bg-gray-800 text-white"
+              onClick={handleConfirmReturn}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Yes, request return"
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
   // Mobile view has a simpler layout with a back button
   if (isMobile) {
     return (
@@ -201,7 +319,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <Link href="/profile/orders" className="mr-4">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-lg font-medium">Order #{order.reference}</h1>
+            <h1 className="text-lg font-medium">Order #{order.reference || order.id}</h1>
           </div>
         </div>
 
@@ -228,12 +346,39 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                     <h3 className="font-medium">{item.product.name}</h3>
                     <p className="text-sm text-gray-500">{item.product.description}</p>
                     <div className="flex justify-between items-center mt-1">
-                      <p className="font-bold">₦{Number(item.amount).toLocaleString()}</p>
+                      <p className="font-bold">₦{Number(item.price).toLocaleString()}</p>
                       <p className="text-sm">Qty: {item.quantity}</p>
                     </div>
                   </div>
                 </div>
               ))}
+            {order.products &&
+              !order.items &&
+              order.products.map((item) => (
+                <div key={item.id} className="flex gap-4 mb-4 border-b pb-4">
+                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                    <Image
+                      src="/placeholder.svg?height=64&width=64"
+                      alt="Product"
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">Product</h3>
+                    <p className="text-sm text-gray-500">Description</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="font-bold">₦{Number(item.price).toLocaleString()}</p>
+                      <p className="text-sm">Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            {(!order.items || order.items.length === 0) && (!order.products || order.products.length === 0) && (
+              <div className="text-center py-4">
+                <p className="text-gray-500">No items found in this order</p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
@@ -243,7 +388,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             </div>
             <div>
               <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">{order.reference}</p>
+              <p className="font-medium">{order.reference || order.id}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Date delivered</p>
@@ -293,7 +438,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               variant="outline"
               className="flex-1"
               onClick={handleRequestReturn}
-              disabled={order.status.toLowerCase() !== "delivered"}
+              // Temporarily disabled for testing
+              // disabled={order.status.toLowerCase() !== "delivered"}
             >
               Return order
             </Button>
@@ -303,15 +449,16 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* Return confirmation modal */}
+        {/* Return modals */}
         {showReturnModal && returnModal}
+        {showConfirmModal && confirmationModal}
       </div>
     )
   }
 
   // Desktop view with sidebar
   return (
-    <ProfileLayout title={`Order #${order.reference}`}>
+    <ProfileLayout title={`Order #${order.reference || order.id}`}>
       {breadcrumb}
 
       <div className="bg-white rounded-lg border overflow-hidden">
@@ -319,7 +466,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           {/* Order header */}
           <div className="flex justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold">Order #{order.reference}</h2>
+              <h2 className="text-xl font-bold">Order #{order.reference || order.id}</h2>
               <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
             </div>
             <div className="text-right">
@@ -350,12 +497,39 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                     <h3 className="font-medium">{item.product.name}</h3>
                     <p className="text-sm text-gray-500">{item.product.description}</p>
                     <div className="flex justify-between items-center mt-1">
-                      <p className="font-bold">₦{Number(item.amount).toLocaleString()}</p>
+                      <p className="font-bold">₦{Number(item.price).toLocaleString()}</p>
                       <p className="text-sm">Qty: {item.quantity}</p>
                     </div>
                   </div>
                 </div>
               ))}
+            {order.products &&
+              !order.items &&
+              order.products.map((item) => (
+                <div key={item.id} className="flex gap-4 mb-4 border-b pb-4">
+                  <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden">
+                    <Image
+                      src="/placeholder.svg?height=80&width=80"
+                      alt="Product"
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">Product</h3>
+                    <p className="text-sm text-gray-500">Description</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="font-bold">₦{Number(item.price).toLocaleString()}</p>
+                      <p className="text-sm">Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            {(!order.items || order.items.length === 0) && (!order.products || order.products.length === 0) && (
+              <div className="text-center py-4">
+                <p className="text-gray-500">No items found in this order</p>
+              </div>
+            )}
           </div>
 
           {/* Order details in two columns */}
@@ -408,7 +582,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               variant="outline"
               className="flex-1"
               onClick={handleRequestReturn}
-              disabled={order.status.toLowerCase() !== "delivered"}
+              // Temporarily disabled for testing
+              // disabled={order.status.toLowerCase() !== "delivered"}
             >
               Request return
             </Button>
@@ -419,9 +594,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* Return confirmation modal */}
+      {/* Return modals */}
       {showReturnModal && returnModal}
+      {showConfirmModal && confirmationModal}
     </ProfileLayout>
   )
 }
-

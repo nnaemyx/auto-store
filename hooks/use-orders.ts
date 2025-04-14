@@ -5,10 +5,10 @@ import { apiClient } from "@/api/api-client"
 
 export interface OrderItem {
   id: number
-  product_id: number
-  order_id: number
-  quantity: number
-  amount: number
+  order_id: string
+  product_id: string
+  quantity: string
+  price: string
   product: {
     id: number
     name: string
@@ -22,37 +22,84 @@ export interface OrderItem {
   }
 }
 
+export interface OrderStatus {
+  id: number
+  name: string
+  description: string
+}
+
+export interface OrderMetadata {
+  amount: number
+  reference: number
+  email: string
+  check_out_id: number
+  delivery_fee: string
+  order_code: number
+  user_id: number
+}
+
+export interface OrderShipping {
+  address: string
+  city: string
+  state: string
+  postal_code: string
+}
+
 export interface Order {
   id: number
-  reference: string
-  amount: number
+  reference?: string
+  amount: string
   status: string
-  created_at: string
-  updated_at: string
-  delivery_date?: string
-  items: OrderItem[]
-  shipping?: {
-    address: string
-    city: string
-    state: string
-    postal_code: string
-  }
+  created_at?: string
+  updated_at?: string
+  delivery_date?: string | null
+  order_code: string
+  check_out_id: string
+  delivery_fee: string
+  payment_method: string
+  user_id: string
+  currency?: string
+  metadata?: OrderMetadata
+  orderStatus?: OrderStatus
+  products?: OrderItem[]
+  items?: OrderItem[]
+  shipping?: OrderShipping
 }
 
 // Function to format date for display
-export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
+export function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return "N/A"
+
+  try {
+    // Check if the date is valid
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) {
+      return "N/A"
+    }
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+  } catch (error) {
+    console.error("Error formatting date:", error)
+    return "N/A"
+  }
 }
 
 // Get order status with appropriate color
-export function getOrderStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
+export function getOrderStatusColor(status: string | OrderStatus | undefined): string {
+  if (!status) return "text-gray-500"
+
+  // If status is an object (OrderStatus), use its name
+  const statusName = typeof status === "object" ? status.name.toLowerCase() : status.toLowerCase()
+
+  switch (statusName) {
     case "delivered":
       return "text-green-500"
+    case "new order":
+      return "text-blue-500"
     case "processing":
       return "text-blue-500"
     case "shipped":
@@ -83,7 +130,11 @@ export function useOrders() {
           },
         })
 
-        return response || []
+        // Handle null response or empty array
+        if (!response) return []
+
+        // Ensure each order has an id to prevent "property id on null" error
+        return response.filter((order) => order && order.id) || []
       } catch (error) {
         console.error("Error fetching orders:", error)
         return []
@@ -98,6 +149,8 @@ export function useOrder(id: string | number) {
     queryKey: ["order", id],
     queryFn: async (): Promise<Order> => {
       try {
+        if (!id) throw new Error("No order ID provided")
+
         const token = localStorage.getItem("token")
         if (!token) {
           throw new Error("Authentication token not found")
@@ -109,6 +162,19 @@ export function useOrder(id: string | number) {
           },
         })
 
+        // Normalize the response to ensure items is always available
+        // Some APIs return 'products', others return 'items'
+        if (response) {
+          if (response.products && !response.items) {
+            response.items = response.products
+          } else if (response.items && !response.products) {
+            response.products = response.items
+          } else if (!response.items && !response.products) {
+            response.items = []
+            response.products = []
+          }
+        }
+
         return response
       } catch (error) {
         console.error(`Error fetching order #${id}:`, error)
@@ -119,3 +185,21 @@ export function useOrder(id: string | number) {
   })
 }
 
+// Custom hook to get product details for an order
+export function useOrderProduct(productId: string | undefined) {
+  return useQuery({
+    queryKey: ["orderProduct", productId],
+    queryFn: async () => {
+      if (!productId) throw new Error("No product ID provided")
+
+      try {
+        const response = await apiClient.get(`/product/get-product/${productId}`)
+        return response
+      } catch (error) {
+        console.error(`Error fetching product #${productId}:`, error)
+        throw error
+      }
+    },
+    enabled: !!productId,
+  })
+}

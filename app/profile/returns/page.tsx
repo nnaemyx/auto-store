@@ -4,78 +4,19 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, X } from "lucide-react"
+import { ChevronRight, X, Loader2 } from "lucide-react"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useReturnRequests, type ReturnRequest } from "@/hooks/use-return-requests"
+import { formatDate } from "@/hooks/use-orders"
 
 export default function ReturnRequestsPage() {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [showReturnDetails, setShowReturnDetails] = useState(false)
-  interface ReturnItem {
-    id: string;
-    name: string;
-    description: string;
-    price: string;
-    date: string;
-    dateDelivered: string;
-    status: string;
-    orderId: string;
-    productName: string;
-    productPrice: string;
-    item: string;
-    trackingId: string;
-    reason: string;
-    images: string[];
-  }
+  const [selectedReturn, setSelectedReturn] = useState<ReturnRequest | null>(null)
 
-  const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null)
-
-  const [returns] = useState([
-    {
-      id: "3200",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "03/12/2024",
-      dateDelivered: "12/12/2024",
-      status: "Processing",
-      orderId: "#23635536",
-      productName: "Name of product",
-      productPrice: "50,687.90",
-      item: "Toyota Camry Interior Seats",
-      trackingId: "9675 6456 3454",
-      reason:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim fghf fhfus skaks",
-      images: [
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-      ],
-    },
-    {
-      id: "3201",
-      name: "Name of Product",
-      description: "Description",
-      price: "40,500.00",
-      date: "03/12/2024",
-      dateDelivered: "12/12/2024",
-      status: "Processing",
-      orderId: "#23635536",
-      productName: "Name of product",
-      productPrice: "50,687.90",
-      item: "Toyota Camry Interior Seats",
-      trackingId: "9675 6456 3454",
-      reason:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim fghf fhfus skaks",
-      images: [
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-        "/placeholder.svg?height=100&width=100",
-      ],
-    },
-  ])
+  // Fetch return requests
+  const { data: returns, isLoading, isError, error } = useReturnRequests()
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -88,7 +29,7 @@ export default function ReturnRequestsPage() {
     </div>
   )
 
-  const handleViewDetails = (returnItem: ReturnItem) => {
+  const handleViewDetails = (returnItem: ReturnRequest) => {
     setSelectedReturn(returnItem)
     setShowReturnDetails(true)
   }
@@ -96,6 +37,51 @@ export default function ReturnRequestsPage() {
   const handleCloseDetails = () => {
     setShowReturnDetails(false)
     setSelectedReturn(null)
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <ProfileLayout title="Return requests">
+        {!isMobile && breadcrumb}
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-red mr-2" />
+          <span>Loading your return requests...</span>
+        </div>
+      </ProfileLayout>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <ProfileLayout title="Return requests">
+        {!isMobile && breadcrumb}
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-red-500 mb-2">Failed to load return requests</p>
+          <p className="text-sm text-gray-500 mb-4">
+            {error instanceof Error ? error.message : "An unexpected error occurred"}
+          </p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </ProfileLayout>
+    )
+  }
+
+  // Empty state
+  if (!returns || returns.length === 0) {
+    return (
+      <ProfileLayout title="Return requests">
+        {!isMobile && breadcrumb}
+        <div className="text-center py-12">
+          <p className="text-lg font-medium mb-2">You haven&apos;t made any return requests yet</p>
+          <p className="text-sm text-gray-500 mb-4">When you request a return, it will appear here</p>
+          <Button asChild className="bg-black hover:bg-gray-800 text-white">
+            <Link href="/profile/orders">View Orders</Link>
+          </Button>
+        </div>
+      </ProfileLayout>
+    )
   }
 
   // Return details modal
@@ -113,37 +99,43 @@ export default function ReturnRequestsPage() {
           <div className="flex items-center gap-4 mb-6">
             <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
               <Image
-                src="/placeholder.svg?height=64&width=64"
-                alt={selectedReturn.productName}
+                src={
+                  selectedReturn.product?.images && selectedReturn.product.images.length > 0
+                    ? selectedReturn.product.images[0].image
+                    : "/placeholder.svg?height=64&width=64"
+                }
+                alt={selectedReturn.product?.name || "Product"}
                 fill
                 className="object-contain p-2"
               />
             </div>
             <div>
               <div className="flex items-center gap-4">
-                <h3 className="font-medium">{selectedReturn.productName}</h3>
-                <span className="text-yellow-500 text-sm">Request processing</span>
+                <h3 className="font-medium">{selectedReturn.product?.name || "Product"}</h3>
+                <span className="text-yellow-500 text-sm">{selectedReturn.status || "Processing"}</span>
               </div>
-              <p className="font-bold">₦{selectedReturn.productPrice}</p>
+              <p className="font-bold">
+                ₦{selectedReturn.product ? Number(selectedReturn.product.amount).toLocaleString() : "0"}
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <p className="text-sm text-gray-500">Item</p>
-              <p className="font-medium">{selectedReturn.item}</p>
+              <p className="font-medium">{selectedReturn.product?.name || "Product"}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Tracking ID</p>
-              <p className="font-medium">{selectedReturn.trackingId}</p>
+              <p className="font-medium">N/A</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Date ordered</p>
-              <p className="font-medium">{selectedReturn.date}</p>
+              <p className="font-medium">{formatDate(selectedReturn.created_at)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Delivered</p>
-              <p className="font-medium">{selectedReturn.dateDelivered}</p>
+              <p className="font-medium">N/A</p>
             </div>
           </div>
 
@@ -152,21 +144,23 @@ export default function ReturnRequestsPage() {
             <p className="text-gray-700">{selectedReturn.reason}</p>
           </div>
 
-          <div className="mb-6">
-            <h3 className="font-medium mb-2">Uploaded pictures</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {selectedReturn.images.map((image: string, index: number) => (
-                <div key={index} className="border border-gray-200 rounded-md aspect-square relative">
-                  <Image
-                    src={image || "/placeholder.svg"}
-                    alt={`Return image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+          {selectedReturn.images && selectedReturn.images.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-medium mb-2">Uploaded pictures</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {selectedReturn.images.map((image, index) => (
+                  <div key={index} className="border border-gray-200 rounded-md aspect-square relative">
+                    <Image
+                      src={image || "/placeholder.svg"}
+                      alt={`Return image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <Button className="w-full bg-black hover:bg-gray-800 text-white" onClick={handleCloseDetails}>
             {isMobile ? "Back to home" : "Go back"}
@@ -183,45 +177,51 @@ export default function ReturnRequestsPage() {
       {/* Desktop layout - grid of returns */}
       {!isMobile && (
         <div className="grid grid-cols-2 gap-4">
-          {returns.map((returnItem, index) => (
-            <div key={index} className="bg-white border rounded-lg overflow-hidden">
+          {returns.map((returnItem) => (
+            <div key={returnItem.id} className="bg-white border rounded-lg overflow-hidden">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-medium">Name of item</h3>
+                <h3 className="font-medium">Return Request</h3>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
               <div className="p-4">
                 <div className="flex gap-4 mb-4">
                   <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                     <Image
-                      src="/placeholder.svg?height=64&width=64"
-                      alt={returnItem.name}
+                      src={
+                        returnItem.product?.images && returnItem.product.images.length > 0
+                          ? returnItem.product.images[0].image
+                          : "/placeholder.svg?height=64&width=64"
+                      }
+                      alt={returnItem.product?.name || "Product"}
                       fill
                       className="object-contain p-2"
                     />
                   </div>
                   <div>
-                    <h4 className="font-medium">{returnItem.name}</h4>
-                    <p className="text-sm text-gray-500">{returnItem.description}</p>
-                    <p className="font-bold mt-1">₦{returnItem.price}</p>
+                    <h4 className="font-medium">{returnItem.product?.name || "Product"}</h4>
+                    <p className="text-sm text-gray-500">{returnItem.product?.description || "Description"}</p>
+                    <p className="font-bold mt-1">
+                      ₦{returnItem.product ? Number(returnItem.product.amount).toLocaleString() : "0"}
+                    </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500">Date of order</p>
-                    <p>{returnItem.date}</p>
+                    <p className="text-gray-500">Date of request</p>
+                    <p>{formatDate(returnItem.created_at)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Order ID</p>
-                    <p>{returnItem.orderId}</p>
+                    <p>#{returnItem.order_id}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Date delivered</p>
-                    <p>{returnItem.dateDelivered}</p>
+                    <p className="text-gray-500">Item ID</p>
+                    <p>#{returnItem.order_item}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="text-yellow-500">{returnItem.status}</p>
+                    <p className="text-yellow-500">{returnItem.status || "Processing"}</p>
                   </div>
                 </div>
 
@@ -240,45 +240,51 @@ export default function ReturnRequestsPage() {
       {/* Mobile layout - list of returns */}
       {isMobile && (
         <div className="space-y-4">
-          {returns.map((returnItem, index) => (
-            <div key={index} className="bg-white border rounded-lg overflow-hidden">
+          {returns.map((returnItem) => (
+            <div key={returnItem.id} className="bg-white border rounded-lg overflow-hidden">
               <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-medium">Name of item</h3>
+                <h3 className="font-medium">Return Request</h3>
                 <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
               <div className="p-4">
                 <div className="flex gap-4 mb-4">
                   <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                     <Image
-                      src="/placeholder.svg?height=64&width=64"
-                      alt={returnItem.name}
+                      src={
+                        returnItem.product?.images && returnItem.product.images.length > 0
+                          ? returnItem.product.images[0].image
+                          : "/placeholder.svg?height=64&width=64"
+                      }
+                      alt={returnItem.product?.name || "Product"}
                       fill
                       className="object-contain p-2"
                     />
                   </div>
                   <div>
-                    <h4 className="font-medium">{returnItem.name}</h4>
-                    <p className="text-sm text-gray-500">{returnItem.description}</p>
-                    <p className="font-bold mt-1">₦{returnItem.price}</p>
+                    <h4 className="font-medium">{returnItem.product?.name || "Product"}</h4>
+                    <p className="text-sm text-gray-500">{returnItem.product?.description || "Description"}</p>
+                    <p className="font-bold mt-1">
+                      ₦{returnItem.product ? Number(returnItem.product.amount).toLocaleString() : "0"}
+                    </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500">Date of order</p>
-                    <p>{returnItem.date}</p>
+                    <p className="text-gray-500">Date of request</p>
+                    <p>{formatDate(returnItem.created_at)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Order ID</p>
-                    <p>{returnItem.orderId}</p>
+                    <p>#{returnItem.order_id}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Date delivered</p>
-                    <p>{returnItem.dateDelivered}</p>
+                    <p className="text-gray-500">Item ID</p>
+                    <p>#{returnItem.order_item}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Status</p>
-                    <p className="text-yellow-500">{returnItem.status}</p>
+                    <p className="text-yellow-500">{returnItem.status || "Processing"}</p>
                   </div>
                 </div>
 
@@ -299,4 +305,3 @@ export default function ReturnRequestsPage() {
     </ProfileLayout>
   )
 }
-

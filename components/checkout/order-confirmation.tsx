@@ -11,13 +11,13 @@ import PaystackPayment from "./paystack-payment"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/api/use-auth"
 
-interface CheckoutData {
+export interface CheckoutData {
   email?: string
   amount?: number
   order_code?: string
   check_out_id?: string
   delivery_fee?: string | number
-  [key: string]: unknown // Add this if there are additional dynamic properties
+  [key: string]: unknown
 }
 
 interface OrderConfirmationProps {
@@ -69,15 +69,6 @@ export default function OrderConfirmation({
     setShowConfirmModal(false)
   }
 
-  interface CheckoutData {
-    email?: string
-    amount?: number
-    order_code?: string
-    check_out_id?: string
-    delivery_fee?: string | number
-    [key: string]: unknown// Add this if there are additional dynamic properties
-  }
-
   const handlePaystackSuccess = (reference: string, checkoutData?: CheckoutData) => {
     toast({
       title: "Payment Successful",
@@ -107,16 +98,15 @@ export default function OrderConfirmation({
   }
 
   // Prepare metadata for Paystack
-// Prepare metadata for Paystack
-const paystackMetadata = {
-  "amount": (checkoutData.amount ? checkoutData.amount : cartSummary.total).toString(),
-  "reference": checkoutData.reference || "",
-  "email": checkoutData.email || shippingDetails.email || "customer@example.com",
-  "check_out_id": checkoutData.check_out_id || "1",
-  "delivery_fee": (checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee).toString(),
-  "order_code": checkoutData.order_code || "didhdd",
-  "user_id": user?.id?.toString() || "1"
-}
+  const paystackMetadata = {
+    amount: (checkoutData.amount ? checkoutData.amount : cartSummary.total).toString(),
+    reference: checkoutData.reference || "",
+    email: checkoutData.email || shippingDetails.email || "customer@example.com",
+    check_out_id: checkoutData.check_out_id || "1",
+    delivery_fee: (checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee).toString(),
+    order_code: checkoutData.order_code || "didhdd",
+    user_id: user?.id?.toString() || "1",
+  }
 
   return (
     <div>
@@ -357,15 +347,14 @@ const paystackMetadata = {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold text-center mb-4">Confirm order?</h2>
             <p className="text-center text-gray-600 mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-              dolore magna aliqua. Ut enim ad minim fghf fhfus skaks
+              Are you sure you want to place this order? Once confirmed, your payment will be processed.
             </p>
             <div className="flex flex-col gap-3">
               <Button onClick={handleConfirmOrder} className="w-full bg-black hover:bg-gray-800 text-white">
                 Yes, place order
               </Button>
               <Button variant="outline" onClick={handleCancelConfirm} className="w-full">
-                No, I want to confirm
+                No, I want to review
               </Button>
             </div>
           </div>
@@ -374,4 +363,3 @@ const paystackMetadata = {
     </div>
   )
 }
-

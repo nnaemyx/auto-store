@@ -14,7 +14,7 @@ interface OrderSuccessProps {
       city: string
       state: string
       postalCode: string
-      country: string
+      country?: string
     }
     payment: {
       method: string
@@ -23,8 +23,8 @@ interface OrderSuccessProps {
       [key: string]: unknown
     }
     checkout: {
-      order_code: string
-      total_amount: number
+      order_code?: string
+      total_amount?: number
       [key: string]: unknown
     }
     orderDate: Date
@@ -204,10 +204,9 @@ export default function OrderSuccess({
         </Button>
 
         <Button asChild={!onViewOrders} onClick={onViewOrders}>
-          {!onViewOrders ? <Link href="/account/orders">View My Orders</Link> : "View My Orders"}
+          {!onViewOrders ? <Link href="/profile/orders">View My Orders</Link> : "View My Orders"}
         </Button>
       </div>
     </div>
   )
 }
-
