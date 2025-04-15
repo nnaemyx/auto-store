@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     domains: ['admin.autostoreng.com', 'res.cloudinary.com'],
     
   },
+  output: 'standalone',
 };
 
 export default nextConfig;
