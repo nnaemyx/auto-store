@@ -4,6 +4,9 @@ import React from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/api-client"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+
+
 
 // Helper functions to safely access localStorage (only in browser)
 const getToken = (): string | null => {
@@ -94,6 +97,7 @@ const cartKeys = {
 export function useCart() {
   const queryClient = useQueryClient()
   const { toast, ToastVariant } = useToast()
+  const router = useRouter();
 
   // Fetch cart items
   const {
@@ -138,7 +142,7 @@ export function useCart() {
   // Add item to cart mutation
   const addToCart = useMutation({
     mutationFn: ({ productId, quantity }: { productId: number; quantity: number }) =>
-      addItemToCart(productId, quantity),
+      addItemToCart(productId, quantity, router, toast, ToastVariant),
     onMutate: async ({ productId, quantity }) => {
       // Cancel any outgoing refetches to prevent conflicts
       await queryClient.cancelQueries({ queryKey: cartKeys.items() })
@@ -207,7 +211,7 @@ export function useCart() {
   const updateQuantity = useMutation({
     mutationFn: ({ productId, quantity }: { productId: number; quantity: number }) => {
       console.log(`Setting product ${productId} to exact quantity ${quantity}`)
-      return addItemToCart(productId, quantity)
+      return addItemToCart(productId, quantity, router, toast, ToastVariant)
     },
     onMutate: async ({ productId, quantity }) => {
       // Cancel any outgoing refetches
@@ -412,12 +416,27 @@ async function fetchCart(): Promise<CartResponse> {
   }
 }
 
-async function addItemToCart(productId: number, quantity: number): Promise<{ success: boolean }> {
-  const token = getToken()
+async function addItemToCart(
+  productId: number,
+  quantity: number,
+  router: ReturnType<typeof useRouter>,
+  toast: ReturnType<typeof useToast>["toast"],
+  ToastVariant: ReturnType<typeof useToast>["ToastVariant"]
+): Promise<{ success: boolean }> {
+  const token = getToken();
 
   if (!token) {
-    // If no token, just return success and rely on localStorage
-    return { success: true }
+    // Show a toast message prompting the user to log in
+    toast({
+      title: "Authentication Required",
+      description: "Please log in to add items to your cart.",
+      variant: ToastVariant.Error, // Assuming "error" is the correct variant
+    });
+
+    // Navigate to the login page
+    router.push("/auth/login");
+        // Throw an error to prevent onSuccess from being called
+        throw new Error("User not logged in");
   }
 
   return apiClient.post(
@@ -430,8 +449,8 @@ async function addItemToCart(productId: number, quantity: number): Promise<{ suc
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    },
-  )
+    }
+  );
 }
 
 async function removeItemFromCart(cartId: number): Promise<{ success: boolean }> {
