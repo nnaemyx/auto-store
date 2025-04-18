@@ -187,6 +187,7 @@ export default function PaymentDetailsForm({
   const selectedFeeOption = deliveryFees?.find((fee) => fee.id.toString() === deliveryFee)
   const deliveryFeeAmount = selectedFeeOption?.amount || 0
   const totalAmount = cartSummary.subtotal + cartSummary.tax + deliveryFeeAmount
+  console.log(totalAmount)
 
   return (
     <div>

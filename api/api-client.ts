@@ -8,6 +8,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://admin.au
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`
 
+
   const defaultHeaders = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -21,21 +22,26 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     },
   })
 
+
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!response.ok) {
     let error
     try {
       error = await response.json()
+      console.error('API Error response:', error);
     } catch {
       error = {
         message: `An error occurred while fetching data: ${response.statusText}`,
       }
+      console.error('API Error (non-JSON):', error);
     }
     throw new Error(error.message || "An error occurred while fetching data")
   }
 
-  return response.json()
+  const data = await response.json();
+  console.log('API Response data:', data);
+  return data;
 }
 
 /**

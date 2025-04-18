@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/api-client"
 import { useToast } from "@/hooks/use-toast"
@@ -37,7 +36,7 @@ export function useReturnRequests() {
           throw new Error("Authentication token not found")
         }
 
-        const response = await apiClient.get<ReturnRequest[]>("/order/return-requests", {
+        const response = await apiClient.get<ReturnRequest[]>("/order/get-return-items", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -63,7 +62,7 @@ export function useReturnRequest(id: string | number) {
           throw new Error("Authentication token not found")
         }
 
-        const response = await apiClient.get<ReturnRequest>(`/order/return-request/${id}`, {
+        const response = await apiClient.get<ReturnRequest>(`/order/get-return-items/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -82,54 +81,70 @@ export function useReturnRequest(id: string | number) {
 // Submit a return request
 export function useSubmitReturnRequest() {
   const queryClient = useQueryClient()
-  const { toast, ToastVariant } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
-  const mutation = useMutation({
-    mutationFn: async (data: { order_id: string; order_item: string; reason: string }) => {
-      setIsSubmitting(true)
+  return useMutation({
+    mutationFn: async (data: {
+      order_id: string;
+      order_item: string;
+      reason: string;
+    }) => {
+      // Validate required fields
+      if (!data.order_id) {
+        throw new Error("Order ID is required");
+      }
+      if (!data.order_item) {
+        throw new Error("Order item is required");
+      }
+      if (!data.reason) {
+        throw new Error("Return reason is required");
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      console.log("Submitting return request with data:", data);
+      console.log("Using token:", token.substring(0, 10) + "...");
+
       try {
-        const token = localStorage.getItem("token")
-        if (!token) {
-          throw new Error("Authentication token not found")
-        }
-
         const response = await apiClient.post("/order/return-item", data, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
+        });
 
-        return response
+        if (!response) {
+          throw new Error("No response received from server");
+        }
+
+        console.log("Return request response:", response);
+        return response;
       } catch (error) {
-        console.error("Error submitting return request:", error)
-        throw error
-      } finally {
-        setIsSubmitting(false)
+        console.error("API error submitting return request:", error);
+        if (error instanceof Error) {
+          throw new Error(`API error: ${error.message}`);
+        } else {
+          throw new Error("Unknown error occurred while submitting return request");
+        }
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["returnRequests"] })
+    onSuccess: (data) => {
+      console.log("Return request submitted successfully:", data);
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["returnRequests"] });
       toast({
-        title: "Return Request Submitted",
-        description: "Your return request has been submitted successfully.",
-        variant: ToastVariant.Success,
-      })
+        title: "Success",
+        description: "Return request submitted successfully",
+      });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error("Error submitting return request:", error);
       toast({
-        title: "Failed to Submit Return Request",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: ToastVariant.Error,
-      })
+        title: "Error",
+        description: error.message || "Failed to submit return request",
+      });
     },
-  })
-
-  return {
-    submitReturnRequest: mutation.mutate,
-    isSubmitting,
-    isSuccess: mutation.isSuccess,
-    isError: mutation.isError,
-    error: mutation.error,
-  }
+  });
 }

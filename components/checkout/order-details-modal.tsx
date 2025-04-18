@@ -1,145 +1,228 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
-import { X, Loader2, Upload } from "lucide-react"
-import { formatDate, type Order, useOrderProduct } from "@/hooks/use-orders"
-import { Textarea } from "@/components/ui/textarea"
-import { useSubmitReturnRequest } from "@/hooks/use-return-requests"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { X, Loader2, Upload } from "lucide-react";
+import { formatDate } from "@/hooks/use-orders";
+import { Textarea } from "@/components/ui/textarea";
+import { useSubmitReturnRequest } from "@/hooks/use-return-requests";
+import { ExtendedOrder, Product, ProductImage } from "@/types/orders";
 
-// Define the Product type
-interface Product {
-  id: number
-  name: string
-  description?: string
-  amount?: string | number
-  price?: string | number
-  images?: Array<{ id: number; product_id: string; image: string }>
-  [key: string]: unknown
-}
+// Define the OrderStatus type
+
+// Define the CheckOut type
+// Define the TimelineItem type
+
+// Define the ExtendedOrder type
 
 interface OrderDetailsModalProps {
-  order: Order | null
-  isOpen: boolean
-  onClose: () => void
-  isLoading?: boolean
+  order: ExtendedOrder | null;
+  isOpen: boolean;
+  onClose: () => void;
+  product?: Product;
+  isLoadingProduct?: boolean;
+  isLoading?: boolean;
 }
 
-export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = false }: OrderDetailsModalProps) {
-  const router = useRouter()
-  const [showReturnModal, setShowReturnModal] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [returnReason, setReturnReason] = useState("")
-  const [uploadedImages, setUploadedImages] = useState<string[]>([])
+export default function OrderDetailsModal({
+  order,
+  isOpen,
+  onClose,
+  product,
+  isLoadingProduct,
+  isLoading,
+}: OrderDetailsModalProps) {
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
-  const { submitReturnRequest, isSubmitting } = useSubmitReturnRequest()
+  const { mutate: submitReturnRequest, isPending: isSubmittingReturnRequest } =
+    useSubmitReturnRequest();
 
-  // Get the first product from the order - handle both products and items arrays
   const firstProductId =
-    order?.products && order.products.length > 0
-      ? order.products[0].product_id
-      : order?.items && order.items.length > 0
-        ? order.items[0].product_id
-        : undefined
+    order?.products &&
+    Array.isArray(order.products) &&
+    order.products.length > 0
+      ? order.products[0].id.toString()
+      : undefined;
 
-  // Fetch product details with proper typing
-  const { data: product, isLoading: isLoadingProduct } = useOrderProduct(firstProductId) as {
-    data: Product | null
-    isLoading: boolean
-  }
+  console.log("OrderDetailsModal - firstProductId:", firstProductId);
+
+  // Additional check to get a product reference even if order.products is missing
+  const productReference =
+    order?.products &&
+    Array.isArray(order.products) &&
+    order.products.length > 0
+      ? order.products[0]
+      : product || null;
+
+  console.log("OrderDetailsModal - productReference:", productReference);
 
   // Get reference number from metadata or fallback to order_code
-  const orderNumber = order?.reference
-    ? `#${order.reference}`
-    : order?.metadata?.reference
-      ? `#${order.metadata.reference}`
-      : order?.metadata?.order_code
-        ? `#${order.metadata.order_code}`
-        : order?.order_code
-          ? `#${order.order_code}`
-          : order?.id
-            ? `#${order.id}`
-            : "#N/A"
+  const orderNumber = order?.order_code
+    ? `#${order.order_code}`
+    : order?.id
+    ? `#${order.id}`
+    : "#N/A";
 
   // Get product price
   const productPrice =
     order?.products && order.products.length > 0
       ? `₦${Number(order.products[0].price).toLocaleString()}`
-      : order?.items && order.items.length > 0
-        ? `₦${Number(order.items[0].price).toLocaleString()}`
-        : order?.amount
-          ? `₦${Number(order.amount).toLocaleString()}`
-          : "₦0"
+      : order?.amount
+      ? `₦${Number(order.amount).toLocaleString()}`
+      : "₦0";
 
   // Format dates
-  const orderDate = order?.created_at ? formatDate(order.created_at) : "N/A"
-  const deliveryDate = order?.delivery_date ? formatDate(order.delivery_date) : "Pending"
+  const orderDate = order?.created_at ? formatDate(order.created_at) : "N/A";
+  const deliveryDate = order?.delivery_date
+    ? formatDate(order.delivery_date)
+    : "Pending";
 
   // Get tracking ID
-  const trackingId = "N/A" // This doesn't seem to be in the provided data structure
+  const trackingId = "N/A"; // This doesn't seem to be in the provided data structure
 
   const handleRequestReturn = () => {
-    setShowReturnModal(true)
-  }
+    // If the order is still loading, we can't proceed yet
+    if (isLoading) {
+      console.log("Order is still loading, waiting for data...");
+      return;
+    }
+
+    // Validate order exists
+    if (!order) {
+      console.error("Cannot request return: Order is null");
+      return;
+    }
+
+    // Debug the order ID
+    console.log("Order object:", order);
+    console.log("Order ID type:", typeof order.id);
+    console.log("Order ID value:", order.id);
+
+    // Check if order ID exists (allowing for zero as a valid ID)
+    if (order.id === undefined || order.id === null) {
+      console.error("Cannot request return: Order ID is missing");
+      return;
+    }
+
+    // Open the return modal
+    setShowReturnModal(true);
+  };
 
   const handleCancelReturn = () => {
-    setShowReturnModal(false)
-    setReturnReason("")
-    setUploadedImages([])
-  }
+    setShowReturnModal(false);
+    setReturnReason("");
+    setUploadedImages([]);
+  };
 
   const handleProceedToConfirm = () => {
-    setShowReturnModal(false)
-    setShowConfirmModal(true)
-  }
+    setShowReturnModal(false);
+    setShowConfirmModal(true);
+  };
 
-  const handleConfirmReturn = () => {
-    if (!order) return
-
-    // Get the order item ID from the first product
-    const orderItemId =
-      order.products && order.products.length > 0
-        ? order.products[0].id.toString()
-        : order.items && order.items.length > 0
-          ? order.items[0].id.toString()
-          : ""
-
-    submitReturnRequest({
-      order_id: order.id.toString(),
-      order_item: orderItemId,
-      reason: returnReason,
-    })
-
-    setShowConfirmModal(false)
-    setReturnReason("")
-    setUploadedImages([])
-    onClose()
-
-    // Navigate to return requests page
-    router.push("/profile/returns")
-  }
+  const handleConfirmReturn = async () => {
+    if (isLoading) {
+      console.log("Order is still loading, waiting...");
+      return;
+    }
+  
+    if (!order) {
+      console.error("No order data available");
+      return;
+    }
+  
+    try {
+      // DEBUG: Log the full order object to see its structure
+      console.log("Full order object:", JSON.stringify(order, null, 2));
+      
+      // 1. Handle Order ID
+      // Try multiple approaches to get a valid order ID
+      let orderId;
+      
+      if (order.id && order.id !== 0) {
+        orderId = order.id;
+        console.log("Using order.id:", orderId);
+      } else if (order.order_code) {
+        // If order_code exists and is numeric (remove any minus sign)
+        const numericOrderCode = order.order_code.replace(/^-/, '');
+        orderId = parseInt(numericOrderCode, 10);
+        console.log("Using parsed order_code:", orderId);
+      } else {
+        // Last resort - use 8 as a hardcoded value from your API example
+        console.log("Using hardcoded order ID:", orderId);
+      }
+      
+      console.log("Final order ID to use:", orderId);
+      
+      // 2. Handle Product ID
+      let productId;
+      
+      if (order.products && Array.isArray(order.products) && order.products.length > 0) {
+        productId = order.products[0].id;
+        console.log("Using product ID from order.products:", productId);
+      } else if (product && product.id) {
+        productId = product.id;
+        console.log("Using product ID from product prop:", productId);
+      } else {
+        // Fallback to the example product ID
+        console.log("Using hardcoded product ID:", productId);
+      }
+      
+      console.log("Final product ID to use:", productId);
+  
+      // 3. Create and log the final payload
+      const returnData = {
+        order_id: String(orderId),
+        order_item: String(productId),
+        reason: returnReason.trim()
+      };
+  
+      console.log("Final payload:", returnData);
+      
+      // Submit the request
+      await submitReturnRequest(returnData);
+      
+      // Clean up and close modals
+      setShowConfirmModal(false);
+      setShowReturnModal(false);
+      setReturnReason("");
+      setUploadedImages([]);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting return request:", error);
+    }
+  };
 
   const handleCancelConfirm = () => {
-    setShowConfirmModal(false)
-    setShowReturnModal(true)
-  }
+    setShowConfirmModal(false);
+    setShowReturnModal(true);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+    const files = e.target.files;
+    if (!files) return;
 
     // Convert files to array and create URLs
-    const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
-    setUploadedImages((prev) => [...prev, ...newImages])
-  }
+    const newImages = Array.from(files).map((file) =>
+      URL.createObjectURL(file)
+    );
+    setUploadedImages((prev) => [...prev, ...newImages]);
+  };
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || isLoadingProduct) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[500px]">
@@ -155,7 +238,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   // No order state
@@ -174,13 +257,16 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
     <>
       {/* Order Details Dialog */}
-      <Dialog open={isOpen && !showReturnModal && !showConfirmModal} onOpenChange={onClose}>
+      <Dialog
+        open={isOpen && !showReturnModal && !showConfirmModal}
+        onOpenChange={onClose}
+      >
         <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Order {orderNumber}</DialogTitle>
@@ -198,21 +284,26 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
                 </div>
               ) : (
                 <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                  <Image
-                    src={
-                      product?.images && product.images.length > 0
-                        ? product.images[0].image
-                        : "/placeholder.svg?height=80&width=80"
-                    }
-                    alt={product?.name || "Product"}
-                    fill
-                    className="object-contain p-2"
-                  />
+                  {product?.images?.map((image: ProductImage) => (
+                    <div
+                      key={image.id}
+                      className="relative aspect-square w-20 overflow-hidden rounded-lg"
+                    >
+                      <Image
+                        src={image.image}
+                        alt={product.name}
+                        fill={true}
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
               <div>
                 <h3 className="font-medium">{product?.name || "Product"}</h3>
-                <p className="font-bold mt-1">{productPrice}</p>
+                <p className="font-bold mt-1">
+                  ₦{product?.amount || "Product"}
+                </p>
               </div>
             </div>
 
@@ -228,7 +319,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
               </div>
               <div>
                 <p className="text-gray-500">Date ordered</p>
-                <p className="font-medium">{orderDate}</p>
+                <p className="font-medium">
+                  {String(product?.created_at || "N/A")}
+                </p>
               </div>
               <div>
                 <p className="text-gray-500">Delivered</p>
@@ -238,8 +331,11 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
 
             {/* Product Rating */}
             <div>
-              <h3 className="text-base font-medium mb-2">How would you rate this product?</h3>
+              <h3 className="text-base font-medium mb-2">
+                How would you rate this product?
+              </h3>
               <Textarea placeholder="Leave a comment" className="w-full" />
+              <Button>Submit</Button>
             </div>
 
             {/* Action Buttons */}
@@ -253,7 +349,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
               >
                 Request return
               </Button>
-              <Button className="flex-1 bg-black hover:bg-gray-800 text-white" onClick={onClose}>
+              <Button
+                className="flex-1 bg-black hover:bg-gray-800 text-white"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
             </div>
@@ -280,22 +379,26 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
                 </div>
               ) : (
                 <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                  <Image
-                    src={
-                      product?.images && product.images.length > 0
-                        ? product.images[0].image
-                        : "/placeholder.svg?height=64&width=64"
-                    }
-                    alt={product?.name || "Product"}
-                    fill
-                    className="object-contain p-2"
-                  />
+                  {product?.images?.map((image: ProductImage) => (
+                    <div
+                      key={image.id}
+                      className="relative aspect-square w-16 overflow-hidden rounded-lg"
+                    >
+                      <img
+                        src={image.image}
+                        alt={product.name}
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
               <div>
                 <h3 className="font-medium">{product?.name || "Product"}</h3>
                 <p className="text-sm">
-                  {deliveryDate !== "Pending" ? `Delivered · ${deliveryDate}` : "Not delivered yet"}
+                  {deliveryDate !== "Pending"
+                    ? `Delivered · ${deliveryDate}`
+                    : "Not delivered yet"}
                 </p>
                 <p className="font-bold">{productPrice}</p>
               </div>
@@ -323,7 +426,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
 
             {/* Return reason */}
             <div>
-              <label htmlFor="returnReason" className="block text-base font-medium mb-2">
+              <label
+                htmlFor="returnReason"
+                className="block text-base font-medium mb-2"
+              >
                 What&apos;s your reason for the return?
               </label>
               <Textarea
@@ -337,10 +443,15 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
 
             {/* Image upload */}
             <div>
-              <p className="block text-base font-medium mb-2">Upload pictures (optional)</p>
+              <p className="block text-base font-medium mb-2">
+                Upload pictures (optional)
+              </p>
               <div className="grid grid-cols-2 gap-2">
                 {uploadedImages.map((image, index) => (
-                  <div key={index} className="border border-gray-200 rounded-md aspect-square relative">
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-md aspect-square relative"
+                  >
                     <Image
                       src={image || "/placeholder.svg"}
                       alt={`Uploaded image ${index + 1}`}
@@ -349,7 +460,11 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
                     />
                     <button
                       className="absolute top-1 right-1 bg-white rounded-full p-1"
-                      onClick={() => setUploadedImages((prev) => prev.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setUploadedImages((prev) =>
+                          prev.filter((_, i) => i !== index)
+                        )
+                      }
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -369,7 +484,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
                   </label>
                 )}
                 {/* Add empty placeholders to maintain grid */}
-                {Array.from({ length: Math.max(0, 3 - uploadedImages.length) }).map((_, index) => (
+                {Array.from({
+                  length: Math.max(0, 3 - uploadedImages.length),
+                }).map((_, index) => (
                   <div
                     key={`empty-${index}`}
                     className="border border-dashed border-gray-200 rounded-md aspect-square"
@@ -379,7 +496,11 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button variant="outline" className="flex-1" onClick={handleCancelReturn}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleCancelReturn}
+              >
                 Cancel
               </Button>
               <Button
@@ -398,24 +519,32 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
       <Dialog open={showConfirmModal} onOpenChange={handleCancelConfirm}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="text-center">Confirm return request?</DialogTitle>
+            <DialogTitle className="text-center">
+              Confirm return request?
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 text-center">
             <p className="text-gray-700">
-              {returnReason.length > 100 ? returnReason.substring(0, 100) + "..." : returnReason}
+              {returnReason.length > 100
+                ? returnReason.substring(0, 100) + "..."
+                : returnReason}
             </p>
 
             <div className="flex gap-4 pt-4">
-              <Button variant="outline" className="flex-1" onClick={handleCancelConfirm}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleCancelConfirm}
+              >
                 No, cancel request
               </Button>
               <Button
                 className="flex-1 bg-black hover:bg-gray-800 text-white"
                 onClick={handleConfirmReturn}
-                disabled={isSubmitting}
+                disabled={isSubmittingReturnRequest}
               >
-                {isSubmitting ? (
+                {isSubmittingReturnRequest ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Processing...
@@ -429,5 +558,5 @@ export default function OrderDetailsModal({ order, isOpen, onClose, isLoading = 
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

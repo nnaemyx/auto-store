@@ -124,7 +124,7 @@ export default function PaystackPayment({
 
       // Ensure we have the correct email and amount
       const paymentEmail: string = paymentData.email || email
-      const paymentAmount: number = (paymentData.amount ? Number(paymentData.amount) : amount) * 100 // convert to kobo
+      const paymentAmount: number = (paymentData.amount ? Number(paymentData.amount) : amount) 
 
       console.log("Payment setup:", {
         email: paymentEmail,
