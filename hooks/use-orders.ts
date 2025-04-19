@@ -91,6 +91,7 @@ export interface Order {
   checkOut: CheckOut
   timeline: TimelineItem[]
   products: OrderItem[]
+  details?: Order
 }
 
 // Function to format date for display

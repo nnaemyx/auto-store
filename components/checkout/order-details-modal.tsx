@@ -76,13 +76,6 @@ export default function OrderDetailsModal({
     ? `#${order.id}`
     : "#N/A";
 
-  // Get product price
-  const productPrice =
-    order?.products && order.products.length > 0
-      ? `₦${Number(order.products[0].price).toLocaleString()}`
-      : order?.amount
-      ? `₦${Number(order.amount).toLocaleString()}`
-      : "₦0";
 
   // Format dates
   const orderDate = order?.created_at ? formatDate(order.created_at) : "N/A";
@@ -149,35 +142,39 @@ export default function OrderDetailsModal({
       
       // 1. Handle Order ID
       // Try multiple approaches to get a valid order ID
-      let orderId;
+      let orderId = 0; // Default fallback value
       
-      if (order.id && order.id !== 0) {
-        orderId = order.id;
-        console.log("Using order.id:", orderId);
-      } else if (order.order_code) {
+      // Check if order has a details property (API response structure)
+      const orderDetails = order.details || order;
+      
+      if (orderDetails.id && orderDetails.id !== 0) {
+        orderId = orderDetails.id;
+        console.log("Using orderDetails.id:", orderId);
+      } else if (orderDetails.order_code) {
         // If order_code exists and is numeric (remove any minus sign)
-        const numericOrderCode = order.order_code.replace(/^-/, '');
-        orderId = parseInt(numericOrderCode, 10);
+        const numericOrderCode = orderDetails.order_code.replace(/^-/, '');
+        orderId = parseInt(numericOrderCode, 10) || 0; // Use 0 if parsing fails
         console.log("Using parsed order_code:", orderId);
       } else {
-        // Last resort - use 8 as a hardcoded value from your API example
-        console.log("Using hardcoded order ID:", orderId);
+        console.log("Using fallback order ID:", orderId);
       }
       
       console.log("Final order ID to use:", orderId);
       
       // 2. Handle Product ID
-      let productId;
+      let productId = 0; // Default fallback value
       
-      if (order.products && Array.isArray(order.products) && order.products.length > 0) {
-        productId = order.products[0].id;
-        console.log("Using product ID from order.products:", productId);
+      // Check if products exist in the order details
+      const products = orderDetails.products || [];
+      
+      if (products && Array.isArray(products) && products.length > 0) {
+        productId = products[0].id;
+        console.log("Using product ID from orderDetails.products:", productId);
       } else if (product && product.id) {
         productId = product.id;
         console.log("Using product ID from product prop:", productId);
       } else {
-        // Fallback to the example product ID
-        console.log("Using hardcoded product ID:", productId);
+        console.log("Using fallback product ID:", productId);
       }
       
       console.log("Final product ID to use:", productId);
@@ -320,7 +317,7 @@ export default function OrderDetailsModal({
               <div>
                 <p className="text-gray-500">Date ordered</p>
                 <p className="font-medium">
-                  {String(product?.created_at || "N/A")}
+                  {orderDate}
                 </p>
               </div>
               <div>
@@ -335,7 +332,7 @@ export default function OrderDetailsModal({
                 How would you rate this product?
               </h3>
               <Textarea placeholder="Leave a comment" className="w-full" />
-              <Button>Submit</Button>
+              <Button className="flex-1 bg-black hover:bg-gray-800 text-white mt-2">Submit</Button>
             </div>
 
             {/* Action Buttons */}
@@ -362,7 +359,7 @@ export default function OrderDetailsModal({
 
       {/* Return Request Dialog */}
       <Dialog open={showReturnModal} onOpenChange={handleCancelReturn}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Return Order {orderNumber}</DialogTitle>
             <DialogClose className="absolute right-4 top-4">
@@ -384,9 +381,10 @@ export default function OrderDetailsModal({
                       key={image.id}
                       className="relative aspect-square w-16 overflow-hidden rounded-lg"
                     >
-                      <img
+                      <Image
                         src={image.image}
                         alt={product.name}
+                        fill={true}
                         className="object-cover"
                       />
                     </div>
@@ -400,7 +398,7 @@ export default function OrderDetailsModal({
                     ? `Delivered · ${deliveryDate}`
                     : "Not delivered yet"}
                 </p>
-                <p className="font-bold">{productPrice}</p>
+                <p className="font-bold">{product?.amount}</p>
               </div>
             </div>
 

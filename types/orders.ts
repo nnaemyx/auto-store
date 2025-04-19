@@ -78,4 +78,5 @@ export interface ExtendedOrder {
     images: Array<{ id: number; product_id: string; image: string }>;
     [key: string]: unknown;
   }>;
+  details?: ExtendedOrder;
 } 

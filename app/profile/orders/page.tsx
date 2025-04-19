@@ -39,35 +39,40 @@ const convertToExtendedOrder = (order: Order | null): ExtendedOrder => {
   console.log("convertToExtendedOrder - order.id:", order.id);
   console.log("convertToExtendedOrder - order.products:", order.products);
 
+  // Check if the order has a details property (API response structure)
+  const orderData = order.details || order;
+
   // Ensure we have a valid order object with all required fields
   const extendedOrder = {
-    id: order.id || 0,
-    user_id: order.user_id || "",
-    amount: order.amount || "0",
-    order_code: order.order_code || "",
-    check_out_id: order.check_out_id || "",
-    status: order.status || "",
-    delivery_fee: order.delivery_fee || "",
-    delivery_date: order.delivery_date || "",
-    payment_method: order.payment_method || "",
-    currency: order.currency || "",
-    created_at: order.created_at || "",
-    updated_at: order.updated_at || "",
-    orderStatus: order.orderStatus || null,
-    checkOut: order.checkOut || null,
-    timeline: order.timeline || [],
-    products: order.products
-      ? order.products.map((product) => ({
+    id: orderData.id || 0,
+    user_id: orderData.user_id || "",
+    amount: orderData.amount || "0",
+    order_code: orderData.order_code || "",
+    check_out_id: orderData.check_out_id || "",
+    status: orderData.status || "",
+    delivery_fee: orderData.delivery_fee || "",
+    delivery_date: orderData.delivery_date || "",
+    payment_method: orderData.payment_method || "",
+    currency: orderData.currency || "",
+    created_at: orderData.created_at || "",
+    updated_at: orderData.updated_at || "",
+    orderStatus: orderData.orderStatus || null,
+    checkOut: orderData.checkOut || null,
+    timeline: orderData.timeline || [],
+    products: orderData.products
+      ? orderData.products.map((product: Order["products"][0]) => ({
           id: product.id,
           name: product.name || "",
-          created_at: product.created_at || new Date().toISOString(),
           description: product.description || "",
           amount: product.amount || 0,
-          quantity: product.quantity || "",
+          quantity: product.quantity || "1",
           price: product.price || 0,
           images: product.images || [],
+          created_at: product.created_at || new Date().toISOString()
         }))
       : [],
+    // Include the details property if it exists
+    details: order.details ? convertToExtendedOrder(order.details) : undefined
   };
 
   console.log("convertToExtendedOrder - extendedOrder:", extendedOrder);
