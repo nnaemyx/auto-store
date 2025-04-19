@@ -40,7 +40,6 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   }
 
   const data = await response.json();
-  console.log('API Response data:', data);
   return data;
 }
 

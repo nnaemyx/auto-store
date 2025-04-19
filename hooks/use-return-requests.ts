@@ -3,26 +3,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/api/api-client"
 import { useToast } from "@/hooks/use-toast"
+import { Product } from "@/types/orders"
 
 export interface ReturnRequest {
-  id: number
+  id: string
   order_id: string
   order_item: string
-  reason: string
   status: string
+  reason: string
   created_at: string
-  images?: string[]
-  product?: {
+  updated_at: string
+  products?: Product[]
+  returnStatus?: {
     id: number
     name: string
     description: string
-    amount: string
-    images: {
-      id: number
-      product_id: string
-      image: string
-    }[]
   }
+  status_id?: string
+  total?: number
+  user_id?: string
 }
 
 // Get all return requests
@@ -52,30 +51,50 @@ export function useReturnRequests() {
 }
 
 // Get a single return request
-export function useReturnRequest(id: string | number) {
-  return useQuery({
-    queryKey: ["returnRequest", id],
-    queryFn: async (): Promise<ReturnRequest> => {
-      try {
-        const token = localStorage.getItem("token")
-        if (!token) {
-          throw new Error("Authentication token not found")
-        }
+export function useReturnRequest(id: string) {
+  const { data: returnRequest, isLoading: isLoadingReturnRequest } = useQuery<ReturnRequest>({
+    queryKey: ["return-request", id],
+    queryFn: async () => {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        throw new Error("Authentication token not found")
+      }
 
+      try {
         const response = await apiClient.get<ReturnRequest>(`/order/get-return-items/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
 
+        if (!response) {
+          throw new Error("No response received from server")
+        }
+
         return response
       } catch (error) {
-        console.error(`Error fetching return request #${id}:`, error)
-        throw error
+        console.error("Error fetching return request:", error)
+        if (error instanceof Error) {
+          throw new Error(`API error: ${error.message}`)
+        } else {
+          throw new Error("Unknown error occurred while fetching return request")
+        }
       }
     },
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id,
   })
+
+  // Get the first product from the products array if it exists
+  const product = returnRequest?.products && returnRequest.products.length > 0 
+    ? returnRequest.products[0] 
+    : null
+
+  return {
+    returnRequest,
+    product,
+    isLoading: isLoadingReturnRequest,
+    error: null,
+  }
 }
 
 // Submit a return request

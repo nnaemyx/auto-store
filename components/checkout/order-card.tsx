@@ -137,7 +137,7 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
               src={
                 product?.images && product.images.length > 0
                   ? product.images[0].image
-                  : ""
+                  : "/placeholder.png"
               }
               alt={product?.name || "Product"}
               fill

@@ -79,4 +79,25 @@ export interface ExtendedOrder {
     [key: string]: unknown;
   }>;
   details?: ExtendedOrder;
+}
+
+export interface OrderItem {
+  id: number
+  name: string
+  category_id: string
+  subcategory_id: string
+  manufacturer_id: string
+  car_model_id: string
+  description: string
+  amount: number
+  quantity: string
+  rating: string
+  product_status_id: string
+  code: string
+  promotion_id: string
+  user_id: string
+  created_at: string
+  images: string[]
+  price: number
+  cart_id: number
 } 

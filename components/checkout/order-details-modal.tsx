@@ -12,11 +12,15 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-import { X, Loader2, Upload } from "lucide-react";
+import { X, Loader2, Upload, Star } from "lucide-react";
 import { formatDate } from "@/hooks/use-orders";
 import { Textarea } from "@/components/ui/textarea";
 import { useSubmitReturnRequest } from "@/hooks/use-return-requests";
 import { ExtendedOrder, Product, ProductImage } from "@/types/orders";
+import ProductReviews from "@/components/product/product-reviews";
+import { useProductReviews, useSubmitProductReview } from "@/hooks/use-product-reviews"
+import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/api/use-auth"
 
 // Define the OrderStatus type
 
@@ -46,10 +50,16 @@ export default function OrderDetailsModal({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [returnReason, setReturnReason] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(product?.id?.toString() || null)
+  const { mutate: submitReview, isPending: isSubmittingReview } = useSubmitProductReview()
+  const { toast, ToastVariant } = useToast()
+  const { user } = useAuth()
 
   const { mutate: submitReturnRequest, isPending: isSubmittingReturnRequest } =
     useSubmitReturnRequest();
-
+    
   const firstProductId =
     order?.products &&
     Array.isArray(order.products) &&
@@ -218,6 +228,44 @@ export default function OrderDetailsModal({
     setUploadedImages((prev) => [...prev, ...newImages]);
   };
 
+  const handleSubmitReview = () => {
+    if (!rating || !comment.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide both a rating and comment",
+        variant: ToastVariant.Error
+      });
+      return;
+    }
+
+    submitReview(
+      {
+        product_id: product?.id?.toString() || "",
+        user_id: user?.id?.toString() || "",
+        comment: comment.trim(),
+        rating,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "Review submitted successfully",
+            variant: ToastVariant.Success
+          });
+          setComment("");
+          setRating(0);
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to submit review",
+            variant: ToastVariant.Error
+          });
+        },
+      }
+    );
+  };
+
   // Loading state
   if (isLoading || isLoadingProduct) {
     return (
@@ -329,10 +377,67 @@ export default function OrderDetailsModal({
             {/* Product Rating */}
             <div>
               <h3 className="text-base font-medium mb-2">
-                How would you rate this product?
+                Product Reviews
               </h3>
-              <Textarea placeholder="Leave a comment" className="w-full" />
-              <Button className="flex-1 bg-black hover:bg-gray-800 text-white mt-2">Submit</Button>
+              
+              {product?.id && Array.isArray(reviews) && (
+                <>
+                  <ProductReviews 
+                    reviews={reviews} 
+                    isLoading={isLoadingReviews} 
+                  />
+                </>
+              )}
+
+              {/* Review Form */}
+              {product?.id && (
+                <div className="mt-6 border-t pt-4">
+                  <h3 className="text-base font-medium mb-4">
+                    Write a Review
+                  </h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmitReview();
+                  }}>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium">Rating:</span>
+                        <div className="flex">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              className="focus:outline-none"
+                              onClick={() => setRating(i + 1)}
+                            >
+                              <Star
+                                className={`h-6 w-6 ${
+                                  i < rating
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <Textarea
+                        placeholder="Write your review here..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                      <Button 
+                        type="submit"
+                        disabled={isSubmittingReview}
+                        className="w-full"
+                      >
+                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

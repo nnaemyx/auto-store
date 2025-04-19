@@ -68,10 +68,19 @@ const convertToExtendedOrder = (order: Order | null): ExtendedOrder => {
           quantity: product.quantity || "1",
           price: product.price || 0,
           images: product.images || [],
-          created_at: product.created_at || new Date().toISOString()
+          created_at: product.created_at || new Date().toISOString(),
+          category_id: product.category_id || "",
+          manufacturer_id: product.manufacturer_id || "",
+          car_model_id: product.car_model_id || "",
+          rating: product.rating || "0",
+          product_status_id: product.product_status_id || "",
+          code: product.code || "",
+          promotion_id: product.promotion_id || "",
+          user_id: product.user_id || "",
+          cart_id: product.cart_id || 0,
+          subcategory_id: product.subcategory_id || ""
         }))
       : [],
-    // Include the details property if it exists
     details: order.details ? convertToExtendedOrder(order.details) : undefined
   };
 
