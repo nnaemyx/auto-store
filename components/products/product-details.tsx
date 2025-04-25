@@ -409,7 +409,7 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
       </div>
 
       {/* Related Products */}
-      <div className="mt-12">
+      <div className="mt-12 px-[16px] lg:px-0">
         <h2 className="text-xl font-bold mb-6">Related Products</h2>
         <RelatedProducts
           categoryId={Number(product.category_id)}

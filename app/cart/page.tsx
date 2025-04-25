@@ -80,8 +80,8 @@ export default function CartPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 py-[7px] px-3 rounded-[4px] w-[92px] bg-[#00000008] mb-6">
-        <Link href="/" className="text-[#2F2F2F] text-sm hover:text-brand-red">
+      <div className="flex items-center gap-2 py-[7px] px-3 mb-6">
+        <Link href="/" className="text-[#2F2F2F] text-sm ">
           Homepage
         </Link>
         {" / "}
@@ -92,7 +92,7 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:w-2/3 px-[20px] pt-[28px]">
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2 py-[7px] px-3 rounded-[4px] w-[92px] bg-[#00000008]">
+            <div className="flex items-center gap-2 py-[7px] px-3 ">
               <h1 className="font-medium text-[15px]">My Cart</h1>
             </div>
             <Button
@@ -243,7 +243,7 @@ export default function CartPage() {
         {/* Cart Summary */}
         <div className="lg:w-1/3 px-[20px] pt-[28px]">
           <div className="bg-white rounded-md border border-[#00000012] p-6 sticky top-24">
-            <div className="flex items-center gap-2 py-[7px] px-3 rounded-[4px] w-[92px] bg-[#00000008] mb-6">
+            <div className="flex items-center gap-2  mb-6">
               <h2 className="font-medium text-[15px]">Summary</h2>
             </div>
 
