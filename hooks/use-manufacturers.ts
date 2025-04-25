@@ -26,20 +26,17 @@ export function useManufacturer(id: number) {
   return useQuery({
     queryKey: manufacturerKeys.detail(id),
     queryFn: () => fetchManufacturerById(id),
-    enabled: !!id, // Only run the query if we have an ID
+    enabled: !!id, 
   })
 }
 
 // API functions
 async function fetchManufacturers(): Promise<Manufacturer[]> {
   const response = await apiClient.get<Manufacturer[]>("/manufacturer/all")
-  // Filter out deleted manufacturers (delete_status = "1")
   return response
 }
 
 async function fetchManufacturerById(id: number): Promise<Manufacturer> {
-  // This endpoint might not exist in the provided list, but we'll include it for completeness
-  // In a real app, you might need to filter from the full list if there's no dedicated endpoint
   const manufacturers = await fetchManufacturers()
   const manufacturer = manufacturers.find((m) => m.id === id)
 

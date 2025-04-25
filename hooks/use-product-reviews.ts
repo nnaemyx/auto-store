@@ -23,25 +23,28 @@ export interface ProductReview {
 export function useProductReviews(productId: string | null) {
   return useQuery({
     queryKey: ["product-reviews", productId],
-    queryFn: async (): Promise<ProductReview[]> => {
-      if (!productId) return []
+    queryFn: async (): Promise<{ reviews: ProductReview[]; averageRating: number }> => {
+      if (!productId) {
+        console.log('No product ID provided')
+        return { reviews: [], averageRating: 0 }
+      }
       
       try {
-        const token = localStorage.getItem("token")
-        if (!token) {
-          throw new Error("Authentication token not found")
-        }
+        console.log('Fetching reviews for product:', productId)
+        const response = await apiClient.get<ProductReview[]>(`/product/get-review/${productId}`)
+        console.log('Reviews response:', response)
 
-        const response = await apiClient.get<ProductReview[]>(`/product/get-review/${productId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        // Calculate average rating
+        const reviews = response || []
+        const averageRating = reviews.length > 0 
+          ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+          : 0
 
-        return response || []
+        console.log('Average rating:', averageRating)
+        return { reviews, averageRating }
       } catch (error) {
         console.error("Error fetching product reviews:", error)
-        return []
+        return { reviews: [], averageRating: 0 }
       }
     },
     enabled: !!productId,

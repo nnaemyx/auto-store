@@ -131,7 +131,10 @@ export function useCart() {
   const cartSummary = React.useMemo(() => {
     if (!data?.items) return { subtotal: 0, tax: 0, shipping_fee: 0, total: 0 }
 
-    const subtotal = data.items.reduce((sum, item) => sum + item.price, 0)
+    const subtotal = data.items.reduce((sum, item) => {
+      const quantity = Number(item.quantity || 1);
+      return sum + (item.price * quantity);
+    }, 0)
     const tax = subtotal * 0.075 // Assuming 7.5% tax
     const shipping_fee = subtotal > 0 ? 1000 : 0 // Flat shipping fee if cart has items
     const total = subtotal + tax + shipping_fee
@@ -207,51 +210,27 @@ export function useCart() {
     },
   })
 
-  // Update cart item quantity mutation
-  const updateQuantity = useMutation({
-    mutationFn: ({ productId, quantity }: { productId: number; quantity: number }) => {
-      console.log(`Setting product ${productId} to exact quantity ${quantity}`)
-      return addItemToCart(productId, quantity, router, toast, ToastVariant)
-    },
-    onMutate: async ({ productId, quantity }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: cartKeys.items() })
-
-      // Snapshot the previous value
+  // Add a new mutation for local quantity updates
+  const updateLocalQuantity = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
       const previousCart = queryClient.getQueryData<CartResponse>(cartKeys.items())
+      if (!previousCart) return
 
-      // Optimistically update the cart with the exact new quantity
-      if (previousCart && previousCart.items) {
-        const updatedItems = previousCart.items.map((item) =>
-          item.id === productId ? { ...item, quantity: quantity.toString() } : item,
-        )
+      const updatedItems = previousCart.items.map(item => 
+        item.id === productId 
+          ? { ...item, quantity: quantity.toString() }
+          : item
+      )
 
-        const updatedCart = { ...previousCart, items: updatedItems }
-        queryClient.setQueryData(cartKeys.items(), updatedCart)
-
-        // Update localStorage with the exact new quantity
-        setLocalCart({ items: updatedItems })
+      const updatedCart = {
+        ...previousCart,
+        items: updatedItems
       }
 
-      return { previousCart }
-    },
-    onSuccess: () => {
-      // Only invalidate after a successful update
-      queryClient.invalidateQueries({ queryKey: cartKeys.items() })
-    },
-    onError: (error, _, context) => {
-      // Revert to previous state on error
-      if (context?.previousCart) {
-        queryClient.setQueryData(cartKeys.items(), context.previousCart)
-        setLocalCart({ items: context.previousCart.items })
-      }
-
-      toast({
-        title: "Failed to update quantity",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: ToastVariant.Error,
-      })
-    },
+      queryClient.setQueryData(cartKeys.items(), updatedCart)
+      setLocalCart({ items: updatedItems })
+      return updatedCart
+    }
   })
 
   // Remove item from cart mutation
@@ -380,11 +359,11 @@ export function useCart() {
     isError,
     error,
     addToCart: addToCart.mutate,
-    updateQuantity: updateQuantity.mutate,
+    updateQuantity: updateLocalQuantity.mutate, // Use local update by default
     removeFromCart: removeFromCart.mutate,
     clearCart: clearCart.mutate,
     isAddingToCart: addToCart.isPending,
-    isUpdatingQuantity: updateQuantity.isPending,
+    isUpdatingQuantity: updateLocalQuantity.isPending,
     isRemovingFromCart: removeFromCart.isPending,
     isClearingCart: clearCart.isPending,
   }

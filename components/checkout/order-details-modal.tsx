@@ -18,16 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSubmitReturnRequest } from "@/hooks/use-return-requests";
 import { ExtendedOrder, Product, ProductImage } from "@/types/orders";
 import ProductReviews from "@/components/product/product-reviews";
-import { useProductReviews, useSubmitProductReview } from "@/hooks/use-product-reviews"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/api/use-auth"
-
-// Define the OrderStatus type
-
-// Define the CheckOut type
-// Define the TimelineItem type
-
-// Define the ExtendedOrder type
+import {
+  useProductReviews,
+  useSubmitProductReview,
+} from "@/hooks/use-product-reviews";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/api/use-auth";
 
 interface OrderDetailsModalProps {
   order: ExtendedOrder | null;
@@ -52,14 +48,17 @@ export default function OrderDetailsModal({
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(product?.id?.toString() || null)
-  const { mutate: submitReview, isPending: isSubmittingReview } = useSubmitProductReview()
-  const { toast, ToastVariant } = useToast()
-  const { user } = useAuth()
+  const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(
+    product?.id?.toString() || null
+  );
+  const { mutate: submitReview, isPending: isSubmittingReview } =
+    useSubmitProductReview();
+  const { toast, ToastVariant } = useToast();
+  const { user } = useAuth();
 
   const { mutate: submitReturnRequest, isPending: isSubmittingReturnRequest } =
     useSubmitReturnRequest();
-    
+
   const firstProductId =
     order?.products &&
     Array.isArray(order.products) &&
@@ -86,7 +85,6 @@ export default function OrderDetailsModal({
     ? `#${order.id}`
     : "#N/A";
 
-
   // Format dates
   const orderDate = order?.created_at ? formatDate(order.created_at) : "N/A";
   const deliveryDate = order?.delivery_date
@@ -108,11 +106,6 @@ export default function OrderDetailsModal({
       console.error("Cannot request return: Order is null");
       return;
     }
-
-    // Debug the order ID
-    console.log("Order object:", order);
-    console.log("Order ID type:", typeof order.id);
-    console.log("Order ID value:", order.id);
 
     // Check if order ID exists (allowing for zero as a valid ID)
     if (order.id === undefined || order.id === null) {
@@ -140,43 +133,43 @@ export default function OrderDetailsModal({
       console.log("Order is still loading, waiting...");
       return;
     }
-  
+
     if (!order) {
       console.error("No order data available");
       return;
     }
-  
+
     try {
       // DEBUG: Log the full order object to see its structure
       console.log("Full order object:", JSON.stringify(order, null, 2));
-      
+
       // 1. Handle Order ID
       // Try multiple approaches to get a valid order ID
       let orderId = 0; // Default fallback value
-      
+
       // Check if order has a details property (API response structure)
       const orderDetails = order.details || order;
-      
+
       if (orderDetails.id && orderDetails.id !== 0) {
         orderId = orderDetails.id;
         console.log("Using orderDetails.id:", orderId);
       } else if (orderDetails.order_code) {
         // If order_code exists and is numeric (remove any minus sign)
-        const numericOrderCode = orderDetails.order_code.replace(/^-/, '');
+        const numericOrderCode = orderDetails.order_code.replace(/^-/, "");
         orderId = parseInt(numericOrderCode, 10) || 0; // Use 0 if parsing fails
         console.log("Using parsed order_code:", orderId);
       } else {
         console.log("Using fallback order ID:", orderId);
       }
-      
+
       console.log("Final order ID to use:", orderId);
-      
+
       // 2. Handle Product ID
       let productId = 0; // Default fallback value
-      
+
       // Check if products exist in the order details
       const products = orderDetails.products || [];
-      
+
       if (products && Array.isArray(products) && products.length > 0) {
         productId = products[0].id;
         console.log("Using product ID from orderDetails.products:", productId);
@@ -186,21 +179,21 @@ export default function OrderDetailsModal({
       } else {
         console.log("Using fallback product ID:", productId);
       }
-      
+
       console.log("Final product ID to use:", productId);
-  
+
       // 3. Create and log the final payload
       const returnData = {
         order_id: String(orderId),
         order_item: String(productId),
-        reason: returnReason.trim()
+        reason: returnReason.trim(),
       };
-  
+
       console.log("Final payload:", returnData);
-      
+
       // Submit the request
       await submitReturnRequest(returnData);
-      
+
       // Clean up and close modals
       setShowConfirmModal(false);
       setShowReturnModal(false);
@@ -233,7 +226,7 @@ export default function OrderDetailsModal({
       toast({
         title: "Error",
         description: "Please provide both a rating and comment",
-        variant: ToastVariant.Error
+        variant: ToastVariant.Error,
       });
       return;
     }
@@ -250,7 +243,7 @@ export default function OrderDetailsModal({
           toast({
             title: "Success",
             description: "Review submitted successfully",
-            variant: ToastVariant.Success
+            variant: ToastVariant.Success,
           });
           setComment("");
           setRating(0);
@@ -259,7 +252,7 @@ export default function OrderDetailsModal({
           toast({
             title: "Error",
             description: "Failed to submit review",
-            variant: ToastVariant.Error
+            variant: ToastVariant.Error,
           });
         },
       }
@@ -364,9 +357,7 @@ export default function OrderDetailsModal({
               </div>
               <div>
                 <p className="text-gray-500">Date ordered</p>
-                <p className="font-medium">
-                  {orderDate}
-                </p>
+                <p className="font-medium">{orderDate}</p>
               </div>
               <div>
                 <p className="text-gray-500">Delivered</p>
@@ -376,15 +367,13 @@ export default function OrderDetailsModal({
 
             {/* Product Rating */}
             <div>
-              <h3 className="text-base font-medium mb-2">
-                Product Reviews
-              </h3>
-              
+              <h3 className="text-base font-medium mb-2">Product Reviews</h3>
+
               {product?.id && Array.isArray(reviews) && (
                 <>
-                  <ProductReviews 
-                    reviews={reviews} 
-                    isLoading={isLoadingReviews} 
+                  <ProductReviews
+                    reviews={reviews}
+                    isLoading={isLoadingReviews}
                   />
                 </>
               )}
@@ -392,13 +381,13 @@ export default function OrderDetailsModal({
               {/* Review Form */}
               {product?.id && (
                 <div className="mt-6 border-t pt-4">
-                  <h3 className="text-base font-medium mb-4">
-                    Write a Review
-                  </h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSubmitReview();
-                  }}>
+                  <h3 className="text-base font-medium mb-4">Write a Review</h3>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSubmitReview();
+                    }}
+                  >
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2">
                         <span className="text-sm font-medium">Rating:</span>
@@ -427,7 +416,7 @@ export default function OrderDetailsModal({
                         onChange={(e) => setComment(e.target.value)}
                         className="min-h-[100px]"
                       />
-                      <Button 
+                      <Button
                         type="submit"
                         disabled={isSubmittingReview}
                         className="w-full"

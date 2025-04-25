@@ -1,72 +1,91 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, Minus, Plus, ShoppingCart, Star, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useProduct, useProductsByCategory } from "@/hooks/use-products"
-import { useCart } from "@/hooks/use-cart"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Minus,
+  Plus,
+  ShoppingCart,
+  Star,
+  Loader2,
+  Heart,
+  ChevronRight,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useProduct, useProductsByCategory } from "@/hooks/use-products";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { useProductReviews } from "@/hooks/use-product-reviews";
 
 interface ProductDetailsProps {
-  id: number
+  id: number;
 }
 
 export default function ProductDetails({ id }: ProductDetailsProps) {
-  const [mainImage, setMainImage] = useState("")
-  const [quantity, setQuantity] = useState(1)
-  const [selectedSize, setSelectedSize] = useState("")
-  const [selectedColor, setSelectedColor] = useState("")
-const {toast} = useToast()
+  const [mainImage, setMainImage] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const { toast } = useToast();
   // Fetch product data using TanStack Query
-  const { data: product, isLoading, isError, error } = useProduct(id)
+  const { data: product, isLoading, isError, error } = useProduct(id);
+
+  // Fetch product reviews
+  const { data: reviewsData } = useProductReviews(
+    product?.id?.toString() || null
+  );
 
   // Use the cart hook
-  const { addToCart, isAddingToCart } = useCart()
+  const { addToCart, isAddingToCart } = useCart();
 
   // Set main image when product data loads
   useEffect(() => {
     if (product && product.images && product.images.length > 0 && !mainImage) {
-      setMainImage(product.images[0].image)
+      setMainImage(product.images[0].image);
     }
-  }, [product, mainImage])
+  }, [product, mainImage]);
 
   const incrementQuantity = () => {
-    setQuantity((prev) => prev + 1)
-  }
+    setQuantity((prev) => prev + 1);
+  };
 
   const decrementQuantity = () => {
     if (quantity > 1) {
-      setQuantity((prev) => prev - 1)
+      setQuantity((prev) => prev - 1);
     }
-  }
+  };
 
   const handleAddToCart = () => {
-    if (!product) return
-    addToCart({ productId: product.id, quantity })
-  }
+    if (!product) return;
+    addToCart({ productId: product.id, quantity });
+  };
 
   const handleBuyNow = () => {
-    if (!product) return
+    if (!product) return;
 
     addToCart(
       { productId: product.id, quantity },
       {
         onSuccess: () => {
           // Navigate to checkout
-          window.location.href = "/checkout"
+          window.location.href = "/checkout";
         },
         onError: (error) => {
           toast({
             title: "Error",
-            description: error instanceof Error ? error.message : "Failed to process purchase",
-          })
+            description:
+              error instanceof Error
+                ? error.message
+                : "Failed to process purchase",
+          });
         },
-      },
-    )
-  }
+      }
+    );
+  };
 
   // Loading state
   if (isLoading) {
@@ -74,7 +93,7 @@ const {toast} = useToast()
       <div className="flex justify-center items-center py-20">
         <Loader2 className="h-10 w-10 animate-spin text-brand-red" />
       </div>
-    )
+    );
   }
 
   // Error state
@@ -82,46 +101,29 @@ const {toast} = useToast()
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-12">
-          <h2 className="text-xl font-bold text-red-500 mb-2">Error Loading Product</h2>
+          <h2 className="text-xl font-bold text-red-500 mb-2">
+            Error Loading Product
+          </h2>
           <p className="text-gray-600 mb-4">
-            {error instanceof Error ? error.message : "Failed to load product details"}
+            {error instanceof Error
+              ? error.message
+              : "Failed to load product details"}
           </p>
           <Button asChild>
             <Link href="/products">Browse Products</Link>
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-6">
-        <Link href="/" className="hover:text-brand-red">
-          Home
-        </Link>
-        {" / "}
-        <Link href="/products" className="hover:text-brand-red">
-          Products
-        </Link>
-        {" / "}
-        {product.category && (
-          <>
-            <Link href={`/category/${product.category.id}`} className="hover:text-brand-red">
-              {product.category.name}
-            </Link>
-            {" / "}
-          </>
-        )}
-        <span className="font-medium text-gray-700">{product.name}</span>
-      </div>
-
+    <div className="lg:container mx-auto lg:p-10 ">
       {/* Product Details Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="flex lg:flex-row flex-col gap-10 mb-8">
         {/* Product Images */}
-        <div className="space-y-4">
-          <div className="relative h-[300px] md:h-[400px] bg-gray-50 rounded-lg overflow-hidden">
+        <div className="space-y-4 max-w-[840px] w-full">
+          <div className="relative h-[300px] md:h-[640px] bg-gray-50 rounded-lg overflow-hidden">
             <Image
               src={
                 mainImage ||
@@ -140,7 +142,7 @@ const {toast} = useToast()
               product.images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative w-[80px] h-[80px] flex-shrink-0 rounded-md overflow-hidden border-2 cursor-pointer hover:border-brand-red"
+                  className="relative w-[210px] h-[160px] flex-shrink-0 rounded-md overflow-hidden cursor-pointer "
                   onClick={() => setMainImage(image.image)}
                 >
                   <Image
@@ -155,11 +157,13 @@ const {toast} = useToast()
         </div>
 
         {/* Product Info */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:max-w-[400px] px-[16px] w-full">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
             <div className="flex items-center gap-2 mt-2">
-              <p className="text-xl md:text-2xl font-bold">₦{Number.parseInt(product.amount).toLocaleString()}</p>
+              <p className="text-xl md:text-2xl font-bold">
+                ₦{Number.parseInt(product.amount).toLocaleString()}
+              </p>
               {product.promotion && product.promotion.discount !== "0" && (
                 <p className="text-sm text-gray-500 line-through">
                   ₦
@@ -178,12 +182,21 @@ const {toast} = useToast()
                 <Star
                   key={i}
                   className={`h-4 w-4 ${
-                    i < Number.parseInt(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                    i < (reviewsData?.averageRating || 0)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-500">({product.rating} rating)</span>
+            <span className="text-sm text-gray-500">
+              ({reviewsData?.averageRating?.toFixed(1) || 0} rating)
+            </span>
+            {reviewsData?.reviews && reviewsData.reviews.length > 0 && (
+              <span className="text-sm text-gray-500">
+                • {reviewsData.reviews.length} reviews
+              </span>
+            )}
           </div>
 
           <p className="text-gray-700">{product.description}</p>
@@ -195,7 +208,7 @@ const {toast} = useToast()
             </label>
             <select
               id="size"
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full bg-[#00000008] rounded-[4px] text-[14px] text-[#595959] p-2"
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
             >
@@ -213,7 +226,7 @@ const {toast} = useToast()
             </label>
             <select
               id="color"
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full bg-[#00000008] rounded-[4px] text-[14px] text-[#595959] p-2"
               value={selectedColor}
               onChange={(e) => setSelectedColor(e.target.value)}
             >
@@ -227,13 +240,25 @@ const {toast} = useToast()
           {/* Quantity */}
           <div className="space-y-2">
             <label className="block text-sm font-medium">Quantity</label>
-            <div className="flex items-center">
-              <Button variant="outline" size="icon" onClick={decrementQuantity} className="h-8 w-8">
-                <Minus className="h-4 w-4" />
+            <div className="flex flex-row items-center gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={decrementQuantity}
+                className="py-[9px] w-9 bg-[#00000008] border-none rounded-[4px]"
+              >
+                <Minus className="size-[18px]" />
               </Button>
-              <span className="mx-4 min-w-[40px] text-center">{quantity}</span>
-              <Button variant="outline" size="icon" onClick={incrementQuantity} className="h-8 w-8">
-                <Plus className="h-4 w-4" />
+              <span className=" min-w-[296px] text-center rounded-[4px] bg-[#00000008] py-[7px]">
+                {quantity}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={incrementQuantity}
+                className="py-[9px] w-9 bg-black text-white rounded-[4px]"
+              >
+                <Plus className="size-[18px]" />
               </Button>
             </div>
           </div>
@@ -241,27 +266,35 @@ const {toast} = useToast()
           {/* Stock Status */}
           <div className="text-sm">
             {Number.parseInt(product.quantity) > 0 ? (
-              <span className="text-green-600">In Stock ({product.quantity} available)</span>
+              <span className="text-green-600">
+                In Stock ({product.quantity} available)
+              </span>
             ) : (
               <span className="text-red-600">Out of Stock</span>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-row sm:flex-row gap-4">
             <Button
-              className="flex-1"
+              className="flex-1 bg-black text-white rounded-[4px]"
               onClick={handleBuyNow}
-              disabled={isAddingToCart || Number.parseInt(product.quantity) <= 0}
+              disabled={
+                isAddingToCart || Number.parseInt(product.quantity) <= 0
+              }
             >
-              {isAddingToCart ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {isAddingToCart ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
               Buy Now
             </Button>
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 bg-[#00000008] border-none rounded-[4px]"
               onClick={handleAddToCart}
-              disabled={isAddingToCart || Number.parseInt(product.quantity) <= 0}
+              disabled={
+                isAddingToCart || Number.parseInt(product.quantity) <= 0
+              }
             >
               {isAddingToCart ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -270,194 +303,182 @@ const {toast} = useToast()
               )}
               Add to Cart
             </Button>
-            <Button variant="outline" size="icon" className="hidden sm:flex">
-              <Heart className="h-4 w-4" />
+
+            <Button className="bg-[#00000008] border-none rounded-[4px] size-[36px]">
+              <Heart className="size-[18px]" />
             </Button>
           </div>
+        </div>
+      </div>
 
-          {/* SKU and Brand */}
-          <div className="text-sm text-gray-500 space-y-1">
-            <p>SKU: {product.code}</p>
-            {product.manufacturer_id && (
-              <p>
-                Brand:{" "}
-                <Link href={`/brand/${product.manufacturer_id}`} className="hover:text-brand-red">
-                  {/* Replace with actual manufacturer name if available */}
-                  Manufacturer #{product.manufacturer_id}
-                </Link>
-              </p>
-            )}
-            {product.category && (
-              <p>
-                Category:{" "}
-                <Link href={`/category/${product.category_id}`} className="hover:text-brand-red">
-                  {product.category.name}
-                </Link>
-              </p>
-            )}
+      <div className="flex lg:flex-row flex-col px-[16px] lg:px-0 gap-10">
+        <div className="max-w-[840px] w-full">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">Description</h2>
+            <div className="space-y-4 text-gray-700">
+              <p>{product.description}</p>
+            </div>
+          </div>
+          {/* Reviews Section */}
+          <div className="bg-white rounded-lg mb-8">
+            <div className="mb-6">
+              <h3 className="text-[15px] font-medium mb-1">
+                Product rating (4.8 from 500 ratings)
+              </h3>
+            </div>
+
+            <div className="space-y-6">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="pb-6 border-b last:border-b-0">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={`https://ui-avatars.com/api/?name=User${
+                          index + 1
+                        }`}
+                      />
+                      <AvatarFallback>U{index + 1}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="mb-2">
+                        <p className="text-sm font-medium">Name of customer</p>
+                        <p className="text-xs text-gray-500">Date</p>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-3">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                        sed do eiusmod tempor incididunt ut labore et dolore
+                        magna aliqua. Ut enim ad minim veniam, quis nostrud
+                        exercitation ullamco laboris nisi ut aliquip ex ea
+                        commodo consequat.
+                      </p>
+                      <div className="flex gap-4">
+                        <button className="flex items-center gap-2 text-gray-500">
+                          <ThumbsUp className="h-4 w-4" />
+                        </button>
+                        <button className="flex items-center gap-2 text-gray-500">
+                          <ThumbsDown className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+        {/* Specifications Section */}
+        <div className="bg-white rounded-lg p-4 max-w-[400px] w-full mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[15px] font-medium">Specifications</h2>
+            <ChevronRight className="h-5 w-5 text-gray-400" />
+          </div>
 
-      {/* Description Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Description</h2>
-        <div className="space-y-4 text-gray-700">
-          <p>{product.description}</p>
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-y-4">
+            <div>
+              <p className="text-gray-500 text-sm">Weight</p>
+              <p className="text-sm">12.5 KG</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Dimensions</p>
+              <p className="text-sm">234 by 128 cm</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Colour</p>
+              <p className="text-sm">Black, Red, Green, Blue</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Condition</p>
+              <p className="text-sm">New</p>
+            </div>
+          </div>
 
-      {/* Specifications Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Specifications</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* {product.specifications &&
-            Object.entries(product.specifications).map(([key, value]) => (
-              <div key={key} className="flex justify-between py-2 border-b">
-                <span className="font-medium capitalize">{key}</span>
-                <span>{value}</span>
+          <div className="mt-6 space-y-3">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-gray-500 text-sm">Est. delivery date</p>
+                <p className="text-sm">05/01/2025</p>
               </div>
-            ))} */}
-        </div>
-      </div>
+              <div className="text-right">
+                <p className="text-gray-500 text-sm">Status</p>
+                <p className="text-yellow-500 text-sm">Order shipped</p>
+              </div>
+            </div>
 
-      {/* Product Rating Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">
-          {/* Product rating ({product.rating} from {product.review_count} ratings) */}
-        </h2>
-        <ProductReviews productId={id} />
+          </div>
+        </div>
       </div>
 
       {/* Related Products */}
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-6">Related Products</h2>
-        <RelatedProducts categoryId={Number(product.category_id)} currentProductId={product.id} />
+        <RelatedProducts
+          categoryId={Number(product.category_id)}
+          currentProductId={product.id}
+        />
       </div>
     </div>
-  )
-}
-
-// Product Reviews Component
-function ProductReviews({  }: { productId: number }) {
-  // In a real app, you would fetch reviews from an API
-  // For now, we'll use mock data
-  const reviews = [
-    {
-      id: 1,
-      user: "Name of customer",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      date: "2 weeks ago",
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      likes: 3,
-      dislikes: 0,
-    },
-    {
-      id: 2,
-      user: "Name of customer",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 4,
-      date: "1 month ago",
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      likes: 1,
-      dislikes: 0,
-    },
-    {
-      id: 3,
-      user: "Name of customer",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      date: "2 months ago",
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      likes: 5,
-      dislikes: 1,
-    },
-  ]
-
-  return (
-    <div className="space-y-6">
-      {reviews.map((review) => (
-        <div key={review.id} className="border-b pb-6">
-          <div className="flex items-start gap-4">
-            <Avatar>
-              <AvatarImage src={review.avatar} alt={review.user} />
-              <AvatarFallback>{review.user.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="font-medium">{review.user}</h4>
-                <span className="text-sm text-gray-500">{review.date}</span>
-              </div>
-              <div className="flex mt-1 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-                  />
-                ))}
-              </div>
-              <p className="text-gray-700 text-sm">{review.content}</p>
-              <div className="flex items-center gap-4 mt-3">
-                <button className="flex items-center gap-1 text-sm text-gray-500">
-                  <ThumbsUp className="h-4 w-4" />
-                  <span>{review.likes}</span>
-                </button>
-                <button className="flex items-center gap-1 text-sm text-gray-500">
-                  <ThumbsDown className="h-4 w-4" />
-                  <span>{review.dislikes}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
+  );
 }
 
 // Related Products Component
-function RelatedProducts({ categoryId, currentProductId }: { categoryId: number; currentProductId: number }) {
-  const { data: products, isLoading, isError } = useProductsByCategory(categoryId)
+function RelatedProducts({
+  categoryId,
+  currentProductId,
+}: {
+  categoryId: number;
+  currentProductId: number;
+}) {
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = useProductsByCategory(categoryId);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-6">
         <Loader2 className="h-6 w-6 animate-spin text-brand-red" />
       </div>
-    )
+    );
   }
 
   if (isError || !products) {
-    return null
+    return null;
   }
 
   // Filter out the current product and limit to 4 items
-  const relatedProducts = products.filter((product) => product.id !== currentProductId).slice(0, 4)
+  const relatedProducts = products
+    .filter((product) => product.id !== currentProductId)
+    .slice(0, 4);
 
   if (relatedProducts.length === 0) {
-    return null
+    return null;
   }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {relatedProducts.map((product) => (
-        <Link key={product.id} href={`/product/${product.id}`} className="group">
+        <Link
+          key={product.id}
+          href={`/product/${product.id}`}
+          className="group"
+        >
           <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
             <div className="relative h-32 md:h-40 bg-gray-50">
               <Image
-                src={product.images[0]?.image  }
+                src={product.images[0]?.image}
                 alt={product.name}
                 fill
                 className="object-contain p-2"
               />
             </div>
             <div className="p-2">
-              <h3 className="font-medium text-sm group-hover:text-brand-red">{product.name}</h3>
-              <p className="font-bold text-sm">₦{product.price.toLocaleString()}</p>
+              <h3 className="font-medium text-sm group-hover:text-brand-red">
+                {product.name}
+              </h3>
+              <p className="font-bold text-sm">
+                ₦{product.price.toLocaleString()}
+              </p>
               <div className="flex flex-wrap gap-1 mt-1">
                 {/* {product.tags &&
                   product.tags.slice(0, 2).map((tag, tagIndex) => (
@@ -471,6 +492,5 @@ function RelatedProducts({ categoryId, currentProductId }: { categoryId: number;
         </Link>
       ))}
     </div>
-  )
+  );
 }
-
