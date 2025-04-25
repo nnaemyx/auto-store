@@ -92,10 +92,10 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
   return (
     <div>
       {/* Mobile filter and sort controls */}
-      <div className="flex items-center justify-between mb-4 md:hidden">
+      <div className="flex items-center justify-end gap-3 mb-4 md:hidden px-[16px] lg:px-0">
         <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 rounded-[4px] w-[92px] bg-[#00000008] border-none">
               <Filter className="h-4 w-4" />
               Filters
             </Button>
@@ -113,13 +113,12 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
         </Sheet>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm">Sort by</span>
           <select
-            className="text-sm border rounded-md px-2 py-1"
+            className="text-sm rounded-[4px] w-[92px] bg-[#00000008] px-2 py-2"
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value)}
           >
-            <option value="relevance">Relevance</option>
+            <option value="relevance">Sort by</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
             <option value="newest">Newest</option>
@@ -381,7 +380,7 @@ function FilterSection({
               <label htmlFor={`mobile-${filterType}-${index}`}>{option}</label>
             </div>
           ))}
-          <Button className="w-full mt-2" onClick={handleApply}>
+          <Button className="w-full mt-2 bg-black text-white" onClick={handleApply}>
             Apply
           </Button>
         </div>
