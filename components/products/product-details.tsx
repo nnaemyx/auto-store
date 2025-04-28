@@ -9,7 +9,6 @@ import {
   ShoppingCart,
   Star,
   Loader2,
-  Heart,
   ChevronRight,
   ThumbsUp,
   ThumbsDown,
@@ -245,11 +244,11 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
                 variant="outline"
                 size="icon"
                 onClick={decrementQuantity}
-                className="py-[9px] w-9 bg-[#00000008] border-none rounded-[4px]"
+                className="py-[9px] lg:w-9 bg-[#00000008] border-none rounded-[4px]"
               >
                 <Minus className="size-[18px]" />
               </Button>
-              <span className=" min-w-[296px] text-center rounded-[4px] bg-[#00000008] py-[7px]">
+              <span className=" lg:min-w-[296px] w-full text-center rounded-[4px] bg-[#00000008] py-[7px]">
                 {quantity}
               </span>
               <Button
@@ -302,10 +301,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
                 <ShoppingCart className="h-4 w-4 mr-2" />
               )}
               Add to Cart
-            </Button>
-
-            <Button className="bg-[#00000008] border-none rounded-[4px] size-[36px]">
-              <Heart className="size-[18px]" />
             </Button>
           </div>
         </div>
