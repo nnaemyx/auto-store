@@ -85,6 +85,16 @@ async function fetchProducts(filters: ProductFilters = {}): Promise<Product[]> {
   let filteredProducts = response
 
   // Apply filters on the client side if needed
+  if (filters.search) {
+    const searchTerm = filters.search.toLowerCase()
+    filteredProducts = filteredProducts.filter((p) => 
+      p.name.toLowerCase().includes(searchTerm) || 
+      p.description.toLowerCase().includes(searchTerm) ||
+      p.category.name.toLowerCase().includes(searchTerm) ||
+      (p.brand?.name.toLowerCase().includes(searchTerm))
+    )
+  }
+
   if (filters.category_id) {
     filteredProducts = filteredProducts.filter((p) => Number.parseInt(p.category_id) === filters.category_id)
   }

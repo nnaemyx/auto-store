@@ -20,10 +20,22 @@ import {
 } from "@/components/ui/collapsible";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/api/use-auth";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // This is specifically the mobile navigation menu
 const NavMenu = ({ onClose }: { onClose?: () => void }) => {
   const { user, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      if (onClose) onClose();
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -51,10 +63,15 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
 
         {/* Search */}
         <div className="px-4 pb-4">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search product or brand..." className="pl-10" />
-          </div>
+            <Input 
+              placeholder="Search product or brand..." 
+              className="pl-10" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
         </div>
       </div>
 

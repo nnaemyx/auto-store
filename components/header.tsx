@@ -48,6 +48,10 @@ const Header = () => {
     return user?.username ? user.username.charAt(0).toUpperCase() : 'U'
   }
 
+  const handleSearchClick = () => {
+    setShowSearch(true)
+  }
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -89,7 +93,7 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2 lg:gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
+          <Button variant="ghost" size="icon" onClick={handleSearchClick}>
             <Search className="h-8 w-[44px]" />
             <span className="sr-only">Search</span>
           </Button>

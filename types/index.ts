@@ -112,6 +112,7 @@ export interface ProductFilters {
   sort_order?: "asc" | "desc"
   page?: number
   limit?: number
+  search?: string
 }
 
 // Keep this for backward compatibility with existing components
