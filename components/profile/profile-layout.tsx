@@ -19,7 +19,6 @@ export default function ProfileLayout({ children, title }: ProfileLayoutProps) {
 
   const navItems = [
     { label: "Profile overview", href: "/profile" },
-    { label: "My favourites", href: "/profile/favourites" },
     { label: "Order history", href: "/profile/orders" },
     { label: "Returned orders", href: "/profile/returns" },
     { label: "Track order", href: "/profile/track-order" },
@@ -52,7 +51,8 @@ export default function ProfileLayout({ children, title }: ProfileLayoutProps) {
           <h1 className="text-lg font-medium">User profile</h1>
         </div>
         <div className="p-4">
-          <nav className="space-y-4" >
+          {children}
+          <nav className="space-y-4 mt-6">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="block py-3 border-b border-gray-200">
                 {item.label}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Heart, User, LogOut, HelpCircle } from "lucide-react";
+import { ShoppingCart, User, LogOut, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/api/use-auth";
@@ -15,12 +15,6 @@ const DesktopNavMenu = () => {
         <Link href="/cart" className="flex items-center gap-2 px-3 py-2.5">
           <ShoppingCart className="h-4.5 w-4.5" />
           <span className="text-[15px] font-[450] tracking-[-3%]">My cart</span>
-        </Link>
-        <Link href="/favorites" className="flex items-center gap-2 px-3 py-2.5">
-          <Heart className="h-4.5 w-4.5" />
-          <span className="text-[15px] font-[450] tracking-[-3%]">
-            My favourites
-          </span>
         </Link>
 
         {user ? (

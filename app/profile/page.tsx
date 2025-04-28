@@ -1,47 +1,62 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Camera } from "lucide-react"
+import { useUser } from "@/hooks/use-user"
 import ProfileLayout from "@/components/profile/profile-layout"
 import { useMediaQuery } from "@/hooks/use-media-query"
-import { useToast } from "@/hooks/use-toast"
-import EditPersonalDetailsModal, { PersonalDetailsData } from "@/components/profile/edeit-personal-details"
-import EditShippingDetailsModal, { ShippingDetailsData } from "@/components/profile/edit-shipping-details"
+import { useAuth } from "@/api/use-auth"
 
 export default function ProfileOverviewPage() {
+  const { updateUser, updateUserImage, isUpdating } = useUser()
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    username: "",
+    phone_number: ""
+  })
+  const { user } = useAuth()
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const { toast } = useToast()
 
-  const [showPersonalDetailsModal, setShowPersonalDetailsModal] = useState(false)
-  const [showShippingDetailsModal, setShowShippingDetailsModal] = useState(false)
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username,
+        phone_number: user.phone_number
+      })
+    }
+  }, [user])
 
-  const [personalDetails, setPersonalDetails] = useState<PersonalDetailsData>({
-    firstName: "John",
-    lastName: "Daniel",
-    email: "johndaniel@fakegmail.com",
-    phone: "+234 7068141207",
-    dateOfBirth: {
-      day: "24",
-      month: "12",
-      year: "2005",
-    },
-    gender: "Male",
-  })
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Create a temporary URL for the selected image
+      const imageUrl = URL.createObjectURL(file)
+      setPreviewImage(imageUrl)
+      
+      // Upload the image
+      updateUserImage(file)
+    }
+  }
 
-  const [shippingDetails, setShippingDetails] = useState<ShippingDetailsData>({
-    firstName: "John",
-    lastName: "Daniel",
-    state: "Kwara",
-    city: "Ilorin",
-    postalCode: "876 546",
-    houseAddress:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim fghf fhfus skaks",
-    alternatePhone: "090 8697 8768",
-    deliveryType: "pickup",
-  })
+  // Clean up preview image URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage)
+      }
+    }
+  }, [previewImage])
 
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    updateUser(formData)
+    setIsEditing(false)
+  }
 
   // Breadcrumb for desktop
   const breadcrumb = (
@@ -54,127 +69,102 @@ export default function ProfileOverviewPage() {
     </div>
   )
 
-  const handleSavePersonalDetails = (data: PersonalDetailsData) => {
-    setPersonalDetails(data)
-    setShowPersonalDetailsModal(false)
-    toast({
-      title: "Success",
-      description: "Personal details updated successfully",
-    })
-  }
-
-  const handleSaveShippingDetails = (data: ShippingDetailsData) => {
-    setShippingDetails(data)
-    setShowShippingDetailsModal(false)
-    toast({
-      title: "Success",
-      description: "Shipping details updated successfully",
-    })
-  }
-
-
-
   return (
     <ProfileLayout>
       {!isMobile && breadcrumb}
 
-      {/* Personal Details Section */}
-      <div className="bg-white rounded-lg border mb-6">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-lg font-medium">Personal details</h2>
-          <Button variant="ghost" className="text-gray-500 text-sm" onClick={() => setShowPersonalDetailsModal(true)}>
-            Edit details
-          </Button>
-        </div>
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">First name</p>
-            <p className="font-medium">{personalDetails.firstName}</p>
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="bg-white rounded-lg border mb-6">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-lg font-medium">Profile</h2>
+            {!isEditing ? (
+              <Button variant="ghost" className="text-gray-500 text-sm" onClick={() => setIsEditing(true)}>
+                Edit profile
+              </Button>
+            ) : (
+              <Button variant="ghost" className="text-gray-500 text-sm" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+            )}
           </div>
-          <div>
-            <p className="text-sm text-gray-500">Last name</p>
-            <p className="font-medium">{personalDetails.lastName}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Email address</p>
-            <p className="font-medium">{personalDetails.email}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Phone number</p>
-            <p className="font-medium">{personalDetails.phone}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Date of birth</p>
-            <p className="font-medium">{`${personalDetails.dateOfBirth.day}th ${new Date(
-              0,
-              Number.parseInt(personalDetails.dateOfBirth.month) - 1,
-            ).toLocaleString("default", { month: "long" })}, ${personalDetails.dateOfBirth.year}`}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Gender</p>
-            <p className="font-medium">{personalDetails.gender}</p>
+
+          <div className="p-4">
+            <div className="flex flex-col items-center space-y-4 mb-6">
+              <div className="relative">
+                <Avatar className="h-24 w-24 rounded-full overflow-hidden">
+                  <AvatarImage 
+                    src={previewImage || user?.image || undefined} 
+                    className="object-cover w-full h-full"
+                  />
+                  <AvatarFallback className="bg-gray-200 text-gray-600">
+                    {user?.username?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <label
+                  htmlFor="image-upload"
+                  className="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full cursor-pointer hover:bg-black/90"
+                >
+                  <Camera className="h-4 w-4" />
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {isEditing ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Username</label>
+                  <Input
+                    value={formData.username}
+                    onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder="Enter your username"
+                    disabled={isUpdating}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Phone Number</label>
+                  <Input
+                    value={formData.phone_number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone_number: e.target.value }))}
+                    placeholder="Enter your phone number"
+                    disabled={isUpdating}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-black text-white hover:bg-black/90"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Updating..." : "Update Profile"}
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-500">Username</p>
+                  <p className="font-medium">{user?.username}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{user?.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone Number</p>
+                  <p className="font-medium">{user?.phone_number}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Shipping Details Section */}
-      <div className="bg-white rounded-lg border mb-6">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-lg font-medium">Shipping details</h2>
-          <Button variant="ghost" className="text-gray-500 text-sm" onClick={() => setShowShippingDetailsModal(true)}>
-            Edit details
-          </Button>
-        </div>
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Recipient&#39;s full name</p>
-            <p className="font-medium">{`${shippingDetails.firstName} ${shippingDetails.lastName} Mac`}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">State</p>
-            <p className="font-medium">{shippingDetails.state}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">City</p>
-            <p className="font-medium">{shippingDetails.city}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Postal code</p>
-            <p className="font-medium">{shippingDetails.postalCode}</p>
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-sm text-gray-500">House address</p>
-            <p className="font-medium">{shippingDetails.houseAddress}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Delivery preference</p>
-            <p className="font-medium">
-              {shippingDetails.deliveryType === "pickup" ? "Pick up station" : "Door delivery"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Alternate phone number</p>
-            <p className="font-medium">{shippingDetails.alternatePhone}</p>
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* Modals */}
-      <EditPersonalDetailsModal
-        isOpen={showPersonalDetailsModal}
-        onClose={() => setShowPersonalDetailsModal(false)}
-        onSave={handleSavePersonalDetails}
-        initialData={personalDetails}
-      />
-
-      <EditShippingDetailsModal
-        isOpen={showShippingDetailsModal}
-        onClose={() => setShowShippingDetailsModal(false)}
-        onSave={handleSaveShippingDetails}
-        initialData={shippingDetails}
-      />
     </ProfileLayout>
   )
 }

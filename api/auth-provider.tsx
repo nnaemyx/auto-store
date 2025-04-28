@@ -110,12 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true)
     },
     onSuccess: (response) => {
-      toast({
-        title: "Success",
-        description: "Registration successful!",
-        variant: ToastVariant.Success,
-      })
-
       if (response.status === "successful" && response.user && response.access_token) {
         // Store the actual access token from the API response
         const token = response.access_token
@@ -127,7 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         router.push("/")
       } else {
-        throw new Error(response.message || "Registration failed")
+        // Only throw error if the response indicates failure
+        if (response.status !== "successful") {
+          throw new Error(response.message || "Registration failed")
+        }
       }
     },
     onError: (error) => {

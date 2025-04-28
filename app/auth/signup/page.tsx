@@ -10,8 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/api/use-auth";
 import { toast } from "sonner";
 import type { RegisterData } from "@/api/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<RegisterData>({
     email: "",
     phone_number: "",
@@ -44,6 +46,7 @@ export default function SignupPage() {
     try {
       await register(formData);
       toast("Registration successful");
+      router.push("/auth/login");
     } catch (err) {
       toast(
         err instanceof Error
@@ -129,6 +132,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
+                showPasswordToggle
               />
             </div>
 
@@ -148,6 +152,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
+                showPasswordToggle
               />
             </div>
 

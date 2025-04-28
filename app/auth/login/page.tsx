@@ -73,6 +73,7 @@ const { toast, ToastVariant } = useToast();
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                showPasswordToggle
               />
             </div>
 

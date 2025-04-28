@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   ShoppingCart,
-  Heart,
   User,
   LogOut,
   HelpCircle,
@@ -66,8 +65,14 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
           <Link href="/profile" onClick={onClose}>
             <div className="px-4 py-3 bg-gray-50">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="h-5 w-5 text-gray-600" />
+                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  <Image
+                    src={user.image}
+                    alt="user profile"
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full"
+                  />
                 </div>
                 <div>
                   <h3 className="text-base font-medium">{user.username}</h3>
@@ -116,14 +121,6 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
                 <span>My cart</span>
               </Link>
 
-              <Link
-                href="/favorites"
-                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
-                onClick={onClose}
-              >
-                <Heart className="h-5 w-5" />
-                <span>My favourites</span>
-              </Link>
 
               {!user && (
                 <Link

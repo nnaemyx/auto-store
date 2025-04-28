@@ -12,7 +12,7 @@ import NavMenu from "@/components/nav-menu"
 import DesktopNavMenu from "@/components/desktop-nav-menu"
 import SearchDialog from "@/components/search-dialog"
 import { useAuth } from "@/api/use-auth"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useCart } from "@/hooks/use-cart"
 
 const Header = () => {
@@ -127,8 +127,15 @@ const Header = () => {
             <SheetTrigger asChild>
               {user ? (
                 <Button variant="outline" className="hidden lg:flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback>{getUserInitial()}</AvatarFallback>
+                  <Avatar className="h-6 w-6 rounded-full overflow-hidden">
+                    <AvatarImage 
+                      src={user.image} 
+                      alt="user profile"
+                      className="object-cover w-full h-full"
+                    />
+                    <AvatarFallback className="bg-gray-200 text-gray-600">
+                      {getUserInitial()}
+                    </AvatarFallback>
                   </Avatar>
                   <span>{user.username}</span>
                 </Button>
