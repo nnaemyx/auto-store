@@ -123,3 +123,16 @@ export interface Brand {
   models: number
 }
 
+export interface ProductReview {
+  id: number
+  product_id: string
+  user_id: string
+  user_name: string
+  rating: number
+  comment: string
+  likes: number
+  dislikes: number
+  created_at: string
+  updated_at: string
+}
+

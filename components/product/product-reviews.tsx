@@ -45,7 +45,7 @@ export default function ProductReviews({ reviews, isLoading }: ProductReviewsPro
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
                 <span className="font-medium mr-2">
-                  {review.user?.name || "Anonymous"}
+                  {review.user?.username || "Anonymous"}
                 </span>
                 <div className="flex">
                   {Array.from({ length: 5 }).map((_, i) => (

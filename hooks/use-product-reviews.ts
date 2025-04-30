@@ -14,8 +14,9 @@ export interface ProductReview {
   updated_at: string
   user?: {
     id: string
-    name: string
+    username: string
     email: string
+    image: string
   }
 }
 

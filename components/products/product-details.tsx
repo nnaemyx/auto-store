@@ -10,8 +10,7 @@ import {
   Star,
   Loader2,
   ChevronRight,
-  ThumbsUp,
-  ThumbsDown,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -318,46 +317,58 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
           <div className="bg-white rounded-lg mb-8">
             <div className="mb-6">
               <h3 className="text-[15px] font-medium mb-1">
-                Product rating (4.8 from 500 ratings)
+                Product rating ({reviewsData?.averageRating?.toFixed(1) || 0} from {reviewsData?.reviews?.length || 0} ratings)
               </h3>
             </div>
 
             <div className="space-y-6">
-              {[...Array(4)].map((_, index) => (
+              {reviewsData?.reviews?.map((review, index) => (
                 <div key={index} className="pb-6 border-b last:border-b-0">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={`https://ui-avatars.com/api/?name=User${
-                          index + 1
-                        }`}
+                        src={review.user?.image || `https://ui-avatars.com/api/?name=${review.user?.username || 'User'}`}
+                        alt={review.user?.username || 'User'}
                       />
-                      <AvatarFallback>U{index + 1}</AvatarFallback>
+                      <AvatarFallback>{review.user?.username?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="mb-2">
-                        <p className="text-sm font-medium">Name of customer</p>
-                        <p className="text-xs text-gray-500">Date</p>
+                        <p className="text-sm font-medium">{review.user?.username || 'Anonymous User'}</p>
+
+                      </div>
+                      <div className="flex items-center gap-1 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < review.rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
                       </div>
                       <p className="text-sm text-gray-700 mb-3">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                        sed do eiusmod tempor incididunt ut labore et dolore
-                        magna aliqua. Ut enim ad minim veniam, quis nostrud
-                        exercitation ullamco laboris nisi ut aliquip ex ea
-                        commodo consequat.
+                        {review.comment}
                       </p>
-                      <div className="flex gap-4">
+                      {/* <div className="flex gap-4">
                         <button className="flex items-center gap-2 text-gray-500">
                           <ThumbsUp className="h-4 w-4" />
+                          <span className="text-xs">{review.likes || 0}</span>
                         </button>
                         <button className="flex items-center gap-2 text-gray-500">
                           <ThumbsDown className="h-4 w-4" />
+                          <span className="text-xs">{review.dislikes || 0}</span>
                         </button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
               ))}
+              {(!reviewsData?.reviews || reviewsData.reviews.length === 0) && (
+                <p className="text-sm text-gray-500 text-center py-4">No reviews yet</p>
+              )}
             </div>
           </div>
         </div>
