@@ -14,9 +14,7 @@ import type { ProductFilters } from "@/types"
 // Filter options
 const filterOptions = {
   priceRange: ["₦1,000 - ₦10,000", "₦10,000 - ₦50,000", "₦50,000 - ₦100,000", "₦100,000+"],
-  condition: ["New", "Used", "Refurbished"],
   brands: ["Local brands", "International brands"],
-  warranty: ["With warranty", "Without warranty"],
 }
 
 interface ProductsGridProps {
