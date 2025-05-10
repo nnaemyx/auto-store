@@ -90,6 +90,14 @@ const Header = () => {
           >
             Exterior Accessories
           </Link>
+          <Link
+            href="/about"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/about") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            About Us
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2 lg:gap-4">

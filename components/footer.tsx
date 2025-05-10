@@ -19,9 +19,11 @@ const Footer = () => {
               />
               <div className="max-w-[478px]">
                 <p className="text-gray-700 text-sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam, quis
+                  At Autostores.ng, we believe no auto-related need should go
+                  unmet — no matter how specific, urgent, or complex. Whether
+                  you know exactly what you’re looking for or need expert
+                  guidance, we make the process seamless, cost-effective, and
+                  dependable.
                 </p>
               </div>
             </div>
@@ -49,7 +51,7 @@ const Footer = () => {
                 >
                   contactadmintobuy@autostore.com
                 </Link>
-                <p className="text-gray-800">+234 70 6878 9878</p>
+                <p className="text-gray-800">+2349039756266</p>
               </div>
 
               {/* Terms and Privacy */}

@@ -17,20 +17,20 @@ export default function BestSellingItems() {
       {/* Desktop Layout - Grid with 4 columns */}
       <div className="">
         {!isLoading && !isError && products && (
-          <div className="hidden lg:grid lg:grid-cols-4 md:gap-6">
-            {products.map((product) => (
+          <div className="hidden lg:grid lg:grid-cols-3 md:gap-6">
+            {products.slice(0, 6).map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}
                 className="group"
               >
-                <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md">
-                  <div className="relative h-40 md:h-[434px] w-[325px] bg-gray-50">
+                <div className="bg-white rounded-md overflow-hidden border border-gray-200 transition-all group-hover:shadow-md flex flex-col">
+                  <div className="relative w-full aspect-square bg-gray-50">
                     <Image
                       src={product.images[0]?.image || ""}
                       alt={product.name}
                       fill
-                      className="object-contain "
+                      className="object-cover rounded-[8px]"
                     />
                     {product.promotion &&
                       product.promotion.discount !== "0" && (

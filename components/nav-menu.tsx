@@ -118,6 +118,13 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
             >
               Exteriors
             </Link>
+            <Link
+              href="/about"
+              className="block py-4 text-gray-700 hover:text-brand-red"
+              onClick={onClose}
+            >
+              About Us
+            </Link>
           </div>
         </div>
 
@@ -137,7 +144,13 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
                 <ShoppingCart className="h-5 w-5" />
                 <span>My cart</span>
               </Link>
-
+              <Link
+                href="/about"
+                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
+                onClick={onClose}
+              >
+                <span>About Us</span>
+              </Link>
 
               {!user && (
                 <Link

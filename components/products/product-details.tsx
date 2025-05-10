@@ -26,8 +26,6 @@ interface ProductDetailsProps {
 export default function ProductDetails({ id }: ProductDetailsProps) {
   const [mainImage, setMainImage] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
   const { toast } = useToast();
   // Fetch product data using TanStack Query
   const { data: product, isLoading, isError, error } = useProduct(id);
@@ -198,42 +196,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
           </div>
 
           <p className="text-gray-700">{product.description}</p>
-
-          {/* Size Selection */}
-          <div className="space-y-2">
-            <label htmlFor="size" className="block text-sm font-medium">
-              Select size
-            </label>
-            <select
-              id="size"
-              className="w-full bg-[#00000008] rounded-[4px] text-[14px] text-[#595959] p-2"
-              value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
-            >
-              <option value="">Select size</option>
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
-          </div>
-
-          {/* Color Selection */}
-          <div className="space-y-2">
-            <label htmlFor="color" className="block text-sm font-medium">
-              Colour
-            </label>
-            <select
-              id="color"
-              className="w-full bg-[#00000008] rounded-[4px] text-[14px] text-[#595959] p-2"
-              value={selectedColor}
-              onChange={(e) => setSelectedColor(e.target.value)}
-            >
-              <option value="">Select colour</option>
-              <option value="black">Black</option>
-              <option value="red">Red</option>
-              <option value="blue">Blue</option>
-            </select>
-          </div>
 
           {/* Quantity */}
           <div className="space-y-2">

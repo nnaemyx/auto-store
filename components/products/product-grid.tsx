@@ -178,8 +178,8 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-[28px] gap-4">
               {products.map((product) => (
                 <Link key={product.id} href={`/product/${product.id}`} className="group ">
-                  <div className="bg-white rounded-md overflow-hidden  transition-all group-hover:shadow-md">
-                    <div className="relative h-40 md:h-[408px] md:max-w-[278px] w-full bg-gray-50">
+                  <div className="bg-white rounded-md overflow-hidden transition-all group-hover:shadow-md flex flex-col">
+                    <div className="relative w-full aspect-square bg-gray-50">
                       <Image
                         src={
                           product.images && product.images.length > 0
