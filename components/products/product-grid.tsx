@@ -6,16 +6,9 @@ import Link from "next/link"
 import { Filter, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/use-products"
 import { useProductTypes } from "@/hooks/use-product-types"
 import type { ProductFilters } from "@/types"
-
-// Filter options
-const filterOptions = {
-  priceRange: ["₦1,000 - ₦10,000", "₦10,000 - ₦50,000", "₦50,000 - ₦100,000", "₦100,000+"],
-}
 
 interface ProductsGridProps {
   categoryId?: number
@@ -56,6 +49,7 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
         product_type: selectedValues.join(","),
       }))
     }
+    setIsFilterOpen(false)
   }
 
   const handleSortChange = (value: string) => {
@@ -244,87 +238,83 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
 
 // Mobile Filters Component
 function MobileFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, values: string[]) => void }) {
+  const { data: productTypes = [] } = useProductTypes()
+  const { data: products } = useProducts({})
+  const [isPriceOpen, setIsPriceOpen] = useState(false)
+  const [isTypeOpen, setIsTypeOpen] = useState(false)
+
+  // Calculate price ranges based on available products
+  const priceRanges = useMemo(() => {
+    if (!products || products.length === 0) return []
+    
+    const prices = products.map(p => Number(p.price))
+    const min = Math.min(...prices)
+    const max = Math.max(...prices)
+    
+    // Create ranges that make sense for the data
+    const ranges = []
+    const step = Math.ceil((max - min) / 4) // Divide into 4 ranges
+    
+    for (let i = 0; i < 4; i++) {
+      const rangeMin = min + (step * i)
+      const rangeMax = i === 3 ? max : min + (step * (i + 1))
+      ranges.push(`₦${rangeMin.toLocaleString()} - ₦${rangeMax.toLocaleString()}`)
+    }
+    
+    return ranges
+  }, [products])
+
+  const handleApply = (filterType: string, values: string[]) => {
+    onApplyFilter(filterType, values)
+    setIsPriceOpen(false)
+    setIsTypeOpen(false)
+  }
+
   return (
     <div className="py-2">
-      {Object.entries(filterOptions).map(([category, options]) => (
-        <FilterSection
-          key={category}
-          title={formatCategoryTitle(category)}
-          options={options}
-          filterType={category}
-          onApplyFilter={onApplyFilter}
-        />
-      ))}
+      {/* Price Range Filter */}
+      <div className="border-b">
+        <button 
+          className="flex items-center justify-between w-full px-4 py-3"
+          onClick={() => setIsPriceOpen(!isPriceOpen)}
+        >
+          <span className="font-medium">Price Range</span>
+          <ChevronDown className={`h-5 w-5 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isPriceOpen && (
+          <div className="px-4 pb-4 space-y-2">
+            <FilterOptions 
+              options={priceRanges} 
+              filterType="priceRange" 
+              onApplyFilter={handleApply}
+              inputType="radio"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Product Type Filter */}
+      <div className="border-b">
+        <button 
+          className="flex items-center justify-between w-full px-4 py-3"
+          onClick={() => setIsTypeOpen(!isTypeOpen)}
+        >
+          <span className="font-medium">Product Type</span>
+          <ChevronDown className={`h-5 w-5 transition-transform ${isTypeOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isTypeOpen && (
+          <div className="px-4 pb-4 space-y-2">
+            <FilterOptions 
+              options={productTypes} 
+              filterType="productType" 
+              onApplyFilter={handleApply}
+              inputType="checkbox"
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
-}
-
-// Filter Section Component for Mobile
-function FilterSection({
-  title,
-  options,
-  filterType,
-  onApplyFilter,
-}: {
-  title: string
-  options: string[]
-  filterType: string
-  onApplyFilter: (filterType: string, values: string[]) => void
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([])
-
-  const handleOptionChange = (option: string) => {
-    setSelectedOptions((prev) => {
-      if (prev.includes(option)) {
-        return prev.filter((item) => item !== option)
-      } else {
-        return [...prev, option]
-      }
-    })
-  }
-
-  const handleApply = () => {
-    onApplyFilter(filterType, selectedOptions)
-    setIsOpen(false)
-  }
-
-  return (
-    <div className="border-b">
-      <button className="flex items-center justify-between w-full px-4 py-3" onClick={() => setIsOpen(!isOpen)}>
-        <span className="font-medium">{title}</span>
-        <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen ? "rotate-180" : "")} />
-      </button>
-
-      {isOpen && (
-        <div className="px-4 pb-4 space-y-2">
-          {options.map((option, index) => (
-            <div key={index} className="flex items-center">
-              <input
-                type="checkbox"
-                id={`mobile-${filterType}-${index}`}
-                className="mr-2"
-                checked={selectedOptions.includes(option)}
-                onChange={() => handleOptionChange(option)}
-              />
-              <label htmlFor={`mobile-${filterType}-${index}`}>{option}</label>
-            </div>
-          ))}
-          <Button className="w-full mt-2 bg-black text-white" onClick={handleApply}>
-            Apply
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Helper function to format category titles
-function formatCategoryTitle(category: string): string {
-  return category
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
 }
 
 // Desktop Filters Component
@@ -354,41 +344,37 @@ function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string,
   }, [products])
 
   return (
-    <div className="space-y-6 mt-8">
+    <div className="py-2">
       {/* Price Range Filter */}
-      <div>
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
-            <h3 className="text-sm font-medium">Price Range</h3>
-            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2">
-            <FilterOptions 
-              options={priceRanges} 
-              filterType="priceRange" 
-              onApplyFilter={onApplyFilter}
-              inputType="radio"
-            />
-          </CollapsibleContent>
-        </Collapsible>
+      <div className="border-b">
+        <button className="flex items-center justify-between w-full px-4 py-3">
+          <span className="font-medium">Price Range</span>
+          <ChevronDown className="h-5 w-5 transition-transform" />
+        </button>
+        <div className="px-4 pb-4 space-y-2">
+          <FilterOptions 
+            options={priceRanges} 
+            filterType="priceRange" 
+            onApplyFilter={onApplyFilter}
+            inputType="radio"
+          />
+        </div>
       </div>
 
       {/* Product Type Filter */}
-      <div>
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
-            <h3 className="text-sm font-medium">Product Type</h3>
-            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2">
-            <FilterOptions 
-              options={productTypes} 
-              filterType="productType" 
-              onApplyFilter={onApplyFilter}
-              inputType="checkbox"
-            />
-          </CollapsibleContent>
-        </Collapsible>
+      <div className="border-b">
+        <button className="flex items-center justify-between w-full px-4 py-3">
+          <span className="font-medium">Product Type</span>
+          <ChevronDown className="h-5 w-5 transition-transform" />
+        </button>
+        <div className="px-4 pb-4 space-y-2">
+          <FilterOptions 
+            options={productTypes} 
+            filterType="productType" 
+            onApplyFilter={onApplyFilter}
+            inputType="checkbox"
+          />
+        </div>
       </div>
     </div>
   )

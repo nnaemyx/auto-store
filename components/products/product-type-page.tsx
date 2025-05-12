@@ -6,7 +6,6 @@ import Link from "next/link"
 import { Filter, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useProductsByType } from "@/hooks/use-products-by-type"
 import { useProductTypes } from "@/hooks/use-product-types"
 import type { ProductFilters } from "@/types"
@@ -291,41 +290,37 @@ function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string,
   }, [products])
 
   return (
-    <div className="space-y-6 mt-8">
+    <div className="py-2">
       {/* Price Range Filter */}
-      <div>
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
-            <h3 className="text-sm font-medium">Price Range</h3>
-            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2">
-            <FilterOptions 
-              options={priceRanges} 
-              filterType="priceRange" 
-              onApplyFilter={onApplyFilter}
-              inputType="radio"
-            />
-          </CollapsibleContent>
-        </Collapsible>
+      <div className="border-b">
+        <button className="flex items-center justify-between w-full px-4 py-3">
+          <span className="font-medium">Price Range</span>
+          <ChevronDown className="h-5 w-5 transition-transform" />
+        </button>
+        <div className="px-4 pb-4 space-y-2">
+          <FilterOptions 
+            options={priceRanges} 
+            filterType="priceRange" 
+            onApplyFilter={onApplyFilter}
+            inputType="radio"
+          />
+        </div>
       </div>
 
       {/* Product Type Filter */}
-      <div>
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
-            <h3 className="text-sm font-medium">Product Type</h3>
-            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2">
-            <FilterOptions 
-              options={productTypes} 
-              filterType="productType" 
-              onApplyFilter={onApplyFilter}
-              inputType="checkbox"
-            />
-          </CollapsibleContent>
-        </Collapsible>
+      <div className="border-b">
+        <button className="flex items-center justify-between w-full px-4 py-3">
+          <span className="font-medium">Product Type</span>
+          <ChevronDown className="h-5 w-5 transition-transform" />
+        </button>
+        <div className="px-4 pb-4 space-y-2">
+          <FilterOptions 
+            options={productTypes} 
+            filterType="productType" 
+            onApplyFilter={onApplyFilter}
+            inputType="checkbox"
+          />
+        </div>
       </div>
     </div>
   )
