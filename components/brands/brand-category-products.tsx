@@ -147,28 +147,28 @@ export default function BrandCategoryProducts({
                   >
                     <div className="space-y-2">
                       <FilterCheckbox
-                        id="price-1-mobile"
+                        id="price-range-1"
                         label="₦1,000 - ₦10,000"
-                        checked={isFilterActive("priceRange", "1000-10000")}
-                        onChange={() => handleFilterChange("priceRange", "1000-10000")}
+                        checked={isFilterActive("priceRange", "₦1,000 - ₦10,000")}
+                        onChange={() => handleFilterChange("priceRange", "₦1,000 - ₦10,000")}
                       />
                       <FilterCheckbox
-                        id="price-2-mobile"
+                        id="price-range-2"
                         label="₦10,000 - ₦50,000"
-                        checked={isFilterActive("priceRange", "10000-50000")}
-                        onChange={() => handleFilterChange("priceRange", "10000-50000")}
+                        checked={isFilterActive("priceRange", "₦10,000 - ₦50,000")}
+                        onChange={() => handleFilterChange("priceRange", "₦10,000 - ₦50,000")}
                       />
                       <FilterCheckbox
-                        id="price-3-mobile"
+                        id="price-range-3"
                         label="₦50,000 - ₦100,000"
-                        checked={isFilterActive("priceRange", "50000-100000")}
-                        onChange={() => handleFilterChange("priceRange", "50000-100000")}
+                        checked={isFilterActive("priceRange", "₦50,000 - ₦100,000")}
+                        onChange={() => handleFilterChange("priceRange", "₦50,000 - ₦100,000")}
                       />
                       <FilterCheckbox
-                        id="price-4-mobile"
+                        id="price-range-4"
                         label="₦100,000+"
-                        checked={isFilterActive("priceRange", "100000+")}
-                        onChange={() => handleFilterChange("priceRange", "100000+")}
+                        checked={isFilterActive("priceRange", "₦100,000+")}
+                        onChange={() => handleFilterChange("priceRange", "₦100,000+")}
                       />
                     </div>
                     <Button onClick={applyFilters} className="w-full mt-3 bg-black text-white hover:bg-black/90">
@@ -184,22 +184,22 @@ export default function BrandCategoryProducts({
                   >
                     <div className="space-y-2">
                       <FilterCheckbox
-                        id="condition-1-mobile"
+                        id="condition-new"
                         label="New"
-                        checked={isFilterActive("condition", "new")}
-                        onChange={() => handleFilterChange("condition", "new")}
+                        checked={isFilterActive("condition", "New")}
+                        onChange={() => handleFilterChange("condition", "New")}
                       />
                       <FilterCheckbox
-                        id="condition-2-mobile"
+                        id="condition-used"
                         label="Used"
-                        checked={isFilterActive("condition", "used")}
-                        onChange={() => handleFilterChange("condition", "used")}
+                        checked={isFilterActive("condition", "Used")}
+                        onChange={() => handleFilterChange("condition", "Used")}
                       />
                       <FilterCheckbox
-                        id="condition-3-mobile"
+                        id="condition-refurbished"
                         label="Refurbished"
-                        checked={isFilterActive("condition", "refurbished")}
-                        onChange={() => handleFilterChange("condition", "refurbished")}
+                        checked={isFilterActive("condition", "Refurbished")}
+                        onChange={() => handleFilterChange("condition", "Refurbished")}
                       />
                     </div>
                     <Button onClick={applyFilters} className="w-full mt-3 bg-black text-white hover:bg-black/90">
@@ -215,16 +215,16 @@ export default function BrandCategoryProducts({
                   >
                     <div className="space-y-2">
                       <FilterCheckbox
-                        id="brands-1-mobile"
+                        id="brands-local"
                         label="Local brands"
-                        checked={isFilterActive("brands", "local")}
-                        onChange={() => handleFilterChange("brands", "local")}
+                        checked={isFilterActive("brands", "Local brands")}
+                        onChange={() => handleFilterChange("brands", "Local brands")}
                       />
                       <FilterCheckbox
-                        id="brands-2-mobile"
+                        id="brands-international"
                         label="International brands"
-                        checked={isFilterActive("brands", "international")}
-                        onChange={() => handleFilterChange("brands", "international")}
+                        checked={isFilterActive("brands", "International brands")}
+                        onChange={() => handleFilterChange("brands", "International brands")}
                       />
                     </div>
                     <Button onClick={applyFilters} className="w-full mt-3 bg-black text-white hover:bg-black/90">
@@ -240,16 +240,16 @@ export default function BrandCategoryProducts({
                   >
                     <div className="space-y-2">
                       <FilterCheckbox
-                        id="warranty-1-mobile"
+                        id="warranty-with"
                         label="With warranty"
-                        checked={isFilterActive("warranty", "with")}
-                        onChange={() => handleFilterChange("warranty", "with")}
+                        checked={isFilterActive("warranty", "With warranty")}
+                        onChange={() => handleFilterChange("warranty", "With warranty")}
                       />
                       <FilterCheckbox
-                        id="warranty-2-mobile"
+                        id="warranty-without"
                         label="Without warranty"
-                        checked={isFilterActive("warranty", "without")}
-                        onChange={() => handleFilterChange("warranty", "without")}
+                        checked={isFilterActive("warranty", "Without warranty")}
+                        onChange={() => handleFilterChange("warranty", "Without warranty")}
                       />
                     </div>
                     <Button onClick={applyFilters} className="w-full mt-3 bg-black text-white hover:bg-black/90">
@@ -280,34 +280,28 @@ export default function BrandCategoryProducts({
             >
               <div className="space-y-2">
                 <FilterCheckbox
-                  id="price-1"
+                  id="price-range-1"
                   label="₦1,000 - ₦10,000"
-                  checked={isFilterActive("priceRange", "1000-10000")}
-                  onChange={() =>
-                    handleFilterChange("priceRange", "1000-10000")
-                  }
+                  checked={isFilterActive("priceRange", "₦1,000 - ₦10,000")}
+                  onChange={() => handleFilterChange("priceRange", "₦1,000 - ₦10,000")}
                 />
                 <FilterCheckbox
-                  id="price-2"
+                  id="price-range-2"
                   label="₦10,000 - ₦50,000"
-                  checked={isFilterActive("priceRange", "10000-50000")}
-                  onChange={() =>
-                    handleFilterChange("priceRange", "10000-50000")
-                  }
+                  checked={isFilterActive("priceRange", "₦10,000 - ₦50,000")}
+                  onChange={() => handleFilterChange("priceRange", "₦10,000 - ₦50,000")}
                 />
                 <FilterCheckbox
-                  id="price-3"
+                  id="price-range-3"
                   label="₦50,000 - ₦100,000"
-                  checked={isFilterActive("priceRange", "50000-100000")}
-                  onChange={() =>
-                    handleFilterChange("priceRange", "50000-100000")
-                  }
+                  checked={isFilterActive("priceRange", "₦50,000 - ₦100,000")}
+                  onChange={() => handleFilterChange("priceRange", "₦50,000 - ₦100,000")}
                 />
                 <FilterCheckbox
-                  id="price-4"
+                  id="price-range-4"
                   label="₦100,000+"
-                  checked={isFilterActive("priceRange", "100000+")}
-                  onChange={() => handleFilterChange("priceRange", "100000+")}
+                  checked={isFilterActive("priceRange", "₦100,000+")}
+                  onChange={() => handleFilterChange("priceRange", "₦100,000+")}
                 />
               </div>
               <Button
@@ -328,24 +322,22 @@ export default function BrandCategoryProducts({
             >
               <div className="space-y-2">
                 <FilterCheckbox
-                  id="condition-1"
+                  id="condition-new"
                   label="New"
-                  checked={isFilterActive("condition", "new")}
-                  onChange={() => handleFilterChange("condition", "new")}
+                  checked={isFilterActive("condition", "New")}
+                  onChange={() => handleFilterChange("condition", "New")}
                 />
                 <FilterCheckbox
-                  id="condition-2"
+                  id="condition-used"
                   label="Used"
-                  checked={isFilterActive("condition", "used")}
-                  onChange={() => handleFilterChange("condition", "used")}
+                  checked={isFilterActive("condition", "Used")}
+                  onChange={() => handleFilterChange("condition", "Used")}
                 />
                 <FilterCheckbox
-                  id="condition-3"
+                  id="condition-refurbished"
                   label="Refurbished"
-                  checked={isFilterActive("condition", "refurbished")}
-                  onChange={() =>
-                    handleFilterChange("condition", "refurbished")
-                  }
+                  checked={isFilterActive("condition", "Refurbished")}
+                  onChange={() => handleFilterChange("condition", "Refurbished")}
                 />
               </div>
               <Button
@@ -366,16 +358,16 @@ export default function BrandCategoryProducts({
             >
               <div className="space-y-2">
                 <FilterCheckbox
-                  id="brands-1"
+                  id="brands-local"
                   label="Local brands"
-                  checked={isFilterActive("brands", "local")}
-                  onChange={() => handleFilterChange("brands", "local")}
+                  checked={isFilterActive("brands", "Local brands")}
+                  onChange={() => handleFilterChange("brands", "Local brands")}
                 />
                 <FilterCheckbox
-                  id="brands-2"
+                  id="brands-international"
                   label="International brands"
-                  checked={isFilterActive("brands", "international")}
-                  onChange={() => handleFilterChange("brands", "international")}
+                  checked={isFilterActive("brands", "International brands")}
+                  onChange={() => handleFilterChange("brands", "International brands")}
                 />
               </div>
               <Button
@@ -396,16 +388,16 @@ export default function BrandCategoryProducts({
             >
               <div className="space-y-2">
                 <FilterCheckbox
-                  id="warranty-1"
+                  id="warranty-with"
                   label="With warranty"
-                  checked={isFilterActive("warranty", "with")}
-                  onChange={() => handleFilterChange("warranty", "with")}
+                  checked={isFilterActive("warranty", "With warranty")}
+                  onChange={() => handleFilterChange("warranty", "With warranty")}
                 />
                 <FilterCheckbox
-                  id="warranty-2"
+                  id="warranty-without"
                   label="Without warranty"
-                  checked={isFilterActive("warranty", "without")}
-                  onChange={() => handleFilterChange("warranty", "without")}
+                  checked={isFilterActive("warranty", "Without warranty")}
+                  onChange={() => handleFilterChange("warranty", "Without warranty")}
                 />
               </div>
               <Button

@@ -108,6 +108,7 @@ export interface ProductFilters {
   car_model_id?: number
   price_min?: number
   price_max?: number
+  product_type?: string
   sort_by?: string
   sort_order?: "asc" | "desc"
   page?: number

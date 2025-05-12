@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Filter, ChevronDown, Loader2 } from "lucide-react"
@@ -9,12 +9,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/use-products"
+import { useProductTypes } from "@/hooks/use-product-types"
 import type { ProductFilters } from "@/types"
 
 // Filter options
 const filterOptions = {
   priceRange: ["₦1,000 - ₦10,000", "₦10,000 - ₦50,000", "₦50,000 - ₦100,000", "₦100,000+"],
-  brands: ["Local brands", "International brands"],
 }
 
 interface ProductsGridProps {
@@ -32,26 +32,28 @@ export default function ProductsGrid({ categoryId, manufacturerId, carModelId }:
     car_model_id: carModelId,
   })
 
-  // Fetch products using TanStack Query
+  // Fetch products
   const { data: products, isLoading, isError, error } = useProducts(filters)
 
   const handleApplyFilter = (filterType: string, selectedValues: string[]) => {
     if (filterType === "priceRange" && selectedValues.length > 0) {
       // Parse price range from string like "₦10,000 - ₦50,000"
-      const range = selectedValues[0].replace("₦", "").replace(/,/g, "").split(" - ")
+      const range = selectedValues[0].replace(/[₦,]/g, "").split(" - ")
       if (range.length === 2) {
-        const min = Number.parseInt(range[0])
-        const max = Number.parseInt(range[1])
-        setFilters((prev) => ({
-          ...prev,
-          price_min: min,
-          price_max: max,
-        }))
+        const min = parseInt(range[0].trim())
+        const max = parseInt(range[1].trim())
+        if (!isNaN(min) && !isNaN(max)) {
+          setFilters((prev) => ({
+            ...prev,
+            price_min: min,
+            price_max: max,
+          }))
+        }
       }
-    } else {
+    } else if (filterType === "productType") {
       setFilters((prev) => ({
         ...prev,
-        [filterType]: selectedValues.join(","),
+        product_type: selectedValues.join(","),
       }))
     }
   }
@@ -257,76 +259,6 @@ function MobileFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, 
   )
 }
 
-// Desktop Filters Component
-function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, values: string[]) => void }) {
-  return (
-    <div className="space-y-6 mt-8">
-      {Object.entries(filterOptions).map(([category, options], index) => (
-        <div key={category}>
-          <Collapsible defaultOpen={index < 3}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
-              <h3 className="text-sm font-medium">{formatCategoryTitle(category)}</h3>
-              <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2">
-              <FilterOptions options={options} filterType={category} onApplyFilter={onApplyFilter} />
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// Filter Options Component
-function FilterOptions({
-  options,
-  filterType,
-  onApplyFilter,
-}: {
-  options: string[]
-  filterType: string
-  onApplyFilter: (filterType: string, values: string[]) => void
-}) {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([])
-
-  const handleOptionChange = (option: string) => {
-    setSelectedOptions((prev) => {
-      if (prev.includes(option)) {
-        return prev.filter((item) => item !== option)
-      } else {
-        return [...prev, option]
-      }
-    })
-  }
-
-  const handleApply = () => {
-    onApplyFilter(filterType, selectedOptions)
-  }
-
-  return (
-    <>
-      {options.map((option, optionIndex) => (
-        <div key={optionIndex} className="flex items-center">
-          <input
-            type="checkbox"
-            id={`${filterType}-${optionIndex}`}
-            className="mr-2"
-            checked={selectedOptions.includes(option)}
-            onChange={() => handleOptionChange(option)}
-          />
-          <label htmlFor={`${filterType}-${optionIndex}`} className="text-sm">
-            {option}
-          </label>
-        </div>
-      ))}
-      <Button variant="outline" size="sm" className="w-full mt-2 bg-black text-white" onClick={handleApply}>
-        Apply
-      </Button>
-    </>
-  )
-}
-
 // Filter Section Component for Mobile
 function FilterSection({
   title,
@@ -390,8 +322,138 @@ function FilterSection({
 // Helper function to format category titles
 function formatCategoryTitle(category: string): string {
   return category
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
+// Desktop Filters Component
+function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string, values: string[]) => void }) {
+  const { data: productTypes = [] } = useProductTypes()
+  const { data: products } = useProducts({})
+
+  // Calculate price ranges based on available products
+  const priceRanges = useMemo(() => {
+    if (!products || products.length === 0) return []
+    
+    const prices = products.map(p => Number(p.price))
+    const min = Math.min(...prices)
+    const max = Math.max(...prices)
+    
+    // Create ranges that make sense for the data
+    const ranges = []
+    const step = Math.ceil((max - min) / 4) // Divide into 4 ranges
+    
+    for (let i = 0; i < 4; i++) {
+      const rangeMin = min + (step * i)
+      const rangeMax = i === 3 ? max : min + (step * (i + 1))
+      ranges.push(`₦${rangeMin.toLocaleString()} - ₦${rangeMax.toLocaleString()}`)
+    }
+    
+    return ranges
+  }, [products])
+
+  return (
+    <div className="space-y-6 mt-8">
+      {/* Price Range Filter */}
+      <div>
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
+            <h3 className="text-sm font-medium">Price Range</h3>
+            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2">
+            <FilterOptions 
+              options={priceRanges} 
+              filterType="priceRange" 
+              onApplyFilter={onApplyFilter}
+              inputType="radio"
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+
+      {/* Product Type Filter */}
+      <div>
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mb-2">
+            <h3 className="text-sm font-medium">Product Type</h3>
+            <ChevronDown className="h-4 w-4 transition-transform ui-open:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2">
+            <FilterOptions 
+              options={productTypes} 
+              filterType="productType" 
+              onApplyFilter={onApplyFilter}
+              inputType="checkbox"
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    </div>
+  )
+}
+
+// Filter Options Component
+function FilterOptions({
+  options,
+  filterType,
+  onApplyFilter,
+  inputType = "checkbox"
+}: {
+  options: string[]
+  filterType: string
+  onApplyFilter: (filterType: string, values: string[]) => void
+  inputType?: "checkbox" | "radio"
+}) {
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([])
+
+  const handleOptionChange = (option: string) => {
+    setSelectedOptions((prev) => {
+      if (inputType === "radio") {
+        return [option]
+      }
+      if (prev.includes(option)) {
+        return prev.filter((item) => item !== option)
+      } else {
+        return [...prev, option]
+      }
+    })
+  }
+
+  const handleApply = () => {
+    if (selectedOptions.length > 0) {
+      onApplyFilter(filterType, selectedOptions)
+    }
+  }
+
+  return (
+    <>
+      {options.map((option, optionIndex) => (
+        <div key={optionIndex} className="flex items-center">
+          <input
+            type={inputType}
+            id={`${filterType}-${optionIndex}`}
+            name={filterType}
+            className="mr-2"
+            checked={selectedOptions.includes(option)}
+            onChange={() => handleOptionChange(option)}
+          />
+          <label htmlFor={`${filterType}-${optionIndex}`} className="text-sm">
+            {option}
+          </label>
+        </div>
+      ))}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="w-full mt-2 bg-black text-white" 
+        onClick={handleApply}
+        disabled={selectedOptions.length === 0}
+      >
+        Apply
+      </Button>
+    </>
+  )
 }
 
