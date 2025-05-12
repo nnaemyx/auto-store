@@ -347,10 +347,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
               <p className="text-sm">12.5 KG</p>
             </div>
             <div>
-              <p className="text-gray-500 text-sm">Dimensions</p>
-              <p className="text-sm">234 by 128 cm</p>
-            </div>
-            <div>
               <p className="text-gray-500 text-sm">Colour</p>
               <p className="text-sm">Black, Red, Green, Blue</p>
             </div>

@@ -21,7 +21,7 @@ const Footer = () => {
                 <p className="text-gray-700 text-sm">
                   At Autostores.ng, we believe no auto-related need should go
                   unmet — no matter how specific, urgent, or complex. Whether
-                  you know exactly what you’re looking for or need expert
+                  you know exactly what you&apos;re looking for or need expert
                   guidance, we make the process seamless, cost-effective, and
                   dependable.
                 </p>
@@ -46,12 +46,18 @@ const Footer = () => {
               <div className="flex flex-col items-center">
                 <h3 className="text-gray-800 font-medium mb-2">Contact Us</h3>
                 <Link
-                  href="mailto:contactadmintobuy@autostore.com"
+                  href="mailto:support@autostores.ng"
                   className="text-gray-800 underline mb-2"
                 >
-                  contactadmintobuy@autostore.com
+                  support@autostores.ng
                 </Link>
-                <p className="text-gray-800">+2349039756266</p>
+                <Link
+                  href="mailto:info@autostores.ng"
+                  className="text-gray-800 underline mb-2"
+                >
+                  info@autostores.ng
+                </Link>
+                <p className="text-gray-800">+234 903 975 6266</p>
               </div>
 
               {/* Terms and Privacy */}
@@ -59,11 +65,23 @@ const Footer = () => {
                 <h3 className="text-gray-800 font-medium mb-2">
                   Terms of agreement
                 </h3>
+                <Link href="/about" className="text-gray-800 mb-2">
+                  About Us
+                </Link>
                 <Link href="/cookies" className="text-gray-800 mb-2">
                   Cookies
                 </Link>
-                <Link href="/privacy-policy" className="text-gray-800">
+                <Link href="/privacy-policy" className="text-gray-800 mb-2">
                   Privacy Policy
+                </Link>
+                <Link href="/faqs" className="text-gray-800 mb-2">
+                  FAQs
+                </Link>
+                <Link href="/maintenance" className="text-gray-800 mb-2">
+                  Vehicle Maintenance
+                </Link>
+                <Link href="/custom-order" className="text-gray-800">
+                  Custom Order
                 </Link>
               </div>
               {/* Categories */}
@@ -90,7 +108,7 @@ const Footer = () => {
         </div>
 
         {/* Mobile Layout */}
-        <div className="lg:hidden flex flex-col rounded-[24px] px-[20px] py-[60px] bg-[#F5F5F5]">
+        <div className="lg:hidden flex flex-col rounded-[24px] px-[10px] py-[60px] bg-[#F5F5F5]">
           {/* Logo and Description */}
           <div className="flex justify-center mb-6">
             <Image
@@ -103,25 +121,32 @@ const Footer = () => {
           </div>
 
           <p className="text-gray-700 text-sm mb-6 text-center">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis
+            At Autostores.ng, we believe no auto-related need should go unmet —
+            no matter how specific, urgent, or complex. Whether you know exactly
+            what you&apos;re looking for or need expert guidance, we make the
+            process seamless, cost-effective, and dependable.
           </p>
 
           {/* Contact Info */}
           <div className="flex flex-col items-center mb-6">
             <h3 className="text-gray-800 font-medium mb-2">Contact Us</h3>
             <Link
-              href="mailto:contactadmintobuy@autostore.com"
+              href="mailto:support@autostores.ng"
               className="text-gray-800 underline mb-2"
             >
-              contactadmintobuy@autostore.com
+              support@autostores.ng
             </Link>
-            <p className="text-gray-800">+234 7068789878</p>
+            <Link
+              href="mailto:info@autostores.ng"
+              className="text-gray-800 underline mb-2"
+            >
+              info@autostores.ng
+            </Link>
+            <p className="text-gray-800">+234 903 975 6266</p>
           </div>
 
           {/* Two Column Layout for Categories and Terms */}
-          <div className="flex justify-between mb-8">
+          <div className="flex flex-col gap-4 justify-between mb-8">
             <div className="flex flex-col">
               <h3 className="text-gray-800 font-medium mb-2">Categories</h3>
               <Link href="/categories/interior" className="text-gray-800 mb-2">
@@ -136,11 +161,23 @@ const Footer = () => {
               <h3 className="text-gray-800 font-medium mb-2">
                 Terms of agreement
               </h3>
+              <Link href="/about" className="text-gray-800 mb-2">
+                About Us
+              </Link>
               <Link href="/cookies" className="text-gray-800 mb-2">
                 Cookies
               </Link>
-              <Link href="/privacy-policy" className="text-gray-800">
+              <Link href="/privacy-policy" className="text-gray-800 mb-2">
                 Privacy Policy
+              </Link>
+              <Link href="/faqs" className="text-gray-800 mb-2">
+                FAQs
+              </Link>
+              <Link href="/maintenance" className="text-gray-800 mb-2">
+                Vehicle Maintenance
+              </Link>
+              <Link href="/custom-order" className="text-gray-800">
+                Custom Order
               </Link>
             </div>
           </div>

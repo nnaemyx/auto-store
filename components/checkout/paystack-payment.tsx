@@ -22,6 +22,7 @@ export interface CheckoutData {
   order_code?: string
   check_out_id?: string
   delivery_fee?: string | number
+  tax?: number
   [key: string]: unknown
 }
 
@@ -124,11 +125,13 @@ export default function PaystackPayment({
 
       // Ensure we have the correct email and amount
       const paymentEmail: string = paymentData.email || email
-      const paymentAmount: number = (paymentData.amount ? Number(paymentData.amount) : amount) 
+      // Use the total from cartSummary directly and convert to kobo
+      const paymentAmount: number = Math.round(amount * 100)
 
       console.log("Payment setup:", {
         email: paymentEmail,
         amount: paymentAmount,
+        originalAmount: amount,
         reference: reference,
         key: PAYSTACK_PUBLIC_KEY.substring(0, 8) + "...", // Log partial key for security
       })
@@ -150,6 +153,8 @@ export default function PaystackPayment({
             transactionId: response.reference,
             amount: paymentAmount / 100, // Convert back to Naira
             date: new Date().toISOString(),
+            tax: paymentData.tax || 0,
+            shipping_fee: paymentData.delivery_fee || 0,
           })
 
           // Store additional metadata in localStorage for access on success page
@@ -162,7 +167,8 @@ export default function PaystackPayment({
                 reference: reference,
                 email: paymentEmail,
                 check_out_id: paymentData.check_out_id || "1",
-                delivery_fee: paymentData.delivery_fee?.toString() || "2000",
+                delivery_fee: paymentData.delivery_fee?.toString() || "1000",
+                tax: paymentData.tax?.toString() || "0",
                 order_code: paymentData.order_code || "didhdd",
                 user_id: "1",
               }),
@@ -207,7 +213,8 @@ export default function PaystackPayment({
         reference: reference,
         email: paymentEmail,
         check_out_id: paymentData.check_out_id || "1",
-        delivery_fee: paymentData.delivery_fee?.toString() || "2000",
+        delivery_fee: paymentData.delivery_fee?.toString() || "1000",
+        tax: paymentData.tax?.toString() || "0",
         order_code: paymentData.order_code || "didhdd",
         user_id: "1",
       }

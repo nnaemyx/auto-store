@@ -125,6 +125,13 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
             >
               About Us
             </Link>
+            <Link
+              href="/maintenance"
+              className="block py-4 text-gray-700 hover:text-brand-red"
+              onClick={onClose}
+            >
+              Vehicle Maintenance
+            </Link>
           </div>
         </div>
 

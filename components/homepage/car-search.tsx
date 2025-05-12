@@ -100,15 +100,16 @@ export default function CarSearch() {
   return (
     <div className="w-full bg-white">
       <div className="container mx-auto max-w-6xl">
-        <h2 className="text-xl md:text-lg font-medium text-center mb-8 md:mb-12">
-          Shop Items Based on Your Car&apos;s Exact Specifications
+        <h2 className="text-xl md:text-lg font-bold text-center ">
+        Which car are you looking to get parts for today?
         </h2>
+        <p className="mb-8 md:mb-12 text-center text-gray-500 mt-2">Let’s find the right fit for your car.</p>
 
         <div className={`${isDesktop ? "flex justify-between gap-4" : "grid grid-cols-2 gap-4"}`}>
           {/* Car Brand */}
           <div className="relative mb-4 md:mb-0 md:flex-1">
             <label htmlFor="brand" className="block font-[450] mb-2 text-[14px] md:text-[16px]">
-              Car Brand
+              Model
             </label>
             <div className="relative">
               <button
@@ -153,7 +154,7 @@ export default function CarSearch() {
           {/* Car Model */}
           <div className="relative mb-4 md:mb-0 md:flex-1">
             <label htmlFor="make" className="block font-[450] mb-2 text-[14px] md:text-[16px]">
-              Car Model
+              Make
             </label>
             <div className="relative">
               <button
@@ -195,7 +196,7 @@ export default function CarSearch() {
           {/* Car Part */}
           <div className="relative mb-4 md:mb-0 md:flex-1">
             <label htmlFor="part" className="block font-[450] mb-2 text-[14px] md:text-[16px]">
-              Car Part
+              Category
             </label>
             <div className="relative">
               <button

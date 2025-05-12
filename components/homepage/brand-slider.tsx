@@ -12,7 +12,7 @@ console.log(brands)
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-xl font-bold mb-6">Shop by Automobile Brand</h2>
+        <h2 className="text-xl font-bold mb-6">Shop by Brands</h2>
         <div className="flex justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-brand-red" />
         </div>
@@ -24,7 +24,7 @@ console.log(brands)
   if (isError || !brands) {
     return (
       <div>
-        <h2 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium ">Shop by Automobile Brand</h2>
+        <h2 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium ">Shop by Brands</h2>
         <div className="text-center py-8 text-gray-500">Unable to load brands. Please try again later.</div>
       </div>
     )
@@ -32,7 +32,7 @@ console.log(brands)
 
   return (
     <div>
-      <h2 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium  mb-6">Shop by Automobile Brand</h2>
+      <h2 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium  mb-6">Shop by Brands</h2>
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
         {brands.map((brand) => (
           <Link key={brand.id} href={`/brands/${brand.id}`} className="flex flex-col items-center">

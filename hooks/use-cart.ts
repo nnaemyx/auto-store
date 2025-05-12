@@ -131,15 +131,28 @@ export function useCart() {
   const cartSummary = React.useMemo(() => {
     if (!data?.items) return { subtotal: 0, tax: 0, shipping_fee: 0, total: 0 }
 
+    // Calculate subtotal using price or amount field
     const subtotal = data.items.reduce((sum, item) => {
       const quantity = Number(item.quantity || 1);
-      return sum + (item.price * quantity);
-    }, 0)
-    const tax = subtotal * 0.075 // Assuming 7.5% tax
-    const shipping_fee = subtotal > 0 ? 1000 : 0 // Flat shipping fee if cart has items
-    const total = subtotal + tax + shipping_fee
+      const itemPrice = Number(item.price || item.amount || 0);
+      return sum + (itemPrice * quantity);
+    }, 0);
 
-    return { subtotal, tax, shipping_fee, total }
+    // Calculate tax (7.5% of subtotal)
+    const tax = Math.round(subtotal * 0.075);
+    
+    // Calculate shipping fee (₦2,000 flat rate if cart has items)
+    const shipping_fee = subtotal > 0 ? 2000 : 0;
+    
+    // Calculate total (subtotal + tax + shipping)
+    const total = subtotal + tax + shipping_fee;
+
+    return { 
+      subtotal: Math.round(subtotal), 
+      tax, 
+      shipping_fee, 
+      total 
+    }
   }, [data])
 
   // Add item to cart mutation

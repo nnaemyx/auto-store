@@ -113,7 +113,9 @@ export default function PaymentDetailsForm({
         town: shippingDetails.townCity,
         alt_phone_number: shippingDetails.alt_phoneNumber,
         delivery_fee: selectedFeeOption.id.toString(),
-        amount: totalAmount, // Include the total amount
+        amount: totalAmount,
+        tax: cartSummary.tax,
+        subtotal: cartSummary.subtotal,
       }
 
       // Call the checkout API
@@ -126,10 +128,20 @@ export default function PaymentDetailsForm({
       console.log("Checkout response:", response)
 
       // Store checkout response for use in Paystack payment
-      localStorage.setItem("checkoutResponse", JSON.stringify(response))
+      localStorage.setItem("checkoutResponse", JSON.stringify({
+        ...response,
+        tax: cartSummary.tax,
+        subtotal: cartSummary.subtotal,
+        delivery_fee: selectedFeeOption.amount,
+      }))
 
       // Update state with checkout data
-      setCheckoutData(response)
+      setCheckoutData({
+        ...response,
+        tax: cartSummary.tax,
+        subtotal: cartSummary.subtotal,
+        delivery_fee: selectedFeeOption.amount,
+      })
       setCheckoutComplete(true)
       setIsProcessing(false)
 
@@ -186,8 +198,17 @@ export default function PaymentDetailsForm({
   // Calculate total amount with selected delivery fee
   const selectedFeeOption = deliveryFees?.find((fee) => fee.id.toString() === deliveryFee)
   const deliveryFeeAmount = selectedFeeOption?.amount || 0
-  const totalAmount = cartSummary.subtotal + cartSummary.tax + deliveryFeeAmount
-  console.log(totalAmount)
+  // Use cartSummary.total directly to maintain consistency
+  const totalAmount = cartSummary.total
+
+  // Log the amounts for debugging
+  console.log("Amount breakdown:", {
+    subtotal: cartSummary.subtotal,
+    tax: cartSummary.tax,
+    deliveryFee: deliveryFeeAmount,
+    total: totalAmount,
+    cartSummaryTotal: cartSummary.total
+  })
 
   return (
     <div>
@@ -364,7 +385,7 @@ export default function PaymentDetailsForm({
                 <div className="flex-1">
                   <h3 className="font-medium">{item.name}</h3>
                   <p className="text-sm text-gray-500">{item.description}</p>
-                  <p className="font-bold mt-1">₦{Number(item.amount).toLocaleString()}</p>
+                  <p className="font-bold mt-1">₦{Number(item.price || item.amount).toLocaleString()}</p>
                 </div>
               </div>
             ))}

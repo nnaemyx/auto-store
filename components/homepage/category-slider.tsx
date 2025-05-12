@@ -210,6 +210,13 @@ export default function CategorySlider() {
             </Button>
           </div>
         </div>
+        <div className="mt-16 mb-8 text-center bg-gray-50 py-12 px-4 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Did not see what you are looking for?</h2>
+          <p className="text-gray-600 mb-8">Make a custom order with us</p>
+          <Button asChild className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg">
+            <Link href="/custom-order">Custom Order</Link>
+          </Button>
+        </div>
       </div>
     </section>
   );

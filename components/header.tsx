@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { ShoppingCart, Search, Menu} from "lucide-react"
+import { ShoppingCart, Search, Menu, Phone} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -98,28 +98,45 @@ const Header = () => {
           >
             About Us
           </Link>
+          <Link
+            href="/maintenance"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/maintenance") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Vehicle Maintenance
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2 lg:gap-4">
-          <Button variant="ghost" size="icon" onClick={handleSearchClick}>
-            <Search className="h-8 w-[44px]" />
-            <span className="sr-only">Search</span>
-          </Button>
-
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
-                <Badge
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-800 text-white"
-                  variant="outline"
-                >
-                  {cartItemCount}
-                </Badge>
-              )}
-              <span className="sr-only">Cart</span>
+          <div className="flex items-center gap-4">
+            <a href="tel:+2349039756266" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700">
+                <Phone className="h-5 w-5" />
+              </Button>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium">Call to order</p>
+                <p className="text-sm text-gray-600">09039756266</p>
+              </div>
+            </a>
+            <Button variant="ghost" size="icon" onClick={handleSearchClick}>
+              <Search className="h-5 w-5" />
             </Button>
-          </Link>
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <Badge
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-800 text-white"
+                    variant="outline"
+                  >
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+
+          </div>
 
           {/* Mobile Menu */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>

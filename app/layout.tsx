@@ -8,6 +8,7 @@ import { Providers } from "@/api/provider"
 import ClientOnly from "@/api/client-only"
 import { AuthProvider } from "@/api/auth-provider"
 import { Toaster } from "sonner"
+import { FloatingWhatsApp } from "@/components/floating-whatsapp"
 
 
 const inter = Inter({ subsets: ["latin"] })
@@ -32,6 +33,7 @@ export default function RootLayout({
               <main className="min-h-screen">{children}</main>
               <Toaster />
               <Footer />
+              <FloatingWhatsApp />
             </AuthProvider>
           </ClientOnly>
         </Providers>
