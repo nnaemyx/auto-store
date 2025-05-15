@@ -258,23 +258,23 @@ export default function ShippingDetailsForm({
                   placeholder="Enter alternative phone number"
                 />
               </div>
-            </div>
+              </div>
 
-            <div>
-              <label
-                htmlFor="postalCode"
-                className="block text-sm font-medium mb-1"
-              >
-                Postal code
-              </label>
-              <Input
-                id="postalCode"
-                name="postalCode"
-                value={formData.postalCode}
-                onChange={handleChange}
+              <div>
+                <label
+                  htmlFor="postalCode"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Postal code
+                </label>
+                <Input
+                  id="postalCode"
+                  name="postalCode"
+                  value={formData.postalCode}
+                  onChange={handleChange}
                 placeholder="Enter your postal code"
                 required
-              />
+                />
             </div>
 
             <div>
@@ -312,7 +312,7 @@ export default function ShippingDetailsForm({
 
             <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white">
               Continue to payment
-            </Button>
+              </Button>
           </form>
         </div>
 
@@ -322,19 +322,19 @@ export default function ShippingDetailsForm({
             <h2 className="text-xl font-bold mb-6">Order summary</h2>
 
             {/* Cart Items */}
-            <div className="space-y-4 mb-6">
-              {cartItems.map((item) => (
+          <div className="space-y-4 mb-6">
+            {cartItems.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden">
-                    <Image
+                  <Image
                       src={item.images && item.images.length > 0 ? item.images[0].image : "/placeholder.svg"}
-                      alt={item.name}
-                      fill
+                    alt={item.name}
+                    fill
                       className="object-contain"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium">{item.name}</h3>
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium">{item.name}</h3>
                     <p className="text-sm text-gray-500">
                       Quantity: {item.quantity}
                     </p>
@@ -342,9 +342,9 @@ export default function ShippingDetailsForm({
                       ₦{Number(item.price).toLocaleString()}
                     </p>
                   </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
             {/* Summary Details */}
             <div className="border-t pt-4 space-y-2">
@@ -362,7 +362,7 @@ export default function ShippingDetailsForm({
               </div>
               <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                 <span>Total</span>
-                <span>₦{cartSummary.total.toLocaleString()}</span>
+                  <span>₦{cartSummary.total.toLocaleString()}</span>
               </div>
             </div>
           </div>
