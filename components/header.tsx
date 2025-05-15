@@ -72,7 +72,7 @@ const Header = () => {
               pathname.includes("/brands") ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            Car Brands
+            Brands
           </Link>
           <Link
             href="/interior"

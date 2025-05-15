@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -11,7 +10,6 @@ import {
   LogOut,
   HelpCircle,
   ChevronDown,
-  Search,
 } from "lucide-react";
 import {
   Collapsible,
@@ -20,22 +18,13 @@ import {
 } from "@/components/ui/collapsible";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/api/use-auth";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 
 // This is specifically the mobile navigation menu
 const NavMenu = ({ onClose }: { onClose?: () => void }) => {
   const { user, logout } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      if (onClose) onClose();
-    }
-  };
+
 
   const handleLogout = () => {
     logout();
@@ -61,18 +50,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
           </Link>
         </div>
 
-        {/* Search */}
-        <div className="px-4 pb-4">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-              placeholder="Search product or brand..." 
-              className="pl-10" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
-        </div>
+ 
       </div>
 
       {/* Scrollable Content */}
@@ -136,7 +114,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         </div>
 
         {/* Main Menu */}
-        <div className="px-4 mt-[58px]">
+        <div className="px-4 mt-[38px]">
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
               <span className="text-base font-medium">Main menu</span>
@@ -151,13 +129,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
                 <ShoppingCart className="h-5 w-5" />
                 <span>My cart</span>
               </Link>
-              <Link
-                href="/about"
-                className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
-                onClick={onClose}
-              >
-                <span>About Us</span>
-              </Link>
+  
 
               {!user && (
                 <Link

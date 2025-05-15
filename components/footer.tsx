@@ -118,10 +118,7 @@ const Footer = () => {
                   Custom Order
                 </Link>
               </div>
-              {/* Categories */}
             </div>
-
-            {/* Larger Logo */}
           </div>
         </div>
         <div className="hidden lg:flex lg:flex-col mt-20">
@@ -192,7 +189,7 @@ const Footer = () => {
           </div>
 
           {/* Two Column Layout for Categories and Terms */}
-          <div className="flex flex-col gap-4 justify-between mb-8">
+          <div className="flex gap-4 justify-between mb-8">
             <div className="flex flex-col">
               <h3 className="text-gray-800 font-medium mb-2">Categories</h3>
               <Link href="/interior" className="text-gray-800 mb-2">
