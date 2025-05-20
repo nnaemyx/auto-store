@@ -17,6 +17,20 @@ const TikTokIcon = () => (
   </svg>
 );
 
+const YouTubeIcon = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="36" height="36" rx="18" fill="currentColor" />
+    <path d="M25.8 14.1C25.6 13.3 25 12.7 24.2 12.5C22.7 12.1 18 12.1 18 12.1C18 12.1 13.3 12.1 11.8 12.5C11 12.7 10.4 13.3 10.2 14.1C9.8 15.6 9.8 18 9.8 18C9.8 18 9.8 20.4 10.2 21.9C10.4 22.7 11 23.3 11.8 23.5C13.3 23.9 18 23.9 18 23.9C18 23.9 22.7 23.9 24.2 23.5C25 23.3 25.6 22.7 25.8 21.9C26.2 20.4 26.2 18 26.2 18C26.2 18 26.2 15.6 25.8 14.1ZM16.5 21V15L21.5 18L16.5 21Z" fill="white"/>
+  </svg>
+);
+
+const FacebookIcon = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="36" height="36" rx="18" fill="currentColor" />
+    <path d="M20.5 18H22V15.5H20.5V14.5C20.5 14.1 20.7 13.9 21.1 13.9H22V12H20.5C19.1 12 18.5 12.7 18.5 13.8V15.5H17V18H18.5V24H20.5V18Z" fill="white"/>
+  </svg>
+);
+
 const Footer = () => {
   return (
     <footer className="w-full">
@@ -57,6 +71,22 @@ const Footer = () => {
                     className="text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     <TikTokIcon />
+                  </a>
+                  <a
+                    href="https://youtube.com/@autostoreng?si=DQD_H4uZw1cCnzXN"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <YouTubeIcon />
+                  </a>
+                  <a
+                    href="https://www.facebook.com/share/16AkkJgea1/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <FacebookIcon />
                   </a>
                 </div>
               </div>
@@ -167,6 +197,22 @@ const Footer = () => {
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               <TikTokIcon />
+            </a>
+            <a
+              href="https://youtube.com/@autostoreng?si=DQD_H4uZw1cCnzXN"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <YouTubeIcon />
+            </a>
+            <a
+              href="https://www.facebook.com/share/16AkkJgea1/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <FacebookIcon />
             </a>
           </div>
 
