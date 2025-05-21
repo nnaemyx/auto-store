@@ -6,12 +6,18 @@ const HeroSection = () => {
     <div className="relative h-[740px] lg:h-[600px] w-full overflow-hidden lg:rounded-lg">
       {/* Video layer */}
       <div className="absolute inset-0">
-        <iframe
-          src="https://www.youtube.com/embed/A-8gIArOxdg?autoplay=1&mute=1&loop=1&playlist=A-8gIArOxdg&controls=0&showinfo=0&rel=0"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
           className="w-full h-full object-cover"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        >
+          <source
+            src="https://res.cloudinary.com/mmainspire/video/upload/v1747790663/guix6akzfpem1ojho5lg.mp4"
+            type="video/mp4"
+          />
+        </video>
       </div>
       
       {/* Dark overlay */}
