@@ -42,7 +42,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         <div className="flex items-center justify-between p-4">
           <Link href="/" className="flex items-center" onClick={onClose}>
             <Image
-              src="/images/1000021435-removebg-preview 1.png"
+              src="/images/WhatsApp Image 2025-05-23 at 04.07.18_3a500f11.png"
               alt="Auto Store"
               width={120}
               height={40}

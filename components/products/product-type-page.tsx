@@ -270,22 +270,18 @@ function DesktopFilters({ onApplyFilter }: { onApplyFilter: (filterType: string,
 
   // Calculate price ranges based on available products
   const priceRanges = useMemo(() => {
-    if (!products || products.length === 0) return []
-    
+    if (!products || products.length === 0) return filterOptions.priceRange;
     const prices = products.map(p => Number(p.amount))
     const min = Math.min(...prices)
     const max = Math.max(...prices)
-    
     // Create ranges that make sense for the data
     const ranges = []
     const step = Math.ceil((max - min) / 4) // Divide into 4 ranges
-    
     for (let i = 0; i < 4; i++) {
       const rangeMin = min + (step * i)
       const rangeMax = i === 3 ? max : min + (step * (i + 1))
       ranges.push(`₦${rangeMin.toLocaleString()} - ₦${rangeMax.toLocaleString()}`)
     }
-    
     return ranges
   }, [products])
 
@@ -343,6 +339,8 @@ function FilterOptions({
   const handleOptionChange = (option: string) => {
     setSelectedOptions((prev) => {
       if (inputType === "radio") {
+        // Auto-apply for radio
+        onApplyFilter(filterType, [option]);
         return [option]
       }
       if (prev.includes(option)) {

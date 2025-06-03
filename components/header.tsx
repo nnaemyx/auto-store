@@ -61,7 +61,7 @@ const Header = () => {
       <div className="flex items-center justify-between w-full px-5">
         <div className="flex items-center gap-6 py-[13.18px]">
           <Link href="/" className="flex items-center">
-            <Image src="/images/1000021435-removebg-preview 1.png" alt="Auto Store" width={88} height={33.65} priority />
+            <Image src="/images/WhatsApp Image 2025-05-23 at 04.07.18_3a500f11.png" alt="Auto Store" width={88} height={33.65} priority />
           </Link>
 
         </div>

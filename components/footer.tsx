@@ -40,10 +40,10 @@ const Footer = () => {
           <div className="w-full bg-[#F5F5F5] rounded-[40px] p-[60px]">
             <div className="flex justify-between w-full">
               <Image
-                src="/images/footer logo.png"
+                src="/images/WhatsApp Image 2025-05-23 at 04.07.18_3a500f11.png"
                 alt="Auto Store NG"
-                width={210}
-                height={80}
+                width={310}
+                height={100}
                 className=""
               />
               <div className="max-w-[478px]">
