@@ -1,6 +1,6 @@
 import { toast as sonnerToast } from "sonner";
 
-enum ToastVariant {
+export enum ToastVariant {
   Success = "success",
   Error = "error",
   Warning = "warning",

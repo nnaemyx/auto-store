@@ -20,7 +20,7 @@ const HighlightCard = ({ title, description, image, categoryId }: HighlightCardP
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src={image }
+          src={image || "/placeholder-image.jpg"}
           alt={title}
           fill
           className="object-cover brightness-[0.85] group-hover:scale-105 transition-transform duration-500"
@@ -36,7 +36,7 @@ const HighlightCard = ({ title, description, image, categoryId }: HighlightCardP
         </div>
         <div className="md:self-end">
           <Button asChild className="bg-white mt-6 md:mt-0 text-black w-[167px] mx-auto md:w-auto md:mx-0 flex justify-center hover:bg-gray-100">
-          <Link href={`/products?category_id=${categoryId}`}>Shop Now</Link>
+            <Link href={`/products?category_id=${categoryId}`}>Shop Now</Link>
           </Button>
         </div>
       </div>
@@ -45,14 +45,6 @@ const HighlightCard = ({ title, description, image, categoryId }: HighlightCardP
 }
 
 export default function ProductHighlights() {
-  // Define the image paths using the public directory
-  const lubricantsImage = "/images/lubricant.png"
-  const wheelsImage = "/images/wheels.png"
-  const rimsImage = "/images/rim.png"
-
-  // Featured images to use with categories
-  const featuredImages = [lubricantsImage, wheelsImage, rimsImage]
-
   // Default descriptions in case categories don't have them
   const defaultDescriptions = [
     "Ensure your engines and parts are protected from wear and tear by using oil from the lubricants section.",
@@ -67,7 +59,6 @@ export default function ProductHighlights() {
     return (
       <section className="">
         <div className="mx-auto">
-
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-brand-red" />
           </div>
@@ -79,7 +70,7 @@ export default function ProductHighlights() {
   if (isError || !categories || categories.length === 0) {
     return (
       <section className="">
-        <div className=" mx-auto">
+        <div className="mx-auto">
           <div className="text-center py-8">
             <p>Unable to load categories. Please try again later.</p>
           </div>
@@ -92,15 +83,14 @@ export default function ProductHighlights() {
   const featuredCategories = categories.slice(0, 3).map((cat, index) => ({
     title: cat.name,
     description: cat.description || defaultDescriptions[index % defaultDescriptions.length],
-    image: featuredImages[index % featuredImages.length],
+    image: cat.image || "/placeholder-image.jpg",
     link: `/products?category_id=${cat.id}`,
     categoryId: cat.id,
   }))
 
   return (
     <section className="">
-      <div className=" mx-auto">
-        
+      <div className="mx-auto">
         <div className="grid md:grid-cols-1 gap-6">
           {featuredCategories.map((highlight, index) => (
             <HighlightCard

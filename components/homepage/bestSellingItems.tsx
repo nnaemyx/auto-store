@@ -94,7 +94,7 @@ export default function BestSellingItems() {
       <div className="">
         {!isLoading && !isError && products && (
           <div className="grid grid-cols-2 gap-4 lg:hidden">
-            {products.map((product) => (
+            {products.slice(0, 6).map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}

@@ -1,33 +1,50 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from '@/components/ui/label';
-import { useToast } from "@/hooks/use-toast";
+import { useToast, ToastVariant } from "@/hooks/use-toast";
+import { useCustomOrder } from '@/hooks/use-custom-order';
 
 const CustomOrderPage = () => {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const customOrderMutation = useCustomOrder();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const formData = new FormData(e.currentTarget);
+    const orderData = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      address: formData.get('address') as string,
+      product_name: formData.get('productName') as string,
+      description: formData.get('description') as string,
+      additional: formData.get('additional') as string,
+    };
 
-    // Show success message
-    toast({
-      title: "Order Request Submitted",
-      description: "Our customer care team will contact you shortly regarding your order.",
-    });
+    try {
+      await customOrderMutation.mutateAsync(orderData);
+      
+      toast({
+        title: "Order Request Submitted",
+        description: "Our customer care team will contact you shortly regarding your order.",
+      });
 
-    setIsSubmitting(false);
-    // Reset form
-    e.currentTarget.reset();
+      // Reset form using the ref
+      formRef.current?.reset();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit order request",
+        variant: ToastVariant.Error,
+      });
+    }
   };
 
   return (
@@ -49,38 +66,39 @@ const CustomOrderPage = () => {
               Can&apos;t find what you&apos;re looking for? Fill out this form to request a custom order. Our team will get back to you within 24 hours.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" placeholder="Enter your full name" required />
+                  <Input id="name" name="name" placeholder="Enter your full name" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" placeholder="Enter your email" required />
+                  <Input id="email" name="email" type="email" placeholder="Enter your email" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="Enter your phone number" required />
+                  <Input id="phone" name="phone" type="tel" placeholder="Enter your phone number" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
-                  <Input id="address" placeholder="Enter your address" required />
+                  <Input id="address" name="address" placeholder="Enter your address" required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="productName">Product Name</Label>
-                <Input id="productName" placeholder="Enter the name of the product you want" required />
+                <Input id="productName" name="productName" placeholder="Enter the name of the product you want" required />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="description">Product Description</Label>
                 <Textarea 
                   id="description" 
+                  name="description"
                   placeholder="Please describe the product you're looking for in detail. Include any specific requirements or features you need."
                   className="min-h-[150px]"
                   required
@@ -91,6 +109,7 @@ const CustomOrderPage = () => {
                 <Label htmlFor="additional">Additional Information</Label>
                 <Textarea 
                   id="additional" 
+                  name="additional"
                   placeholder="Any additional information that might help us understand your requirements better."
                   className="min-h-[100px]"
                 />
@@ -100,9 +119,9 @@ const CustomOrderPage = () => {
                 <Button 
                   type="submit" 
                   className="bg-black text-white hover:bg-gray-800 px-8"
-                  disabled={isSubmitting}
+                  disabled={customOrderMutation.isPending}
                 >
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                  {customOrderMutation.isPending ? "Submitting..." : "Submit Request"}
                 </Button>
               </div>
             </form>

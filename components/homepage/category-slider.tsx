@@ -16,14 +16,6 @@ interface CategoryCardProps {
   categoryId: number;
 }
 
-// Default images to use for categories
-const categoryImages = [
-  "/images/pexels-markusspiske-2027045.png",
-  "/images/pexels-julius-weidenauer-296473414-28292055.png",
-  "/images/pexels-cottonbro-7565163.png",
-  "/images/pexels-cottonbro-4489765.png",
-];
-
 const CategoryCard = ({
   title,
   image,
@@ -35,7 +27,7 @@ const CategoryCard = ({
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src={image}
+          src={image || "/placeholder-image.jpg"}
           alt={title}
           fill
           className="object-cover brightness-[0.55] group-hover:scale-105 transition-transform duration-500"
@@ -74,8 +66,8 @@ export default function CategorySlider() {
   const categoryCards = categories
     ? categories.slice(0, 8).map((category, index) => ({
         title: category.name,
-        subtitle: index === 0 ? "(From USA)" : undefined, // Just add a subtitle to the first one as an example
-        image: categoryImages[index % categoryImages.length], // Cycle through our existing images
+        subtitle: index === 0 ? "(From USA)" : undefined,
+        image: category.image || "/placeholder-image.jpg",
         link: `/products?category_id=${category.id}`,
         categoryId: category.id,
       }))
@@ -111,7 +103,7 @@ export default function CategorySlider() {
   if (isLoading) {
     return (
       <section className="">
-        <div className=" mx-auto">
+        <div className="mx-auto">
           <h2 className="text-xl font-bold mb-6">Shop these Categories</h2>
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-brand-red" />
@@ -123,8 +115,8 @@ export default function CategorySlider() {
 
   if (isError || !categories || categories.length === 0) {
     return (
-      <section className=" ">
-        <div className=" mx-auto">
+      <section className="">
+        <div className="mx-auto">
           <h2 className="text-xl font-bold mb-6">Shop these Categories</h2>
           <div className="text-center py-8">
             <p>Unable to load categories. Please try again later.</p>
@@ -137,7 +129,7 @@ export default function CategorySlider() {
   return (
     <section className="">
       <div className="mx-auto">
-        <div className="flex justify-between items-center mb-6  md:pr-10">
+        <div className="flex justify-between items-center mb-6 md:pr-10">
           <h2 className="text-[16px] text-center mx-auto md:mx-0 lg:text-left font-medium">Shop these Categories</h2>
 
           {/* Desktop Navigation */}
@@ -164,57 +156,48 @@ export default function CategorySlider() {
         </div>
 
         {/* Slider */}
-        <div className="relative md:mt-[44px]">
-          <div
-            ref={sliderRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {categoryCards.map((category, index) => (
-              <div
-                key={index}
-                className={`${
-                  isMobile ? "w-[300px]" : "w-[380px]"
-                } flex-shrink-0 snap-start`}
-              >
-                <CategoryCard
-                  title={category.title}
-                  subtitle={category.subtitle}
-                  image={category.image}
-                  link={category.link}
-                  categoryId={category.categoryId}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Mobile Navigation */}
-          <div className="flex justify-center gap-2 mt-6 md:hidden">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handlePrev}
-              disabled={currentIndex === 0}
-              className="h-8 w-8 rounded-full"
+        <div
+          ref={sliderRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {categoryCards.map((category, index) => (
+            <div
+              key={index}
+              className={`${
+                isMobile ? "w-[300px]" : "w-[380px]"
+              } flex-shrink-0 snap-start`}
             >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleNext}
-              disabled={currentIndex >= maxIndex}
-              className="h-8 w-8 rounded-full"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+              <CategoryCard
+                title={category.title}
+                subtitle={category.subtitle}
+                image={category.image}
+                link={category.link}
+                categoryId={category.categoryId}
+              />
+            </div>
+          ))}
         </div>
-        <div className="mt-16 mb-8 text-center bg-gray-50 py-12 px-4 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Did not see what you are looking for?</h2>
-          <p className="text-gray-600 mb-8">Make a custom order with us</p>
-          <Button asChild className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg">
-            <Link href="/custom-order">Custom Order</Link>
+
+        {/* Mobile Navigation */}
+        <div className="flex justify-center gap-2 mt-6 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+            className="h-8 w-8 rounded-full"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleNext}
+            disabled={currentIndex >= maxIndex}
+            className="h-8 w-8 rounded-full"
+          >
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
