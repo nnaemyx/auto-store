@@ -207,6 +207,10 @@ export function useOrder(id: string | number) {
 
         console.log("useOrder - raw response:", response);
 
+        // Calculate delivery date (24 hours from order creation)
+        const orderDate = response.created_at ? new Date(response.created_at) : new Date();
+        const deliveryDate = new Date(orderDate.getTime() + 24 * 60 * 60 * 1000);
+
         // Transform the response to match our needs
         const transformedOrder = {
           ...response,
@@ -216,7 +220,7 @@ export function useOrder(id: string | number) {
           order_code: response.order_code || "",
           status: response.orderStatus?.name || (response.status ? response.status.toString() : "Unknown"),
           delivery_fee: response.delivery_fee || "0",
-          delivery_date: response.delivery_date || null,
+          delivery_date: deliveryDate.toISOString(),
           payment_method: response.payment_method || "Unknown",
           currency: response.currency || "USD",
           total: response.total || 0,

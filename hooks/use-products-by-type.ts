@@ -49,8 +49,16 @@ async function fetchProductsByType(type: string, filters: ProductFilters = {}): 
       const productTypeName = product.product_type.name.toLowerCase()
       const searchType = type.toLowerCase()
 
-      console.log(`Product ${product.id} type: ${productTypeName}`)
-      return productTypeName.includes(searchType)
+      // Map old product types to new ones
+      const typeMapping: { [key: string]: string[] } = {
+        "universal products": ["interior", "exterior", "universal"],
+        "car spare parts": ["spare parts", "parts"]
+      }
+
+      // Check if the product type matches any of the mapped types
+      return typeMapping[searchType]?.some(mappedType => 
+        productTypeName.includes(mappedType)
+      ) || productTypeName.includes(searchType)
     })
 
     console.log(`Found ${filteredProducts.length} products matching type: ${type}`)

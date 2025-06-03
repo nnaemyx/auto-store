@@ -18,6 +18,7 @@ import { useProduct, useProductsByCategory } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useProductReviews } from "@/hooks/use-product-reviews";
+import { useOrder } from "@/hooks/use-orders"
 
 interface ProductDetailsProps {
   id: number;
@@ -29,6 +30,8 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
   const { toast } = useToast();
   // Fetch product data using TanStack Query
   const { data: product, isLoading, isError, error } = useProduct(id);
+  // Fetch order data
+  const { data: orderData } = useOrder(id.toString());
 
   // Fetch product reviews
   const { data: reviewsData } = useProductReviews(
@@ -223,16 +226,7 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
             </div>
           </div>
 
-          {/* Stock Status */}
-          <div className="text-sm">
-            {Number.parseInt(product.quantity) > 0 ? (
-              <span className="text-green-600">
-                In Stock ({product.quantity} available)
-              </span>
-            ) : (
-              <span className="text-red-600">Out of Stock</span>
-            )}
-          </div>
+
 
           {/* Action Buttons */}
           <div className="flex flex-row sm:flex-row gap-4">
@@ -344,15 +338,15 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
           <div className="grid grid-cols-2 gap-y-4">
             <div>
               <p className="text-gray-500 text-sm">Weight</p>
-              <p className="text-sm">12.5 KG</p>
+              <p className="text-sm">{product.weight || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-sm">Colour</p>
-              <p className="text-sm">Black, Red, Green, Blue</p>
+              <p className="text-gray-500 text-sm">SKU</p>
+              <p className="text-sm">{product.code || 'N/A'}</p>
             </div>
             <div>
               <p className="text-gray-500 text-sm">Condition</p>
-              <p className="text-sm">New</p>
+              <p className="text-sm">{product.product_state_id === "1" ? "Brand New" : "Fairly Used"}</p>
             </div>
           </div>
 
@@ -360,11 +354,19 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-gray-500 text-sm">Est. delivery date</p>
-                <p className="text-sm">05/01/2025</p>
+                <p className="text-sm">
+                  {orderData?.delivery_date ? new Date(orderData.delivery_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  }) : 'N/A'}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-gray-500 text-sm">Status</p>
-                <p className="text-yellow-500 text-sm">Order shipped</p>
+                <p className={`text-sm ${orderData?.status?.toLowerCase().includes('shipped') ? 'text-yellow-500' : 'text-gray-500'}`}>
+                  {orderData?.status || 'Pending'}
+                </p>
               </div>
             </div>
 

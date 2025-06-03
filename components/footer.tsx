@@ -96,13 +96,13 @@ const Footer = () => {
                 <h3 className="text-gray-800 font-medium mb-4">Categories</h3>
                 <div className="flex flex-col">
                   <Link
-                    href="/interior"
+                    href="/universal-products"
                     className="text-gray-800 mb-2"
                   >
-                    Interior accessories
+                    Universal Products
                   </Link>
-                  <Link href="/exterior" className="text-gray-800">
-                    Exterior accessories
+                  <Link href="/car-spare-parts" className="text-gray-800">
+                    Car Spare Parts
                   </Link>
                 </div>
               </div>
@@ -238,11 +238,11 @@ const Footer = () => {
           <div className="flex gap-4 justify-between mb-8">
             <div className="flex flex-col">
               <h3 className="text-gray-800 font-medium mb-2">Categories</h3>
-              <Link href="/interior" className="text-gray-800 mb-2">
-                Interior accessories
+              <Link href="/universal-products" className="text-gray-800 mb-2">
+                Universal Products
               </Link>
-              <Link href="/exterior" className="text-gray-800">
-                Exterior accessories
+              <Link href="/car-spare-parts" className="text-gray-800">
+                Car Spare Parts
               </Link>
             </div>
 

@@ -75,20 +75,20 @@ const Header = () => {
             Brands
           </Link>
           <Link
-            href="/interior"
+            href="/universal-products"
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              pathname.includes("/interior") ? "text-primary" : "text-muted-foreground"
+              pathname.includes("/universal-products") ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            Interior Accessories
+            Universal Products
           </Link>
           <Link
-            href="/exterior"
+            href="/car-spare-parts"
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              pathname.includes("/exterior") ? "text-primary" : "text-muted-foreground"
+              pathname.includes("/car-spare-parts") ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            Exterior Accessories
+            Car Spare Parts
           </Link>
           <Link
             href="/about"

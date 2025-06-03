@@ -92,6 +92,8 @@ export interface Product {
   images: ProductImage[]
   price: number
   product_type?: ProductType
+  weight?: string
+  product_state_id?: string
   brand?: {
     id: number
     name: string

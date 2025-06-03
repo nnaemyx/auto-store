@@ -79,22 +79,22 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         )}
 
         {/* Categories */}
-        <div className="px-4 py-3">
+        <div className="px-4 py-4">
           <h3 className="text-base font-medium mb-3">Categories</h3>
           <div className="space-y-4">
             <Link
-              href="/interior"
+              href="/universal-products"
               className="block py-4 text-gray-700 hover:text-brand-red"
               onClick={onClose}
             >
-              Interior Accessories
+              Universal Products
             </Link>
             <Link
-              href="/exterior"
+              href="/car-spare-parts"
               className="block py-4 text-gray-700 hover:text-brand-red"
               onClick={onClose}
             >
-              Exteriors
+              Car Spare Parts
             </Link>
             <Link
               href="/about"
