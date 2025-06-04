@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { apiClient } from '@/api/api-client';
 
 interface CustomOrderData {
   name: string;
@@ -10,22 +11,13 @@ interface CustomOrderData {
   additional?: string;
 }
 
+interface CustomOrderResponse {
+  status: string;
+  message: string;
+}
+
 const submitCustomOrder = async (data: CustomOrderData) => {
-  const response = await fetch('https://admin.autostores.ng/api/custom-order', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-    credentials: 'include', // This will include cookies if needed
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to submit order');
-  }
-
-  return response.json();
+  return apiClient.post<CustomOrderResponse>('/custom-order', data);
 };
 
 export const useCustomOrder = () => {
