@@ -18,7 +18,6 @@ import { useProduct, useProductsByCategory } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useProductReviews } from "@/hooks/use-product-reviews";
-import { useOrder } from "@/hooks/use-orders"
 
 interface ProductDetailsProps {
   id: number;
@@ -30,8 +29,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
   const { toast } = useToast();
   // Fetch product data using TanStack Query
   const { data: product, isLoading, isError, error } = useProduct(id);
-  // Fetch order data
-  const { data: orderData } = useOrder(id.toString());
 
   // Fetch product reviews
   const { data: reviewsData } = useProductReviews(
@@ -349,28 +346,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
               <p className="text-sm">{product.product_state_id === "1" ? "Brand New" : "Fairly Used"}</p>
             </div>
           </div>
-
-          <div className="mt-6 space-y-3">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-gray-500 text-sm">Est. delivery date</p>
-                <p className="text-sm">
-                  {orderData?.delivery_date ? new Date(orderData.delivery_date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                  }) : 'N/A'}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-500 text-sm">Status</p>
-                <p className={`text-sm ${orderData?.status?.toLowerCase().includes('shipped') ? 'text-yellow-500' : 'text-gray-500'}`}>
-                  {orderData?.status || 'Pending'}
-                </p>
-              </div>
-            </div>
-
-          </div>
         </div>
       </div>
 
@@ -443,7 +418,7 @@ function RelatedProducts({
                 {product.name}
               </h3>
               <p className="font-bold text-sm">
-                ₦{product.price.toLocaleString()}
+                ₦{Number.parseInt(product.amount).toLocaleString()}
               </p>
               <div className="flex flex-wrap gap-1 mt-1">
                 {/* {product.tags &&

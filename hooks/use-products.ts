@@ -34,9 +34,13 @@ export function useProduct(id: number) {
 
 // Get products by category ID
 export function useProductsByCategory(categoryId: number) {
+  console.log("useProductsByCategory called with ID:", categoryId);
   return useQuery({
     queryKey: productKeys.byCategory(categoryId),
-    queryFn: () => fetchProductsByCategory(categoryId),
+    queryFn: () => {
+      console.log("useProductsByCategory queryFn executing");
+      return fetchProductsByCategory(categoryId);
+    },
     enabled: !!categoryId, // Only run the query if we have a category ID
   })
 }
@@ -150,19 +154,51 @@ async function fetchProductById(id: number): Promise<Product> {
 }
 
 async function fetchProductsByCategory(categoryId: number): Promise<Product[]> {
-  const response = await apiClient.get<Product[]>(`/product/get-product-by-category/${categoryId}`)
+  try {
+    console.log("fetchProductsByCategory executing with ID:", categoryId);
+    
+    // First get all products
+    const allProducts = await apiClient.get<Product[]>("/product/all")
+    console.log("Total products fetched:", allProducts.length);
+    
+    // Get the category name from the first product that matches the categoryId
+    const categoryProduct = allProducts.find(
+      (product) => Number.parseInt(product.category_id) === categoryId
+    )
+    console.log("Found category product:", categoryProduct);
+    
+    if (!categoryProduct?.category?.name) {
+      console.error("Category not found for ID:", categoryId)
+      return []
+    }
 
-  // Filter out deleted products (delete_status = "1")
-  const filteredProducts = response.filter((product) => product.delete_status === "2")
+    const categoryName = categoryProduct.category.name
+    console.log("Using category name:", categoryName);
+    
+    // Filter by category name and check product_status_id
+    const filteredProducts = allProducts.filter(
+      (product) => 
+        product.category?.name === categoryName && 
+        product.product_status_id === "1" // 1 means in stock/active
+    )
+    console.log("Filtered products count:", filteredProducts.length);
+    console.log("Filtered products:", filteredProducts);
 
-  // Process images to get full URLs
-  return filteredProducts.map((product) => ({
-    ...product,
-    images: product.images.map((img) => ({
-      ...img,
-      image: getImageUrl(img.image),
-    })),
-  }))
+    // Process images to get full URLs
+    const processedProducts = filteredProducts.map((product) => ({
+      ...product,
+      images: product.images.map((img) => ({
+        ...img,
+        image: getImageUrl(img.image),
+      })),
+    }))
+    console.log("Final processed products:", processedProducts);
+
+    return processedProducts;
+  } catch (error) {
+    console.error("Error fetching products by category:", error)
+    return []
+  }
 }
 
 async function fetchProductsByManufacturer(manufacturerId: number): Promise<Product[]> {
