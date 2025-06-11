@@ -28,11 +28,10 @@ const HeroSection = () => {
         <div className="container mx-auto lg:mx-0 flex lg:flex-row flex-col justify-center lg:justify-between items-baseline lg:pb-6 pb-[44px] ">
           <div className="mx-auto lg:mx-0">
             <h1 className="text-[24px] lg:text-6xl lg:text-left text-center font-semibold tracking-tight leading-none text-white">
-              Just Tires
+              Our Mission
             </h1>
             <p className="text-gray-200 lg:text-base lg:text-left text-center font-normal max-w-md mt-2">
-              Explore our vast collection of car tires for all your normal,
-              track and off road needs.
+              To simplify and transform how individuals and businesses buy automotive products — through a reliable online platform that guarantees quality, affordability, and transparency with every request.
             </p>
           </div>
           <Link href="/product" className="mx-auto lg:mx-0 mt-[24px] lg:mt-0">

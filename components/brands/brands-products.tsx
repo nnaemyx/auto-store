@@ -6,6 +6,7 @@ import { useProducts } from "@/hooks/use-products"
 import { Loader2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import ProductsGrid from "@/components/products/product-grid"
 
 interface BrandProductsProps {
   brandId: number
@@ -72,36 +73,11 @@ export default function BrandProducts({ brandId }: BrandProductsProps) {
         </div>
       </div>
 
-      {/* Categories for this brand */}
-      {categories && categories.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-xl font-bold mb-6">Categories</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/products/brand/${brandId}/category/${category.id}`}
-                className="flex flex-col items-center group"
-              >
-                <div className="bg-gray-50 rounded-full p-4 w-[80px] h-[80px] flex items-center justify-center mb-2 transition-all group-hover:shadow-md">
-                  <div className="relative h-12 w-12">
-                    <Image
-                      src={
-                        category.image
-                         
-                      }
-                      alt={category.name}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-                <span className="text-sm text-center">{category.name}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Products for this brand */}
+      <div className="mb-12">
+        <h2 className="text-xl font-bold mb-6">Products</h2>
+        <ProductsGrid manufacturerId={brandId} />
+      </div>
     </div>
   )
 }

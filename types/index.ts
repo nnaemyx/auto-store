@@ -25,6 +25,7 @@ export interface Category {
   description: string
   created_at: string
   updated_at: string
+  product_count?: number
 }
 
 // Product types

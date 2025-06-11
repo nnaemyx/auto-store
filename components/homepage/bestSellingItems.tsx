@@ -3,11 +3,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
+import type { Product } from "@/types";
 
 import { useProducts } from "@/hooks/use-products";
 
 export default function BestSellingItems() {
   const { data: products, isLoading, isError } = useProducts();
+  // Shuffle products for randomness
+  const randomProducts = useMemo(() => {
+    if (!products) return [];
+    const shuffled = [...products];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, 6);
+  }, [products]);
+
   return (
     <div className="">
       <h2 className="text-[20px] md:text-[18px] tracking-[-4%] text-center lg:text-left font-medium mb-10">
@@ -18,7 +31,7 @@ export default function BestSellingItems() {
       <div className="">
         {!isLoading && !isError && products && (
           <div className="hidden lg:grid lg:grid-cols-3 md:gap-6">
-            {products.slice(0, 6).map((product) => (
+            {randomProducts.map((product: Product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}
@@ -94,7 +107,7 @@ export default function BestSellingItems() {
       <div className="">
         {!isLoading && !isError && products && (
           <div className="grid grid-cols-2 gap-4 lg:hidden">
-            {products.slice(0, 6).map((product) => (
+            {randomProducts.map((product: Product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}

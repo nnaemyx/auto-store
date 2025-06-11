@@ -165,7 +165,7 @@ const Footer = () => {
           {/* Logo and Description */}
           <div className="flex justify-center mb-6">
             <Image
-              src="/images/footer logo.png"
+              src="/images/WhatsApp Image 2025-05-23 at 04.07.18_3a500f11.png"
               alt="Auto Store NG"
               width={129}
               height={49.32}

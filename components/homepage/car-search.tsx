@@ -97,13 +97,16 @@ export default function CarSearch() {
     router.push(`/products?${params.toString()}`)
   }
 
+  // When rendering categories, filter to only those with products
+  const categoriesWithProducts = categories?.filter((cat) => cat.product_count && cat.product_count > 0) || [];
+
   return (
     <div className="w-full bg-white">
       <div className="container mx-auto max-w-6xl">
         <h2 className="text-xl md:text-lg font-bold text-center ">
-        Which car are you looking to get parts for today?
+          Which brand are you looking to get products today?
         </h2>
-        <p className="mb-8 md:mb-12 text-center text-gray-500 mt-2">Let’s find the right fit for your car.</p>
+        <p className="mb-8 md:mb-12 text-center text-gray-500 mt-2">Let&apos;s find the right fit for your needs.</p>
 
         <div className={`${isDesktop ? "flex justify-between gap-4" : "grid grid-cols-2 gap-4"}`}>
           {/* Car Brand */}
@@ -216,9 +219,9 @@ export default function CarSearch() {
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </button>
 
-              {isPartOpen && categories && categories.length > 0 && (
+              {isPartOpen && categoriesWithProducts && categoriesWithProducts.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                  {categories.map((p) => (
+                  {categoriesWithProducts.map((p) => (
                     <button
                       key={p.id}
                       className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
