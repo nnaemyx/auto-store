@@ -35,9 +35,39 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
+    // Client-side validation
+    const errors: string[] = [];
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+
+    // Phone number validation (basic format)
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(formData.phone_number)) {
+      errors.push("Please enter a valid phone number");
+    }
+
+    // Username validation
+    if (formData.username.length < 3) {
+      errors.push("Username must be at least 3 characters long");
+    }
+
+    // Password validation
+    if (formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters long");
+    }
+
+    // Password match validation
     if (formData.password !== formData.confirm_password) {
-      toast("Passwords don't match");
+      errors.push("Passwords don't match");
+    }
+
+    // Show all validation errors if any
+    if (errors.length > 0) {
+      errors.forEach(error => toast(error));
       return;
     }
 
@@ -48,11 +78,8 @@ export default function SignupPage() {
       toast("Registration successful");
       router.push("/auth/login");
     } catch (err) {
-      toast(
-        err instanceof Error
-          ? err.message
-          : "Failed to create account. Please try again."
-      );
+      // Error handling is now done in the auth provider
+      console.error(err);
     } finally {
       setIsLoading(false);
     }

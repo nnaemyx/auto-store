@@ -69,7 +69,7 @@ export default function PaymentPage() {
         onSubmit={handleSubmit}
         shippingDetails={shippingDetails}
         cartItems={cart?.cart_items || []}
-        cartSummary={cart?.summary || { subtotal: 0, tax: 0, shipping_fee: 0, total: 0 }}
+        cartSummary={cart?.summary || { subtotal: 0, total: 0 }}
       />
     </div>
   )

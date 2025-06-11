@@ -255,16 +255,6 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-[#2F2F2F] text-sm">Tax</span>
-                <span className="text-[#2F2F2F] text-sm">₦{cart.summary.tax.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-[#2F2F2F] text-sm">Shipping Fee</span>
-                <span className="text-[#2F2F2F] text-sm">₦{cart.summary.shipping_fee.toLocaleString()}</span>
-              </div>
-
               <Separator className="bg-[#00000012]" />
 
               <div className="flex justify-between">

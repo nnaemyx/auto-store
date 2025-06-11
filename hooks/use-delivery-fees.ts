@@ -8,6 +8,11 @@ export interface DeliveryFee {
   name: string
   amount: number
   description?: string
+  location: string
+  weight_range: {
+    min: number
+    max: number
+  }
 }
 
 export function useDeliveryFees() {
@@ -17,12 +22,7 @@ export function useDeliveryFees() {
       try {
         const token = localStorage.getItem("token")
         if (!token) {
-          // If no token, return default delivery fees
-          return [
-            { id: 1, name: "Standard Delivery", amount: 1000, description: "Delivery within 5-7 days" },
-            { id: 2, name: "Express Delivery", amount: 2000, description: "Delivery within 2-3 days" },
-            { id: 3, name: "Premium Delivery", amount: 3000, description: "Next day delivery" },
-          ]
+          throw new Error("Authentication required")
         }
 
         const response = await apiClient.get<DeliveryFee[]>("/cart/get-delivery-fee", {

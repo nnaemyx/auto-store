@@ -79,6 +79,7 @@ export interface CartItem {
   category: CartItemCategory
   brand: CartItemBrand
   car_model: CartItemCarModel
+  weight?: number
 }
 
 export interface CartResponse {
@@ -129,7 +130,7 @@ export function useCart() {
 
   // Calculate cart summary
   const cartSummary = React.useMemo(() => {
-    if (!data?.items) return { subtotal: 0, tax: 0, shipping_fee: 0, total: 0 }
+    if (!data?.items) return { subtotal: 0, total: 0 }
 
     // Calculate subtotal using price or amount field
     const subtotal = data.items.reduce((sum, item) => {
@@ -138,20 +139,9 @@ export function useCart() {
       return sum + (itemPrice * quantity);
     }, 0);
 
-    // Calculate tax (7.5% of subtotal)
-    const tax = Math.round(subtotal * 0.075);
-    
-    // Calculate shipping fee (₦2,000 flat rate if cart has items)
-    const shipping_fee = subtotal > 0 ? 2000 : 0;
-    
-    // Calculate total (subtotal + tax + shipping)
-    const total = subtotal + tax + shipping_fee;
-
     return { 
-      subtotal: Math.round(subtotal), 
-      tax, 
-      shipping_fee, 
-      total 
+      subtotal: Math.round(subtotal),
+      total: Math.round(subtotal) // Total is now just the subtotal
     }
   }, [data])
 

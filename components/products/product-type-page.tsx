@@ -337,18 +337,17 @@ function FilterOptions({
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
 
   const handleOptionChange = (option: string) => {
-    setSelectedOptions((prev) => {
-      if (inputType === "radio") {
-        // Auto-apply for radio
-        onApplyFilter(filterType, [option]);
-        return [option]
-      }
-      if (prev.includes(option)) {
-        return prev.filter((item) => item !== option)
-      } else {
-        return [...prev, option]
-      }
-    })
+    if (inputType === "radio") {
+      setSelectedOptions([option])
+    } else {
+      setSelectedOptions((prev) => {
+        if (prev.includes(option)) {
+          return prev.filter((item) => item !== option)
+        } else {
+          return [...prev, option]
+        }
+      })
+    }
   }
 
   const handleApply = () => {

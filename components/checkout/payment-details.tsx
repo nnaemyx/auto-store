@@ -11,7 +11,6 @@ import type { CartItem } from "@/hooks/use-cart"
 import { apiClient } from "@/api/api-client"
 import { Loader2 } from "lucide-react"
 import PaystackPayment from "./paystack-payment"
-import { useDeliveryFees } from "@/hooks/use-delivery-fees"
 
 const getToken = (): string | null => {
   if (typeof window === "undefined") return null
@@ -35,8 +34,6 @@ interface PaymentDetailsFormProps {
   cartItems: CartItem[]
   cartSummary: {
     subtotal: number
-    tax: number
-    shipping_fee: number
     total: number
   }
 }
@@ -51,39 +48,69 @@ export default function PaymentDetailsForm({
   const { toast, ToastVariant } = useToast()
 
   const [discountCode, setDiscountCode] = useState("")
+  const [discountAmount, setDiscountAmount] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [deliveryFee, setDeliveryFee] = useState("")
   const [checkoutComplete, setCheckoutComplete] = useState(false)
   const [checkoutData, setCheckoutData] = useState<Record<string, unknown> | null>(null)
 
-  // Fetch delivery fees from the API
-  const { data: deliveryFees, isLoading: isLoadingFees, isError: isErrorFees } = useDeliveryFees()
+  // Calculate total weight of cart items
+  const totalWeight = cartItems.reduce((sum, item) => {
+    const weight = Number(item.weight || 0);
+    const quantity = Number(item.quantity || 1);
+    return sum + (weight * quantity);
+  }, 0);
 
-  // Set default delivery fee if none selected and fees are loaded
-  if (deliveryFees && deliveryFees.length > 0 && !deliveryFee) {
-    setDeliveryFee(deliveryFees[0].id.toString())
-  }
+  // Calculate delivery fee based on weight
+  const deliveryFeeAmount = totalWeight <= 5 ? 2000 : 
+                           totalWeight <= 10 ? 3000 : 
+                           totalWeight <= 20 ? 5000 : 8000;
 
-  const handleApplyDiscount = () => {
-    if (discountCode) {
+  // Calculate subtotal with discount
+  const subtotalWithDiscount = cartSummary.subtotal - discountAmount;
+
+  // Calculate total amount with delivery fee and discount
+  const totalAmount = subtotalWithDiscount + deliveryFeeAmount;
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode) {
       toast({
-        title: "Discount Applied",
-        description: `Discount code "${discountCode}" has been applied`,
-        variant: ToastVariant.Success,
-      })
-    }
-  }
-
-  const handleCheckout = async () => {
-    if (!deliveryFee) {
-      toast({
-        title: "Missing Delivery Option",
-        description: "Please select a delivery option",
+        title: "Invalid Code",
+        description: "Please enter a discount code",
         variant: ToastVariant.Error,
       })
       return
     }
 
+    try {
+      const token = getToken()
+      if (!token) {
+        throw new Error("Authentication required")
+      }
+
+      const response = await apiClient.post<{ discount_amount: number }>("/cart/apply-discount", {
+        code: discountCode
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      setDiscountAmount(response.discount_amount)
+      toast({
+        title: "Discount Applied",
+        description: `Discount of ₦${response.discount_amount.toLocaleString()} has been applied`,
+        variant: ToastVariant.Success,
+      })
+    } catch (error) {
+      toast({
+        title: "Invalid Code",
+        description: error instanceof Error ? error.message : "Invalid discount code",
+        variant: ToastVariant.Error,
+      })
+    }
+  }
+
+  const handleCheckout = async () => {
     setIsProcessing(true)
 
     try {
@@ -92,15 +119,6 @@ export default function PaymentDetailsForm({
       if (!token) {
         throw new Error("Authentication token not found. Please log in.")
       }
-
-      // Find selected delivery fee
-      const selectedFeeOption = deliveryFees?.find((fee) => fee.id.toString() === deliveryFee)
-      if (!selectedFeeOption) {
-        throw new Error("Invalid delivery fee selected")
-      }
-
-      // Calculate total amount including delivery fee
-      const totalAmount = cartSummary.subtotal + cartSummary.tax + selectedFeeOption.amount
 
       // Prepare checkout data
       const checkoutPayload = {
@@ -112,9 +130,9 @@ export default function PaymentDetailsForm({
         postal_code: shippingDetails.postalCode,
         town: shippingDetails.townCity,
         alt_phone_number: shippingDetails.alt_phoneNumber,
-        delivery_fee: selectedFeeOption.id.toString(),
+        delivery_fee: deliveryFeeAmount.toString(),
         amount: totalAmount,
-        tax: cartSummary.tax,
+        tax: 0,
         subtotal: cartSummary.subtotal,
       }
 
@@ -130,17 +148,17 @@ export default function PaymentDetailsForm({
       // Store checkout response for use in Paystack payment
       localStorage.setItem("checkoutResponse", JSON.stringify({
         ...response,
-        tax: cartSummary.tax,
+        tax: 0,
         subtotal: cartSummary.subtotal,
-        delivery_fee: selectedFeeOption.amount,
+        delivery_fee: deliveryFeeAmount,
       }))
 
       // Update state with checkout data
       setCheckoutData({
         ...response,
-        tax: cartSummary.tax,
+        tax: 0,
         subtotal: cartSummary.subtotal,
-        delivery_fee: selectedFeeOption.amount,
+        delivery_fee: deliveryFeeAmount,
       })
       setCheckoutComplete(true)
       setIsProcessing(false)
@@ -182,7 +200,7 @@ export default function PaymentDetailsForm({
           paymentReference: reference,
           paymentVerification: responseData?.verificationResult || null,
         },
-        deliveryFee,
+        deliveryFee: deliveryFeeAmount.toString(),
       })
     }
   }
@@ -195,16 +213,10 @@ export default function PaymentDetailsForm({
     })
   }
 
-  // Calculate total amount with selected delivery fee
-  const selectedFeeOption = deliveryFees?.find((fee) => fee.id.toString() === deliveryFee)
-  const deliveryFeeAmount = selectedFeeOption?.amount || 0
-  // Use cartSummary.total directly to maintain consistency
-  const totalAmount = cartSummary.total
-
   // Log the amounts for debugging
   console.log("Amount breakdown:", {
     subtotal: cartSummary.subtotal,
-    tax: cartSummary.tax,
+    tax: 0,
     deliveryFee: deliveryFeeAmount,
     total: totalAmount,
     cartSummaryTotal: cartSummary.total
@@ -234,40 +246,18 @@ export default function PaymentDetailsForm({
         <div className={isMobile ? "w-full" : "lg:w-1/2"}>
           <h2 className="text-xl font-bold mb-6">Payment Method</h2>
 
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-4">Please select your delivery option:</p>
+          <div className="bg-white rounded-lg border p-6">
+            <h2 className="text-xl font-bold mb-6">Payment Details</h2>
 
-            {isLoadingFees ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-brand-red mr-2" />
-                <span>Loading delivery options...</span>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Delivery Fee</span>
+                <span>₦{deliveryFeeAmount.toLocaleString()}</span>
               </div>
-            ) : isErrorFees ? (
-              <p className="text-red-500 text-sm">Error loading delivery options. Please try again.</p>
-            ) : (
-              <div className="space-y-3 mb-6">
-                {deliveryFees?.map((fee) => (
-                  <div key={fee.id} className="flex items-center">
-                    <input
-                      type="radio"
-                      id={`deliveryFee${fee.id}`}
-                      name="deliveryFee"
-                      value={fee.id.toString()}
-                      checked={deliveryFee === fee.id.toString()}
-                      onChange={() => setDeliveryFee(fee.id.toString())}
-                      className="mr-2"
-                      disabled={checkoutComplete}
-                    />
-                    <label htmlFor={`deliveryFee${fee.id}`} className="flex flex-col">
-                      <span>
-                        {fee.name} (₦{fee.amount.toLocaleString()})
-                      </span>
-                      {fee.description && <span className="text-xs text-gray-500">{fee.description}</span>}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            )}
+              <p className="text-sm text-gray-500">
+                Delivery fee is calculated based on total weight ({totalWeight}kg)
+              </p>
+            </div>
 
             {!checkoutComplete ? (
               <>
@@ -278,7 +268,7 @@ export default function PaymentDetailsForm({
                 <Button
                   onClick={handleCheckout}
                   className="w-full bg-black hover:bg-gray-800 text-white mb-6"
-                  disabled={isProcessing || isLoadingFees || !deliveryFee}
+                  disabled={isProcessing}
                 >
                   {isProcessing ? (
                     <>
@@ -400,20 +390,17 @@ export default function PaymentDetailsForm({
                 <span className="font-medium">₦{cartSummary.subtotal.toLocaleString()}</span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
-                <span>₦{cartSummary.tax.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping Fee</span>
-                <span>₦{deliveryFeeAmount.toLocaleString()}</span>
-              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>-₦{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
 
               <div className="pt-2 border-t mt-2">
                 <div className="flex justify-between font-bold">
                   <span>Total amount</span>
-                  <span>₦{totalAmount.toLocaleString()}</span>
+                  <span>₦{(cartSummary.subtotal - discountAmount).toLocaleString()}</span>
                 </div>
               </div>
             </div>

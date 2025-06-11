@@ -11,26 +11,24 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import type { CartItem } from "@/hooks/use-cart";
 import { Checkbox } from "../ui/checkbox";
 
-
+interface ShippingDetails {
+  firstName: string;
+  lastName: string;
+  stateOfResidence: string;
+  townCity: string;
+  phoneNumber: string;
+  alt_phoneNumber: string;
+  postalCode: string;
+  houseAddress: string;
+  saveDetails: boolean;
+  deliveryType: string;
+}
 
 interface ShippingDetailsFormProps {
-  onSubmit: (data: {
-    firstName: string;
-    lastName: string;
-    stateOfResidence: string;
-    townCity: string;
-    phoneNumber: string;
-    alt_phoneNumber:string;
-    postalCode: string;
-    houseAddress: string;
-    saveDetails: boolean;
-    deliveryType: string;
-  }) => void;
+  onSubmit: (formData: ShippingDetails) => void;
   cartItems: CartItem[];
   cartSummary: {
     subtotal: number;
-    tax: number;
-    shipping_fee: number;
     total: number;
   };
 }
@@ -352,17 +350,9 @@ export default function ShippingDetailsForm({
                 <span className="text-gray-600">Subtotal</span>
                 <span>₦{cartSummary.subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
-                <span>₦{cartSummary.tax.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping fee</span>
-                <span>₦{cartSummary.shipping_fee.toLocaleString()}</span>
-              </div>
               <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                 <span>Total</span>
-                  <span>₦{cartSummary.total.toLocaleString()}</span>
+                <span>₦{cartSummary.total.toLocaleString()}</span>
               </div>
             </div>
           </div>

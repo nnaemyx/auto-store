@@ -66,12 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true)
     },
     onSuccess: (response) => {
-      toast({
-        title: "Success",
-        description: "Login successful!",
-        variant: ToastVariant.Success,
-      })
-
       if (response.status === "successful" && response.user && response.access_token) {
         // Store the actual access token from the API response
         const token = response.access_token
@@ -82,6 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLocalStorage("user", JSON.stringify(userData))
         setUser(userData)
         
+        toast({
+          title: "Success",
+          description: "Login successful!",
+          variant: ToastVariant.Success,
+        })
+        
         router.push("/")
       } else {
         throw new Error(response.message || "Login failed")
@@ -91,10 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Login error:", error)
       toast({
         title: "Login Failed",
-        description: error instanceof Error ? error.message : "Invalid email or password",
+        description: "Invalid email or password. Please check your credentials and try again.",
         variant: ToastVariant.Error,
       })
-      throw error
     },
     onSettled: () => {
       setIsLoading(false)
@@ -129,9 +128,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onError: (error) => {
       console.error("Registration error:", error)
+      let errorMessage = "Failed to create account. Please try again."
+      
+      if (error instanceof Error) {
+        const errorStr = error.message.toLowerCase()
+        if (errorStr.includes("email") && errorStr.includes("exists")) {
+          errorMessage = "This email address is already registered. Please use a different email or try logging in."
+        } else if (errorStr.includes("phone") && errorStr.includes("exists")) {
+          errorMessage = "This phone number is already registered. Please use a different phone number."
+        } else if (errorStr.includes("password")) {
+          errorMessage = "Password must be at least 6 characters long and include a mix of letters, numbers, and special characters."
+        } else if (errorStr.includes("username") && errorStr.includes("exists")) {
+          errorMessage = "This username is already taken. Please choose a different username."
+        } else if (errorStr.includes("phone") && errorStr.includes("invalid")) {
+          errorMessage = "Please enter a valid phone number."
+        } else if (errorStr.includes("email") && errorStr.includes("invalid")) {
+          errorMessage = "Please enter a valid email address."
+        }
+      }
+
       toast({
         title: "Registration Failed",
-        description: error instanceof Error ? error.message : "Failed to create account",
+        description: errorMessage,
         variant: ToastVariant.Error,
       })
       throw error

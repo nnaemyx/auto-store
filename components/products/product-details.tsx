@@ -335,7 +335,7 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
           <div className="grid grid-cols-2 gap-y-4">
             <div>
               <p className="text-gray-500 text-sm">Weight</p>
-              <p className="text-sm">{product.weight || 'N/A'}</p>
+              <p className="text-sm">{product.weight || 'N/A'} grams</p>
             </div>
             <div>
               <p className="text-gray-500 text-sm">SKU</p>

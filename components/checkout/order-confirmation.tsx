@@ -40,8 +40,6 @@ interface OrderConfirmationProps {
   cartItems: CartItem[]
   cartSummary: {
     subtotal: number
-    tax: number
-    shipping_fee: number
     total: number
   }
 }
@@ -103,7 +101,7 @@ export default function OrderConfirmation({
     reference: checkoutData.reference || "",
     email: checkoutData.email || shippingDetails.email || "customer@example.com",
     check_out_id: checkoutData.check_out_id || "1",
-    delivery_fee: (checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee).toString(),
+    delivery_fee: (checkoutData.delivery_fee ? checkoutData.delivery_fee : "0").toString(),
     order_code: checkoutData.order_code || "didhdd",
     user_id: user?.id?.toString() || "1",
   }
@@ -211,18 +209,6 @@ export default function OrderConfirmation({
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium">₦{cartSummary.subtotal.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
-                <span>₦{cartSummary.tax.toLocaleString()}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping Fee</span>
-                <span>
-                  ₦{checkoutData.delivery_fee ? checkoutData.delivery_fee : cartSummary.shipping_fee.toLocaleString()}
-                </span>
               </div>
 
               <div className="pt-2 border-t mt-2">
