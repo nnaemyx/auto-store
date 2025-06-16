@@ -130,10 +130,15 @@ export default function PaymentDetailsForm({
         postal_code: shippingDetails.postalCode,
         town: shippingDetails.townCity,
         alt_phone_number: shippingDetails.alt_phoneNumber,
-        delivery_fee: deliveryFeeAmount.toString(),
-        amount: totalAmount,
+        delivery_fee: deliveryFeeAmount,
+        amount: cartSummary.subtotal + deliveryFeeAmount,
         tax: 0,
         subtotal: cartSummary.subtotal,
+        items: cartItems.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price || item.amount
+        }))
       }
 
       // Call the checkout API

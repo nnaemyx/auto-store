@@ -1,7 +1,6 @@
 "use client"
 
 import { useManufacturer } from "@/hooks/use-manufacturers"
-import { useCategories } from "@/hooks/use-categories"
 import { useProducts } from "@/hooks/use-products"
 import { Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -14,10 +13,9 @@ interface BrandProductsProps {
 
 export default function BrandProducts({ brandId }: BrandProductsProps) {
   const { data: brand, isLoading: brandLoading, isError: brandError, error: brandErrorMsg } = useManufacturer(brandId)
-  const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { isLoading: productsLoading } = useProducts({ manufacturer_id: brandId })
 
-  if (brandLoading || categoriesLoading || productsLoading) {
+  if (brandLoading || productsLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center py-12">
