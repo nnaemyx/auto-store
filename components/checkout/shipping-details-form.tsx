@@ -10,22 +10,24 @@ import { Input } from "@/components/ui/input";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { CartItem } from "@/hooks/use-cart";
 import { Checkbox } from "../ui/checkbox";
+import { Loader2, Tag } from "lucide-react";
 
 interface ShippingDetails {
-  firstName: string;
-  lastName: string;
-  stateOfResidence: string;
-  townCity: string;
-  phoneNumber: string;
-  alt_phoneNumber: string;
-  postalCode: string;
-  houseAddress: string;
-  saveDetails: boolean;
-  deliveryType: string;
+    firstName: string;
+    lastName: string;
+    stateOfResidence: string;
+    townCity: string;
+    phoneNumber: string;
+    alt_phoneNumber: string;
+    postalCode: string;
+    houseAddress: string;
+    saveDetails: boolean;
+    deliveryType: string;
+    couponCode?: string;
 }
 
 interface ShippingDetailsFormProps {
-  onSubmit: (formData: ShippingDetails) => void;
+  onSubmit: (formData: ShippingDetails & { appliedCoupon?: { code: string; discount: number } }) => void;
   cartItems: CartItem[];
   cartSummary: {
     subtotal: number;
@@ -53,6 +55,10 @@ export default function ShippingDetailsForm({
   });
   const [lgas, setLgas] = useState<string[]>([]);
   const [isLoadingLgas, setIsLoadingLgas] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   // Fetch Lagos LGAs
   useEffect(() => {
@@ -115,8 +121,52 @@ export default function ShippingDetailsForm({
       localStorage.removeItem("savedShippingDetails");
     }
 
-    onSubmit(formData);
+    // Include applied coupon data in the submission
+    const submissionData = {
+      ...formData,
+      ...(appliedCoupon && { appliedCoupon })
+    };
+
+    onSubmit(submissionData);
   };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponError("");
+
+    try {
+      // Simulate API call to validate coupon
+      // In real implementation, this would call your backend API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock response - replace with actual API call
+      const mockDiscount = Math.min(cartSummary.subtotal * 0.1, 5000); // 10% off, max ₦5,000
+      
+      setAppliedCoupon({
+        code: couponCode,
+        discount: mockDiscount
+      });
+      setCouponCode("");
+    } catch {
+      setCouponError("Invalid coupon code");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError("");
+  };
+
+  const finalTotal = appliedCoupon 
+    ? cartSummary.total - appliedCoupon.discount 
+    : cartSummary.total;
 
   return (
     <div>
@@ -337,7 +387,7 @@ export default function ShippingDetailsForm({
                       Quantity: {item.quantity}
                     </p>
                     <p className="font-medium">
-                      ₦{Number(item.price).toLocaleString()}
+                      ₦{Number(item.amount).toLocaleString()}
                     </p>
                   </div>
               </div>
@@ -350,10 +400,74 @@ export default function ShippingDetailsForm({
                 <span className="text-gray-600">Subtotal</span>
                 <span>₦{cartSummary.subtotal.toLocaleString()}</span>
               </div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount ({appliedCoupon.code})</span>
+                  <span>-₦{appliedCoupon.discount.toLocaleString()}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                 <span>Total</span>
-                <span>₦{cartSummary.total.toLocaleString()}</span>
+                <span>₦{finalTotal.toLocaleString()}</span>
               </div>
+            </div>
+
+            {/* Coupon Section */}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Tag className="h-4 w-4" />
+                <span className="text-sm font-medium">Have a coupon?</span>
+              </div>
+              
+              {!appliedCoupon ? (
+                <div className="space-y-2">
+                  <div className="flex space-x-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder="Enter coupon code"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !couponCode.trim()}
+                      className="bg-black hover:bg-gray-800 text-white px-4"
+                    >
+                      {isApplyingCoupon ? (
+                        <Loader2 className="animate-spin h-4 w-4" />
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="text-xs text-red-500">{couponError}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-md">
+                  <div>
+                    <p className="text-sm font-medium text-green-800">
+                      Coupon applied: {appliedCoupon.code}
+                    </p>
+                    <p className="text-xs text-green-600">
+                      You saved ₦{appliedCoupon.discount.toLocaleString()}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

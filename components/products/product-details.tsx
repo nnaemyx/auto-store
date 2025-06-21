@@ -36,7 +36,10 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
   );
 
   // Use the cart hook
-  const { addToCart, isAddingToCart } = useCart();
+  const { addToCart, isAddingToCart, cart, updateCartItem, isUpdatingCartItem } = useCart();
+
+  // Find if this product is already in the cart
+  const cartItem = product ? cart.cart_items.find((item) => item.id === product.id) : undefined;
 
   // Set main image when product data loads
   useEffect(() => {
@@ -58,6 +61,11 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
   const handleAddToCart = () => {
     if (!product) return;
     addToCart({ productId: product.id, quantity });
+  };
+
+  const handleUpdateQuantity = () => {
+    if (!cartItem) return;
+    updateCartItem({ id: cartItem.cart_id, quantity });
   };
 
   const handleBuyNow = () => {
@@ -223,8 +231,6 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
             </div>
           </div>
 
-
-
           {/* Action Buttons */}
           <div className="flex flex-row sm:flex-row gap-4">
             <Button
@@ -239,21 +245,35 @@ export default function ProductDetails({ id }: ProductDetailsProps) {
               ) : null}
               Buy Now
             </Button>
-            <Button
-              variant="outline"
-              className="flex-1 bg-[#00000008] border-none rounded-[4px]"
-              onClick={handleAddToCart}
-              disabled={
-                isAddingToCart || Number.parseInt(product.quantity) <= 0
-              }
-            >
-              {isAddingToCart ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <ShoppingCart className="h-4 w-4 mr-2" />
-              )}
-              Add to Cart
-            </Button>
+            {cartItem ? (
+              <Button
+                variant="outline"
+                className="flex-1 bg-[#00000008] border-none rounded-[4px]"
+                onClick={handleUpdateQuantity}
+                disabled={isUpdatingCartItem}
+              >
+                {isUpdatingCartItem ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                )}
+                Update Quantity
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="flex-1 bg-[#00000008] border-none rounded-[4px]"
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || Number.parseInt(product.quantity) <= 0}
+              >
+                {isAddingToCart ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                )}
+                Add to Cart
+              </Button>
+            )}
           </div>
         </div>
       </div>

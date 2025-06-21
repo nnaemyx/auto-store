@@ -4,6 +4,8 @@ import BestSellingItems from "@/components/homepage/bestSellingItems";
 import CarSearch from "@/components/homepage/car-search";
 import ProductHighlights from "@/components/homepage/product-highlights";
 import CategorySlider from "@/components/homepage/category-slider";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -24,17 +26,24 @@ export default function Home() {
       </section>
 
       <section className="md:py-15 py-20 md:px-10 px-4">
-        <CarSearch/>
+        <CarSearch />
       </section>
 
-      
       <section className="md:py-15  md:px-3">
-        <ProductHighlights/>
+        <ProductHighlights />
       </section>
 
       <section className="md:py-[48px] pl-4 py-20 md:pl-10">
-        <CategorySlider/>
+        <CategorySlider />
       </section>
+
+      <div className="flex justify-center my-12">
+        <Link href="/custom-order">
+          <Button className="bg-brand-red text-black px-8 py-4 text-lg rounded-lg shadow hover:bg-brand-red/90 transition">
+            Can&apos;t find what you need? Make a Custom Order
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

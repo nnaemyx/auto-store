@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { ShoppingCart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import React from "react";
 
 export default function CartPage() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -13,14 +14,65 @@ export default function CartPage() {
     cart,
     isLoading,
     isError,
-    updateQuantity,
+    updateCartItem,
+    isUpdatingCartItem,
     clearCart,
     isClearingCart,
   } = useCart();
 
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
-    if (newQuantity > 0) {
-      updateQuantity({ productId, quantity: newQuantity });
+  // Local state for quantity inputs
+  const [quantities, setQuantities] = React.useState<{ [key: number]: number }>(
+    {}
+  );
+
+  // Calculate cart summary from items
+  const cartSummary = React.useMemo(() => {
+    if (!cart?.cart_items || cart.cart_items.length === 0) {
+      return { subtotal: 0, total: 0 };
+    }
+
+    const subtotal = cart.cart_items.reduce((sum, item) => {
+      return sum + (Number(item.price) || 0);
+    }, 0);
+
+    return {
+      subtotal,
+      total: subtotal, // Assuming no additional fees for now
+    };
+  }, [cart?.cart_items]);
+
+  React.useEffect(() => {
+    // Initialize quantities from cart items
+    if (cart?.cart_items) {
+      const initial: { [key: number]: number } = {};
+      cart.cart_items.forEach((item) => {
+        initial[item.id] = Number(item.quantity || 1);
+      });
+      setQuantities(initial);
+    }
+  }, [cart?.cart_items]);
+
+  const handleInputChange = (id: number, value: string) => {
+    let num = Number(value.replace(/\D/g, ""));
+    if (!num || num < 1) num = 1;
+    setQuantities((prev) => ({ ...prev, [id]: num }));
+  };
+
+  const handleIncrement = (id: number) => {
+    setQuantities((prev) => ({ ...prev, [id]: (prev[id] || 1) + 1 }));
+  };
+
+  const handleDecrement = (id: number) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [id]: Math.max(1, (prev[id] || 1) - 1),
+    }));
+  };
+
+  const handleUpdate = (cart_id: number) => {
+    const quantity = quantities[cart_id];
+    if (quantity && quantity > 0) {
+      updateCartItem({ id: cart_id, quantity });
     }
   };
 
@@ -114,10 +166,14 @@ export default function CartPage() {
 
           <form>
             <div className="space-y-6">
-              {cart.cart_items.map((item) => {
-                const itemQuantity = Number(item.quantity || 1);
+              {cart.cart_items.map((item, index) => {
+                const itemQuantity =
+                  quantities[item.cart_id] ?? Number(item.quantity || 1);
                 return (
-                  <div key={item.id} className="bg-white rounded-md overflow-hidden transition-all hover:shadow-md">
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-md overflow-hidden transition-all hover:shadow-md"
+                  >
                     <div className="flex flex-col sm:flex-row p-4 gap-4">
                       {/* Product Image */}
                       <div className="relative w-full sm:w-24 h-24 bg-gray-50 rounded-[8px] overflow-hidden">
@@ -135,13 +191,52 @@ export default function CartPage() {
 
                       {/* Product Details */}
                       <div className="flex-1">
-                        <h3 className="font-[450] text-[#2F2F2F] text-sm group-hover:text-brand-red">{item.name}</h3>
+                        <h3 className="font-[450] text-[#2F2F2F] text-sm group-hover:text-brand-red">
+                          {item.name}
+                        </h3>
                         <p className="text-sm text-[#2F2F2F]">
                           {item.description}
                         </p>
                         <p className="font-semibold text-[#212121] text-sm mt-2">
                           ₦{Number(item.amount).toLocaleString()}
                         </p>
+
+                        {/* Quantity input, plus/minus, and update button */}
+                        <div className="flex items-center gap-2 mt-4">
+                          <button
+                            type="button"
+                            className="border rounded h-8 w-8 flex items-center justify-center"
+                            onClick={() => handleDecrement(item.cart_id)}
+                            disabled={itemQuantity <= 1 || isUpdatingCartItem}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min={1}
+                            name={`quantity${index + 1}`}
+                            value={itemQuantity}
+                            onChange={(e) =>
+                              handleInputChange(item.cart_id, e.target.value)
+                            }
+                            className="w-16 border rounded px-2 py-1 text-center"
+                          />
+                          <button
+                            type="button"
+                            className="border rounded h-8 w-8 flex items-center justify-center"
+                            onClick={() => handleIncrement(item.cart_id)}
+                            disabled={isUpdatingCartItem}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                          <Button
+                            type="button"
+                            onClick={() => handleUpdate(item.cart_id)}
+                            disabled={isUpdatingCartItem}
+                          >
+                            {isUpdatingCartItem ? "Updating..." : "Update"}
+                          </Button>
+                        </div>
 
                         {/* Mobile: Edit and Remove buttons */}
                         {isMobile && (
@@ -167,71 +262,11 @@ export default function CartPage() {
                           </div>
                         )}
 
-                        {/* Desktop: Bottom row with quantity and actions */}
-                        {!isMobile && (
-                          <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => handleQuantityChange(item.id, itemQuantity - 1)}
-                                disabled={itemQuantity <= 1}
-                                type="button"
-                              >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="mx-3 min-w-[40px] text-center font-medium">
-                                {itemQuantity}
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => handleQuantityChange(item.id, itemQuantity + 1)}
-                                type="button"
-                              >
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <div className="text-right">
-                              <span className="font-semibold text-[#212121] text-sm">
-                                ₦{(Number(item.amount) * itemQuantity).toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                        )}
+                        {/* Desktop: Bottom row with price - REMOVED per user request */}
+                        {/* (No per-item total here; only use cart summary from the hook) */}
                       </div>
 
-                      {/* Mobile: Quantity Controls */}
-                      {isMobile && (
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleQuantityChange(item.id, itemQuantity - 1)}
-                              disabled={itemQuantity <= 1}
-                              type="button"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="mx-3 min-w-[40px] text-center">
-                              {itemQuantity}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleQuantityChange(item.id, itemQuantity + 1)}
-                              type="button"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                      {/* Mobile: Quantity Controls (hidden, now handled above) */}
                     </div>
                   </div>
                 );
@@ -251,15 +286,19 @@ export default function CartPage() {
               <div className="flex justify-between">
                 <span className="text-[#2F2F2F] text-sm">Subtotal</span>
                 <span className="font-semibold text-[#212121] text-sm">
-                  ₦{cart.summary.subtotal.toLocaleString()}
+                  ₦{cartSummary.subtotal.toLocaleString()}
                 </span>
               </div>
 
               <Separator className="bg-[#00000012]" />
 
               <div className="flex justify-between">
-                <span className="font-semibold text-[#212121] text-sm">Total amount</span>
-                <span className="font-semibold text-[#212121] text-sm">₦{cart.summary.total.toLocaleString()}</span>
+                <span className="font-semibold text-[#212121] text-sm">
+                  Total amount
+                </span>
+                <span className="font-semibold text-[#212121] text-sm">
+                  ₦{cartSummary.total.toLocaleString()}
+                </span>
               </div>
             </div>
 

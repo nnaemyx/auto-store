@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,32 +14,35 @@ const CustomOrderPage = () => {
   const { toast } = useToast();
   const customOrderMutation = useCustomOrder();
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedImages, setSelectedImages] = React.useState<FileList | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
+    
+    // Extract only the required fields
     const orderData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
-      address: formData.get('address') as string,
-      product_name: formData.get('productName') as string,
+      product_name: formData.get('product_name') as string,
       description: formData.get('description') as string,
-      additional: formData.get('additional') as string,
+      address: formData.get('address') as string || undefined,
+      additional: formData.get('additional') as string || undefined,
+      images: selectedImages || undefined,
     };
 
     try {
       await customOrderMutation.mutateAsync(orderData);
-      
       toast({
         title: "Order Request Submitted",
         description: "Our customer care team will contact you shortly regarding your order.",
       });
-
-      // Reset form using the ref
       formRef.current?.reset();
+      setSelectedImages(null);
     } catch (error) {
+      console.error("Custom order error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to submit order request",
@@ -90,8 +94,8 @@ const CustomOrderPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="productName">Product Name</Label>
-                <Input id="productName" name="productName" placeholder="Enter the name of the product you want" required />
+                <Label htmlFor="product_name">Product Name</Label>
+                <Input id="product_name" name="product_name" placeholder="Enter the name of the product you want" required />
               </div>
 
               <div className="space-y-2">
@@ -126,11 +130,7 @@ const CustomOrderPage = () => {
                     multiple
                     className="hidden"
                     onChange={(e) => {
-                      const files = e.target.files;
-                      if (files && files.length > 0) {
-                        // Handle file selection
-                        console.log(`${files.length} files selected`);
-                      }
+                      setSelectedImages(e.target.files);
                     }}
                   />
                   <label htmlFor="images" className="cursor-pointer">
@@ -149,6 +149,21 @@ const CustomOrderPage = () => {
                       <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                     </div>
                   </label>
+                  {/* Image preview */}
+                  {selectedImages && selectedImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                      {Array.from(selectedImages).map((file, idx) => (
+                        <div key={idx} className="w-20 h-20 relative border rounded overflow-hidden bg-gray-50 flex items-center justify-center">
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

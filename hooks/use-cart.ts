@@ -128,23 +128,6 @@ export function useCart() {
     }
   }, [data])
 
-  // Calculate cart summary
-  const cartSummary = React.useMemo(() => {
-    if (!data?.items) return { subtotal: 0, total: 0 }
-
-    // Calculate subtotal using price or amount field
-    const subtotal = data.items.reduce((sum, item) => {
-      const quantity = Number(item.quantity || 1);
-      const itemPrice = Number(item.price || item.amount || 0);
-      return sum + (itemPrice * quantity);
-    }, 0);
-
-    return { 
-      subtotal: Math.round(subtotal),
-      total: Math.round(subtotal) // Total is now just the subtotal
-    }
-  }, [data])
-
   // Add item to cart mutation
   const addToCart = useMutation({
     mutationFn: ({ productId, quantity }: { productId: number; quantity: number }) =>
@@ -156,19 +139,15 @@ export function useCart() {
       // Snapshot the previous value
       const previousCart = queryClient.getQueryData<CartResponse>(cartKeys.items())
 
-      // Optimistically update localStorage
+      // Optimistically update localStorage and cache only if item exists
       const localCart = getLocalCart() || { items: [] }
       const existingItemIndex = localCart.items.findIndex((item) => item.id === productId)
 
       if (existingItemIndex >= 0) {
         // Update existing item with the exact new quantity
         localCart.items[existingItemIndex].quantity = quantity.toString()
-      } else {
-        // This is a simplified approach - in a real app, you'd need more product details
-        console.log("Adding new item to cart - note: this is just a localStorage update")
+        setLocalCart(localCart)
       }
-
-      setLocalCart(localCart)
 
       // Also update the query cache
       if (previousCart && previousCart.items) {
@@ -180,12 +159,11 @@ export function useCart() {
             ...updatedItems[existingItemIndex],
             quantity: quantity.toString(),
           }
+          queryClient.setQueryData(cartKeys.items(), {
+            ...previousCart,
+            items: updatedItems,
+          })
         }
-
-        queryClient.setQueryData(cartKeys.items(), {
-          ...previousCart,
-          items: updatedItems,
-        })
       }
 
       return { previousCart }
@@ -235,6 +213,62 @@ export function useCart() {
       return updatedCart
     }
   })
+
+  // Add a mutation for updating cart item quantity via /cart/update
+  const updateCartItem = useMutation({
+    mutationFn: async ({ id, quantity }: { id: number; quantity: number }) => {
+      const token = getToken();
+      if (!token) throw new Error("Not authenticated");
+      
+      // Get the current cart to find the product_id for this cart item
+      const currentCart = await apiClient.get<CartResponse>("/cart/get-cart", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      const cartItem = currentCart.items.find(item => item.cart_id === id);
+      if (!cartItem) {
+        throw new Error("Cart item not found");
+      }
+      
+      // Remove the item first
+      await apiClient.delete(`/cart/delete-cart/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      // Add it back with the new quantity
+      return apiClient.post(
+        "/cart/add-product",
+        { 
+          id: cartItem.id, // product_id
+          quantity: quantity 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: cartKeys.items() });
+      toast({
+        title: "Cart updated",
+        description: "Cart item quantity updated successfully.",
+        variant: ToastVariant.Success,
+      });
+    },
+    onError(error) {
+      toast({
+        title: "Failed to update cart",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: ToastVariant.Error,
+      });
+    },
+  });
 
   // Remove item from cart mutation
   const removeFromCart = useMutation({
@@ -356,17 +390,19 @@ export function useCart() {
   return {
     cart: {
       cart_items: data?.items || [],
-      summary: cartSummary,
+      summary: undefined, // No frontend calculation, rely on backend
     },
     isLoading,
     isError,
     error,
     addToCart: addToCart.mutate,
     updateQuantity: updateLocalQuantity.mutate, // Use local update by default
+    updateCartItem: updateCartItem.mutate, // Expose the new mutation
     removeFromCart: removeFromCart.mutate,
     clearCart: clearCart.mutate,
     isAddingToCart: addToCart.isPending,
     isUpdatingQuantity: updateLocalQuantity.isPending,
+    isUpdatingCartItem: updateCartItem.isPending,
     isRemovingFromCart: removeFromCart.isPending,
     isClearingCart: clearCart.isPending,
   }

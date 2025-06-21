@@ -4,10 +4,27 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import PaymentDetailsForm from "@/components/checkout/payment-details"
 import { useCart } from "@/hooks/use-cart"
+import React from "react"
 
 export default function PaymentPage() {
   const router = useRouter()
   const { cart } = useCart()
+
+  // Calculate cart summary from items
+  const cartSummary = React.useMemo(() => {
+    if (!cart?.cart_items || cart.cart_items.length === 0) {
+      return { subtotal: 0, total: 0 };
+    }
+
+    const subtotal = cart.cart_items.reduce((sum, item) => {
+      return sum + (Number(item.price) || 0);
+    }, 0);
+
+    return {
+      subtotal,
+      total: subtotal, // Assuming no additional fees for now
+    };
+  }, [cart?.cart_items]);
 
   interface ShippingDetails {
     firstName: string
@@ -69,7 +86,7 @@ export default function PaymentPage() {
         onSubmit={handleSubmit}
         shippingDetails={shippingDetails}
         cartItems={cart?.cart_items || []}
-        cartSummary={cart?.summary || { subtotal: 0, total: 0 }}
+        cartSummary={cartSummary}
       />
     </div>
   )

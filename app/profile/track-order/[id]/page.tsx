@@ -44,7 +44,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const { id } = await params
+    const { id } = await params
         const response = await api.get<OrderDetails>(`/order/${id}`)
         setOrderDetails(response)
       } catch (err) {
@@ -124,20 +124,20 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               <div className="space-y-4">
                 {orderDetails.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-                      <Image
+              <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                <Image
                         src={item.images[0]?.image || "/placeholder.svg?height=64&width=64"}
                         alt={item.name}
-                        fill
-                        className="object-contain p-2"
-                      />
-                    </div>
+                  fill
+                  className="object-contain p-2"
+                />
+              </div>
                     <div className="flex-1">
                       <h4 className="font-medium">{item.name}</h4>
                       <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                       <p className="font-bold">₦{item.price.toLocaleString()}</p>
                     </div>
-                  </div>
+                </div>
                 ))}
               </div>
             </div>
@@ -214,20 +214,20 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <div className="space-y-4">
               {orderDetails.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-                    <Image
+            <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+              <Image
                       src={item.images[0]?.image || "/placeholder.svg?height=64&width=64"}
                       alt={item.name}
-                      fill
-                      className="object-contain p-2"
-                    />
-                  </div>
+                fill
+                className="object-contain p-2"
+              />
+            </div>
                   <div className="flex-1">
                     <h4 className="font-medium">{item.name}</h4>
                     <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                     <p className="font-bold">₦{item.price.toLocaleString()}</p>
                   </div>
-                </div>
+              </div>
               ))}
             </div>
           </div>
