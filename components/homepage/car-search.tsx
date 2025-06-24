@@ -7,27 +7,17 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useRouter } from "next/navigation"
 import { useCategories } from "@/hooks/use-categories"
 import { useManufacturers } from "@/hooks/use-manufacturers"
-import { apiClient } from "@/api/api-client"
 
 export default function CarSearch() {
   const router = useRouter()
   const [brand, setBrand] = useState<string>("")
   const [brandId, setBrandId] = useState<string>("")
   const [make, setMake] = useState<string>("")
-  interface CarModel {
-    id: string;
-    name: string;
-    manufacturer_id: string;
-    image?: string;
-    description?: string;
-  }
-
-  const [carModels, setCarModels] = useState<CarModel[]>([])
+  const [makeId, setMakeId] = useState<string>("")
   const [part, setPart] = useState<string>("")
   const [isBrandOpen, setIsBrandOpen] = useState(false)
   const [isMakeOpen, setIsMakeOpen] = useState(false)
   const [isPartOpen, setIsPartOpen] = useState(false)
-  const [isLoadingModels, setIsLoadingModels] = useState(false)
 
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -37,44 +27,6 @@ export default function CarSearch() {
   // Fetch categories (parts)
   const { data: categories, isLoading: isLoadingCategories } = useCategories()
 
-  // Function to fetch car models when a brand is selected
-  const fetchCarModels = async (manufacturerId: string) => {
-    if (!manufacturerId) return
-
-    setIsLoadingModels(true)
-    try {
-      // Fetch all products
-      const products = await apiClient.get("/product/all") as Array<{ manufacturer_id: string; brand?: { id: string; name: string; manufacturer_id: string; image?: string; description?: string } }>;
-
-      // Filter products by manufacturer_id and extract unique car models
-      const filteredProducts = products.filter((product) => product.manufacturer_id === manufacturerId)
-
-      // Extract unique car models from filtered products
-      const modelsMap = new Map()
-
-      filteredProducts.forEach((product: { manufacturer_id: string; brand?: { id: string; name: string; manufacturer_id: string; image?: string; description?: string } }) => {
-        if (product.brand && !modelsMap.has(product.brand.id)) {
-          modelsMap.set(product.brand.id, {
-            id: product.brand.id,
-            name: product.brand.name,
-            manufacturer_id: product.brand.manufacturer_id,
-            image: product.brand.image,
-            description: product.brand.description,
-          })
-        }
-      })
-
-      // Convert map to array
-      const models = Array.from(modelsMap.values())
-      setCarModels(models)
-    } catch (error) {
-      console.error("Error fetching car models:", error)
-      setCarModels([])
-    } finally {
-      setIsLoadingModels(false)
-    }
-  }
-
   const handleSearch = () => {
     // Build query parameters
     const params = new URLSearchParams()
@@ -83,9 +35,8 @@ export default function CarSearch() {
       params.append("manufacturer_id", brandId)
     }
 
-    if (make) {
-      const selectedModel = carModels?.find((m) => m.name === make)
-      if (selectedModel) params.append("car_model_id", selectedModel.id.toString())
+    if (makeId) {
+      params.append("car_model_id", makeId)
     }
 
     if (part) {
@@ -98,7 +49,7 @@ export default function CarSearch() {
   }
 
   // When rendering categories, filter to only those with products
-  const categoriesWithProducts = categories?.filter((cat) => cat.product_count && cat.product_count > 0) || [];
+  const categoriesWithProducts = categories?.filter((cat) => cat.name && cat.name.trim() !== "") || [];
 
   return (
     <div className="w-full bg-white">
@@ -112,7 +63,7 @@ export default function CarSearch() {
           {/* Car Brand */}
           <div className="relative mb-4 md:mb-0 md:flex-1">
             <label htmlFor="brand" className="block font-[450] mb-2 text-[14px] md:text-[16px]">
-              Model
+              Brand
             </label>
             <div className="relative">
               <button
@@ -127,7 +78,7 @@ export default function CarSearch() {
                     Loading brands...
                   </span>
                 ) : (
-                  <span className="text-gray-500 text-sm">{brand || "Car brand"}</span>
+                  <span className="text-gray-500 text-sm">{brand || "Select brand"}</span>
                 )}
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </button>
@@ -142,8 +93,8 @@ export default function CarSearch() {
                         setBrand(b.name)
                         setBrandId(b.id.toString())
                         setIsBrandOpen(false)
-                        setMake("") // Reset model when brand changes
-                        fetchCarModels(b.id.toString()) // Fetch car models for this brand
+                        setMake("") // Reset make when brand changes
+                        setMakeId("")
                       }}
                     >
                       {b.name}
@@ -154,7 +105,7 @@ export default function CarSearch() {
             </div>
           </div>
 
-          {/* Car Model */}
+          {/* Car Make */}
           <div className="relative mb-4 md:mb-0 md:flex-1">
             <label htmlFor="make" className="block font-[450] mb-2 text-[14px] md:text-[16px]">
               Make
@@ -164,31 +115,32 @@ export default function CarSearch() {
                 id="make"
                 className="w-full px-4 py-2 text-left border bg-[#00000003] border-[#0000000F] rounded-[4px] flex justify-between items-center"
                 onClick={() => setIsMakeOpen(!isMakeOpen)}
-                disabled={!brand || isLoadingModels}
+                disabled={isLoadingBrands}
               >
-                {isLoadingModels ? (
+                {isLoadingBrands ? (
                   <span className="flex items-center text-gray-500 text-sm">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading models...
+                    Loading makes...
                   </span>
                 ) : (
-                  <span className="text-gray-500 text-sm">{make || "Select model"}</span>
+                  <span className="text-gray-500 text-sm">{make || "Select make"}</span>
                 )}
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </button>
 
-              {isMakeOpen && carModels && carModels.length > 0 && (
+              {isMakeOpen && brands && brands.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                  {carModels.map((m) => (
+                  {brands.map((b) => (
                     <button
-                      key={m.id}
+                      key={b.id}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
                       onClick={() => {
-                        setMake(m.name)
+                        setMake(b.name)
+                        setMakeId(b.id.toString())
                         setIsMakeOpen(false)
                       }}
                     >
-                      {m.name}
+                      {b.name}
                     </button>
                   ))}
                 </div>
@@ -211,10 +163,10 @@ export default function CarSearch() {
                 {isLoadingCategories ? (
                   <span className="flex items-center text-gray-500 text-sm">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading parts...
+                    Loading categories...
                   </span>
                 ) : (
-                  <span className="text-gray-500 text-sm">{part || "Select part"}</span>
+                  <span className="text-gray-500 text-sm">{part || "Select category"}</span>
                 )}
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </button>
