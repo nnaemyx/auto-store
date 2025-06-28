@@ -8,6 +8,8 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useToast } from "@/hooks/use-toast"
 import { apiClient } from "@/api/api-client"
 import { CartItem } from "@/hooks/use-cart"
+import { useCheckout, CheckoutRequest } from "@/hooks/use-checkout"
+import { useOrderCreation, OrderRequest } from "@/hooks/use-order-creation"
 import { Loader2 } from "lucide-react"
 import PaystackPayment from "@/components/checkout/paystack-payment"
 
@@ -37,6 +39,13 @@ interface PaymentDetailsFormProps {
   }
 }
 
+interface DeliveryOption {
+  id: number;
+  name: string;
+  description: string;
+  amount: string;
+}
+
 export default function PaymentDetailsForm({
   onSubmit,
   shippingDetails,
@@ -50,6 +59,14 @@ export default function PaymentDetailsForm({
   const [checkoutData, setCheckoutData] = useState<Record<string, unknown> | null>(null)
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
   const [deliveryFeeAmount, setDeliveryFeeAmount] = useState(0)
+  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([])
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<DeliveryOption | null>(null)
+  const [isLoadingDeliveryOptions, setIsLoadingDeliveryOptions] = useState(false)
+  const [checkoutId, setCheckoutId] = useState<number | null>(null)
+
+  // Initialize hooks
+  const checkoutMutation = useCheckout()
+  const orderCreationMutation = useOrderCreation()
 
   // Get applied coupon from localStorage
   useEffect(() => {
@@ -64,71 +81,35 @@ export default function PaymentDetailsForm({
     }
   }, [])
 
-  // Fetch delivery fee from backend
+  // Fetch delivery options on mount
   useEffect(() => {
-    const fetchDeliveryFee = async () => {
+    const fetchDeliveryOptions = async () => {
+      setIsLoadingDeliveryOptions(true)
       try {
-        const token = getToken()
-        if (!token) {
-          throw new Error("Authentication required")
-        }
-
-        // Calculate total weight of cart items
-        const totalWeight = cartItems.reduce((sum, item) => {
-          const weight = Number(item.weight || 0);
-          const quantity = Number(item.quantity || 1);
-          return sum + (weight * quantity);
-        }, 0);
-
-        console.log("Total weight for delivery fee:", totalWeight)
-
-        // Try to fetch delivery fee from backend
-        try {
-          const response = await apiClient.get<{ delivery_fee: number }>(`/cart/get-delivery-fee?weight=${totalWeight}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            }
-          })
-
-          console.log("Delivery fee response:", response)
-          if (response && response.delivery_fee) {
-            setDeliveryFeeAmount(response.delivery_fee)
-            return
-          }
-        } catch (apiError) {
-          console.error("Delivery fee API error:", apiError)
-        }
-
-        // Fallback to hardcoded delivery fee
-        const fallbackFee = totalWeight <= 5 ? 2000 : 
-                           totalWeight <= 10 ? 3000 : 
-                           totalWeight <= 20 ? 5000 : 8000;
-        console.log("Using fallback delivery fee:", fallbackFee)
-        setDeliveryFeeAmount(fallbackFee)
-      } catch (error) {
-        console.error("Error in delivery fee calculation:", error)
-        // Final fallback
-        setDeliveryFeeAmount(2000)
+        const data = await apiClient.get<DeliveryOption[]>("/get-delivery-option")
+        setDeliveryOptions(data)
+        if (data.length > 0) setSelectedDeliveryOption(data[0])
+      } catch {
+        setDeliveryOptions([])
+      } finally {
+        setIsLoadingDeliveryOptions(false)
       }
     }
+    fetchDeliveryOptions()
+  }, [])
 
-    if (cartItems.length > 0) {
-      fetchDeliveryFee()
+  // Update delivery fee when option changes
+  useEffect(() => {
+    if (selectedDeliveryOption) {
+      setDeliveryFeeAmount(Number(selectedDeliveryOption.amount))
     }
-  }, [cartItems])
-
-  // Calculate total weight of cart items
-  const totalWeight = cartItems.reduce((sum, item) => {
-    const weight = Number(item.weight || 0);
-    const quantity = Number(item.quantity || 1);
-    return sum + (weight * quantity);
-  }, 0);
+  }, [selectedDeliveryOption])
 
   // Calculate subtotal with discount
-  const subtotalWithDiscount = cartSummary.subtotal - (appliedCoupon?.discount || 0);
+  const subtotalWithDiscount = cartSummary.subtotal - (appliedCoupon?.discount || 0)
 
   // Calculate total amount with delivery fee and discount
-  const totalAmount = subtotalWithDiscount + deliveryFeeAmount;
+  const totalAmount = subtotalWithDiscount + deliveryFeeAmount
 
   // Log the amounts for debugging
   console.log("Amount breakdown:", {
@@ -138,18 +119,7 @@ export default function PaymentDetailsForm({
     deliveryFee: deliveryFeeAmount,
     totalAmount,
     cartSummaryTotal: cartSummary.total,
-    totalWeight
   })
-
-  // Ensure delivery fee is not 0
-  if (deliveryFeeAmount === 0 && cartItems.length > 0) {
-    console.warn("Delivery fee is 0, using fallback")
-    const fallbackFee = totalWeight <= 5 ? 2000 : 
-                       totalWeight <= 10 ? 3000 : 
-                       totalWeight <= 20 ? 5000 : 8000;
-    console.log("Setting fallback delivery fee:", fallbackFee)
-    setDeliveryFeeAmount(fallbackFee)
-  }
 
   const handleCheckout = async () => {
     setIsProcessing(true)
@@ -184,15 +154,44 @@ export default function PaymentDetailsForm({
         appliedCoupon: appliedCoupon
       })
 
-      // Since the backend doesn't have /cart/check-out or /order/create endpoints,
-      // we'll create a minimal checkout response that can be used by Paystack
-      // The actual order will be created after successful payment
+      // Create checkout request data
+      const checkoutRequest: CheckoutRequest = {
+        user_id: localStorage.getItem("userId") || "1", // Get from localStorage or default
+        name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
+        phone_number: shippingDetails.phoneNumber,
+        email: shippingDetails.email || "customer@example.com",
+        alt_phone_number: shippingDetails.alt_phoneNumber,
+        state: shippingDetails.stateOfResidence,
+        address: shippingDetails.houseAddress,
+        town: shippingDetails.townCity,
+        postal_code: shippingDetails.postalCode,
+        items: cartItems,
+        subtotal: subtotal,
+        delivery_fee: selectedDeliveryOption ? selectedDeliveryOption.id : 0,
+        total_amount: totalAmount,
+        coupon_code: appliedCoupon?.code,
+        discount: discount
+      }
+
+      console.log("Creating checkout with data:", checkoutRequest)
+
+      // Use the checkout hook to create checkout
+      const checkoutResponse = await checkoutMutation.mutateAsync(checkoutRequest)
+      
+      console.log("Checkout created successfully:", checkoutResponse)
+      console.log("Checkout response structure:", JSON.stringify(checkoutResponse, null, 2))
+      console.log("Checkout response ID:", checkoutResponse?.id)
+      
+      // Store checkout ID for order creation
+      setCheckoutId(checkoutResponse?.id || null)
+
+      // Create checkout response data for Paystack
       const checkoutResponseData = {
         amount: totalAmount.toString(),
         reference: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         email: shippingDetails.email,
-        check_out_id: "1", // Default value, will be updated after payment
-        delivery_fee: deliveryFee.toString(),
+        check_out_id: checkoutResponse?.id?.toString() || "1",
+        delivery_fee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
         tax: "0",
         order_code: `ORD_${Date.now()}`,
         user_id: "1",
@@ -204,7 +203,7 @@ export default function PaymentDetailsForm({
         shipping_state: shippingDetails.stateOfResidence,
         shipping_postal_code: shippingDetails.postalCode,
         shipping_phone: shippingDetails.phoneNumber,
-        shipping_full_name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
+        shipping_name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
         items: cartItems
       }
 
@@ -242,7 +241,7 @@ export default function PaymentDetailsForm({
     [key: string]: unknown; // Add additional fields if necessary
   }
 
-  const handlePaystackSuccess = (reference: string, responseData?: PaystackResponseData) => {
+  const handlePaystackSuccess = async (reference: string, responseData?: PaystackResponseData) => {
     toast({
       title: "Payment Successful",
       description: `Your payment was successful. Reference: ${reference}`,
@@ -250,14 +249,70 @@ export default function PaymentDetailsForm({
     })
 
     // Pass the checkout data to the parent component
-    if (checkoutData) {
+    if (checkoutData && checkoutId) {
+      // Send order to backend using the order creation hook
+      try {
+        console.log("Creating order after successful payment");
+        
+        // Prepare order data
+        const orderRequest: OrderRequest = {
+          check_out_id: checkoutId,
+          amount: totalAmount.toString(),
+          reference: reference,
+          email: shippingDetails.email || "customer@example.com",
+          delivery_fee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
+          payment_method: "paystack",
+          currency: "NGN",
+          total: totalAmount,
+          payment_reference: reference,
+          payment_verification: responseData?.verificationResult || null,
+          shipping_address: shippingDetails.houseAddress,
+          shipping_city: shippingDetails.townCity,
+          shipping_state: shippingDetails.stateOfResidence,
+          shipping_postal_code: shippingDetails.postalCode,
+          shipping_phone: shippingDetails.phoneNumber,
+          shipping_full_name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
+          items: cartItems.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            amount: item.amount
+          })),
+          coupon_code: appliedCoupon?.code,
+          discount: appliedCoupon?.discount
+        };
+        
+        console.log("Order request data:", orderRequest);
+        
+        // Use the order creation hook
+        const orderResponse = await orderCreationMutation.mutateAsync(orderRequest);
+        
+        console.log("Order created successfully:", orderResponse);
+        
+        toast({
+          title: "Order Created",
+          description: "Your order has been created successfully",
+          variant: ToastVariant.Success,
+        });
+      } catch (error) {
+        console.error("Error creating order:", error);
+        console.error("Error details:", {
+          message: error instanceof Error ? error.message : "Unknown error",
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+        toast({
+          title: "Order Creation Failed",
+          description: "We could not save your order after payment. Please contact support.",
+          variant: ToastVariant.Error,
+        });
+      }
       onSubmit({
         checkoutResponse: {
           ...checkoutData,
           paymentReference: reference,
           paymentVerification: responseData?.verificationResult || null,
         },
-        deliveryFee: deliveryFeeAmount.toString(),
+        deliveryFee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
       })
     }
   }
@@ -298,14 +353,29 @@ export default function PaymentDetailsForm({
             <h2 className="text-xl font-bold mb-6">Payment Details</h2>
 
             <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Delivery Fee</span>
-                <span>₦{deliveryFeeAmount.toLocaleString()}</span>
+              <div>
+                <label className="block text-sm font-medium mb-1">Delivery Location</label>
+                <select
+                  className="w-full border text-black border-gray-300 rounded-md p-2 mb-2"
+                  value={selectedDeliveryOption?.id || ''}
+                  onChange={e => {
+                    const opt = deliveryOptions.find(opt => opt.id === Number(e.target.value))
+                    setSelectedDeliveryOption(opt || null)
+                  }}
+                  disabled={isLoadingDeliveryOptions}
+                >
+                  {deliveryOptions.map(opt => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.name} - ₦{Number(opt.amount).toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+                {selectedDeliveryOption && (
+                  <p className="text-xs text-gray-500 mb-1">{selectedDeliveryOption.description}</p>
+                )}
+                {isLoadingDeliveryOptions && <p className="text-xs text-gray-500">Loading delivery options...</p>}
               </div>
-              <p className="text-sm text-gray-500">
-                Delivery fee is calculated based on total weight ({totalWeight}kg)
-              </p>
-            </div>
+              </div>
 
             {!checkoutComplete ? (
               <>
@@ -442,7 +512,7 @@ export default function PaymentDetailsForm({
                 <div className="flex justify-between text-green-600">
                   <span>Discount ({appliedCoupon.code})</span>
                   <span>-₦{appliedCoupon.discount.toLocaleString()}</span>
-                </div>
+              </div>
               )}
 
               <div className="pt-2 border-t mt-2">
@@ -455,7 +525,7 @@ export default function PaymentDetailsForm({
 
             {appliedCoupon && (
               <div className="mt-4 p-3 bg-green-50 rounded-md">
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-green-800">
                       Coupon applied: {appliedCoupon.code}
@@ -464,7 +534,7 @@ export default function PaymentDetailsForm({
                       You saved ₦{appliedCoupon.discount.toLocaleString()}
                     </p>
                   </div>
-                </div>
+              </div>
               </div>
             )}
           </div>

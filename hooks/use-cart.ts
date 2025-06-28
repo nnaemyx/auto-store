@@ -159,10 +159,10 @@ export function useCart() {
             ...updatedItems[existingItemIndex],
             quantity: quantity.toString(),
           }
-          queryClient.setQueryData(cartKeys.items(), {
-            ...previousCart,
-            items: updatedItems,
-          })
+        queryClient.setQueryData(cartKeys.items(), {
+          ...previousCart,
+          items: updatedItems,
+        })
         }
       }
 

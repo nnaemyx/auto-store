@@ -15,6 +15,7 @@ import { Loader2, Tag } from "lucide-react";
 interface ShippingDetails {
     firstName: string;
     lastName: string;
+    email: string;
     stateOfResidence: string;
     townCity: string;
     phoneNumber: string;
@@ -44,6 +45,7 @@ export default function ShippingDetailsForm({
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
     stateOfResidence: "Lagos",
     townCity: "",
     phoneNumber: "",
@@ -228,6 +230,24 @@ export default function ShippingDetailsForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              <div>
+                <label
                   htmlFor="stateOfResidence"
                   className="block text-sm font-medium mb-1"
                 >
@@ -241,7 +261,9 @@ export default function ShippingDetailsForm({
                   className="bg-gray-100"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="townCity"
@@ -405,7 +427,7 @@ export default function ShippingDetailsForm({
                 <div className="flex justify-between text-green-600">
                   <span>Discount ({appliedCoupon.code})</span>
                   <span>-₦{appliedCoupon.discount.toLocaleString()}</span>
-                </div>
+              </div>
               )}
               
               <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">

@@ -20,7 +20,7 @@ const CustomOrderPage = () => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    
+
     // Extract only the required fields
     const orderData = {
       name: formData.get('name') as string,
@@ -35,10 +35,10 @@ const CustomOrderPage = () => {
 
     try {
       await customOrderMutation.mutateAsync(orderData);
-      toast({
-        title: "Order Request Submitted",
-        description: "Our customer care team will contact you shortly regarding your order.",
-      });
+    toast({
+      title: "Order Request Submitted",
+      description: "Our customer care team will contact you shortly regarding your order.",
+    });
       formRef.current?.reset();
       setSelectedImages(null);
     } catch (error) {

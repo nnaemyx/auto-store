@@ -52,12 +52,6 @@ export default function CartPage() {
     }
   }, [cart?.cart_items]);
 
-  const handleInputChange = (id: number, value: string) => {
-    let num = Number(value.replace(/\D/g, ""));
-    if (!num || num < 1) num = 1;
-    setQuantities((prev) => ({ ...prev, [id]: num }));
-  };
-
   const handleIncrement = (id: number) => {
     setQuantities((prev) => ({ ...prev, [id]: (prev[id] || 1) + 1 }));
   };
@@ -74,6 +68,12 @@ export default function CartPage() {
     if (quantity && quantity > 0) {
       updateCartItem({ id: cart_id, quantity });
     }
+  };
+
+  const handleInputChange = (id: number, value: string) => {
+    let num = Number(value.replace(/\D/g, ""));
+    if (!num || num < 1) num = 1;
+    setQuantities((prev) => ({ ...prev, [id]: num }));
   };
 
   const handleClearCart = () => {

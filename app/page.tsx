@@ -37,9 +37,9 @@ export default function Home() {
         <CategorySlider />
       </section>
 
-      <div className="flex justify-center px-3">
+      <div className="flex justify-center px-8">
         <Link href="/custom-order">
-          <Button className="bg-brand-red text-black px-8 py-4 text-[14px] md:text-lg rounded-lg shadow hover:bg-brand-red/90 transition">
+          <Button className="bg-brand-red w-[300px] text-black px-10 py-4 text-[14px] md:text-lg">
             Can&apos;t find what you need? Make a Custom Order
           </Button>
         </Link>
