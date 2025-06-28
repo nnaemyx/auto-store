@@ -12,6 +12,7 @@ import { useCheckout, CheckoutRequest } from "@/hooks/use-checkout"
 import { useOrderCreation, OrderRequest } from "@/hooks/use-order-creation"
 import { Loader2 } from "lucide-react"
 import PaystackPayment from "@/components/checkout/paystack-payment"
+import { useAuth } from "@/api/use-auth"
 
 const getToken = (): string | null => {
   if (typeof window === "undefined") return null
@@ -67,6 +68,7 @@ export default function PaymentDetailsForm({
   // Initialize hooks
   const checkoutMutation = useCheckout()
   const orderCreationMutation = useOrderCreation()
+  const auth = useAuth()
 
   // Get applied coupon from localStorage
   useEffect(() => {
@@ -121,6 +123,12 @@ export default function PaymentDetailsForm({
     cartSummaryTotal: cartSummary.total,
   })
 
+  console.log("Auth user data:", {
+    user: auth.user,
+    userId: auth.user?.id,
+    userIdString: auth.user?.id?.toString()
+  })
+
   const handleCheckout = async () => {
     setIsProcessing(true)
 
@@ -154,9 +162,15 @@ export default function PaymentDetailsForm({
         appliedCoupon: appliedCoupon
       })
 
+      console.log("Auth user data:", {
+        user: auth.user,
+        userId: auth.user?.id,
+        userIdString: auth.user?.id?.toString()
+      })
+
       // Create checkout request data
       const checkoutRequest: CheckoutRequest = {
-        user_id: localStorage.getItem("userId") || "1", // Get from localStorage or default
+        user_id: auth.user?.id?.toString() || "1",
         name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
         phone_number: shippingDetails.phoneNumber,
         email: shippingDetails.email || "customer@example.com",
@@ -194,7 +208,7 @@ export default function PaymentDetailsForm({
         delivery_fee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
         tax: "0",
         order_code: `ORD_${Date.now()}`,
-        user_id: "1",
+        user_id: auth.user?.id?.toString() || "1",
         subtotal: subtotal.toString(),
         discount: discount.toString(),
         coupon_code: appliedCoupon?.code || null,

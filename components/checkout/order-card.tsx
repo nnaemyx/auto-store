@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { formatDate, getOrderStatusColor, useOrderProduct } from "@/hooks/use-orders"
 import Link from "next/link"
 import { Product } from "@/types/orders"
+import { useAuth } from "@/api/use-auth"
 
 // Define the OrderStatus type
 interface OrderStatus {
@@ -74,6 +75,8 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
+  const { user } = useAuth()
+  
   // Get the first product from the order
   const firstProductId =
     order.products && order.products.length > 0
@@ -84,6 +87,9 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
   console.log("OrderCard - order.id:", order.id);
   console.log("OrderCard - products:", order.products);
   console.log("OrderCard - firstProductId:", firstProductId);
+  console.log("OrderCard - order.checkOut:", order.checkOut);
+  console.log("OrderCard - order.user_id:", order.user_id);
+  console.log("OrderCard - order.check_out_id:", order.check_out_id);
 
   // Fetch product details with proper typing
   const { product, isLoading: isLoadingProduct } = useOrderProduct(firstProductId ?? null, order.products)
@@ -109,8 +115,8 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
   const orderDate = order.created_at ? formatDate(order.created_at) : "N/A"
   const deliveryDate = order.delivery_date ? formatDate(order.delivery_date) : "Pending"
 
-  // Get customer name from checkOut if available
-  const customerName = order.checkOut?.full_name || "Customer"
+  // Get customer name from checkOut if available, otherwise use authenticated user's name
+  const customerName = order.checkOut?.full_name || user?.username || "Customer"
 
   return (
     <Card className="overflow-hidden">

@@ -14,6 +14,7 @@ import {
   storePaymentDetails,
   confirmOrder,
 } from "@/lib/paystack"
+import { useAuth } from "@/api/use-auth"
 
 // Define the CheckoutData interface
 export interface CheckoutData {
@@ -65,6 +66,7 @@ export default function PaystackPayment({
   checkoutData,
 }: PaystackPaymentProps) {
   const router = useRouter()
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [isScriptLoaded, setIsScriptLoaded] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
@@ -136,6 +138,12 @@ export default function PaystackPayment({
         key: PAYSTACK_PUBLIC_KEY.substring(0, 8) + "...", // Log partial key for security
       })
 
+      console.log("Auth user data for Paystack:", {
+        user: user,
+        userId: user?.id,
+        userIdString: user?.id?.toString()
+      })
+
       // Define the callback function separately to ensure it's valid
       const callbackFunction = (response: { reference: string }) => {
         console.log("Paystack callback received with reference:", response.reference)
@@ -170,7 +178,7 @@ export default function PaystackPayment({
                 delivery_fee: paymentData.delivery_fee?.toString() || "1000",
                 tax: paymentData.tax?.toString() || "0",
                 order_code: paymentData.order_code || "didhdd",
-                user_id: "1",
+                user_id: user?.id?.toString() || "1",
               }),
             )
           } catch (err) {
@@ -216,7 +224,7 @@ export default function PaystackPayment({
         delivery_fee: paymentData.delivery_fee?.toString() || "1000",
         tax: paymentData.tax?.toString() || "0",
         order_code: paymentData.order_code || "didhdd",
-        user_id: "1",
+        user_id: user?.id?.toString() || "1",
       }
 
       // Create the config object with the correct metadata structure
