@@ -40,73 +40,22 @@ export async function verifyPaystackTransaction(reference: string): Promise<Pays
 
     console.log("Verifying transaction with reference:", reference)
 
-    // Try GET method first (most common for verification endpoints)
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/paystack/verify/${reference}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/paystack/verify`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reference }),
+    })
 
-      console.log("GET verification status:", response.status)
+    console.log("POST verification status:", response.status)
 
-      if (response.ok) {
-        return await response.json()
-      }
-
-      // If GET fails with 404 or 405, try with query parameter
-      if (response.status === 404 || response.status === 405) {
-        const queryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/paystack/verify?reference=${reference}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-
-        console.log("GET with query param verification status:", queryResponse.status)
-
-        if (queryResponse.ok) {
-          return await queryResponse.json()
-        }
-      }
-
-      // If both GET attempts fail, try POST as a last resort
-      const postResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/paystack/verify`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ reference }),
-      })
-
-      console.log("POST verification status:", postResponse.status)
-
-      if (!postResponse.ok) {
-        throw new Error(`Verification failed with status: ${postResponse.status}`)
-      }
-
-      return await postResponse.json()
-    } catch (error) {
-      console.error("Error during verification attempts:", error)
-
-      // As a fallback, we'll simulate a successful verification for testing
-      // IMPORTANT: Remove this in production!
-      console.warn("Using simulated verification response for testing")
-      return {
-        status: "success",
-        message: "Verification successful (simulated)",
-        data: {
-          reference: reference,
-          amount: 0,
-          status: "success",
-          transaction_date: new Date().toISOString(),
-        },
-      }
+    if (!response.ok) {
+      throw new Error(`Verification failed with status: ${response.status}`)
     }
+
+    return await response.json()
   } catch (error) {
     console.error("Error verifying transaction:", error)
     throw error

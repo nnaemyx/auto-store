@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function SuccessPage() {
   const router = useRouter()
-  const { cart, clearCart } = useCart()
+  const { cart } = useCart()
   const { toast, ToastVariant } = useToast()
   const initializationComplete = useRef(false)
 
@@ -88,7 +88,6 @@ export default function SuccessPage() {
             // Temporarily skip verification to allow order creation
             console.log("Skipping verification for now to allow order creation")
             setVerificationStatus("success")
-            await clearCart()
             
             toast({
               title: "Payment Successful",
@@ -102,7 +101,6 @@ export default function SuccessPage() {
             // IMPORTANT: Remove this in production!
             console.warn("Using simulated success despite error")
             setVerificationStatus("success")
-            await clearCart()
 
             // In production, uncomment this:
             /*
@@ -115,8 +113,7 @@ export default function SuccessPage() {
             */
           }
         } else {
-          // Clear cart even if no reference (for testing/development purposes)
-          await clearCart()
+          // No reference needed for testing/development purposes
         }
 
         // Format shipping details for the order details object
@@ -175,7 +172,7 @@ export default function SuccessPage() {
     }
 
     initializeSuccessPage()
-  }, []) // Empty dependency array to run only once
+  }, [router, toast, ToastVariant.Success, ToastVariant.Error, paymentMeta]) // Add missing dependencies
 
   // Function to handle user navigation after viewing order details
   const handleContinueShopping = () => {
