@@ -164,6 +164,26 @@ export default function ProfileOverviewPage() {
             )}
           </div>
         </div>
+
+        {/* Change Password Section */}
+        <div className="bg-white rounded-lg border">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-medium">Security</h2>
+          </div>
+          <div className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">Password</p>
+                <p className="text-sm text-gray-500">Update your password to keep your account secure</p>
+              </div>
+              <Link href="/auth/change-password">
+                <Button variant="outline" className="text-brand-red border-brand-red hover:bg-brand-red hover:text-white">
+                  Change Password
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </ProfileLayout>
   )

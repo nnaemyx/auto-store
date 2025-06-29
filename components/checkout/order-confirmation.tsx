@@ -100,10 +100,10 @@ export default function OrderConfirmation({
     amount: (checkoutData.amount ? checkoutData.amount : cartSummary.total).toString(),
     reference: checkoutData.reference || "",
     email: checkoutData.email || shippingDetails.email || "customer@example.com",
-    check_out_id: checkoutData.check_out_id || "1",
+    check_out_id: checkoutData.check_out_id,
     delivery_fee: (checkoutData.delivery_fee ? checkoutData.delivery_fee : "0").toString(),
     order_code: checkoutData.order_code || "didhdd",
-    user_id: user?.id?.toString() || "1",
+    user_id: user?.id?.toString(),
   }
 
   return (

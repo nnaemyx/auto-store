@@ -135,6 +135,20 @@ export default function SuccessPage() {
                           checkoutData.order_code ||
                           Math.floor(Math.random() * 1000000).toString().padStart(6, "0")
 
+        // Calculate total amount from multiple sources
+        const totalAmount = 
+          (metadataFromStorage && metadataFromStorage.amount) ||
+          (checkoutData && checkoutData.amount) ||
+          (paymentMeta && paymentMeta.amount) ||
+          0
+
+        console.log("Total amount calculation:", {
+          metadataFromStorage,
+          checkoutData,
+          paymentMeta,
+          calculatedTotal: totalAmount
+        })
+
         // Set order details
         setOrderDetails({
           shipping: formattedShipping,
@@ -145,8 +159,7 @@ export default function SuccessPage() {
           checkout: {
             ...checkoutData,
             order_code: orderCode,
-            // Add metadata if available
-            ...(paymentMeta.amount ? { total_amount: parseFloat(paymentMeta.amount) } : {})
+            total_amount: parseFloat(totalAmount.toString())
           },
           orderDate: new Date(),
           estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now

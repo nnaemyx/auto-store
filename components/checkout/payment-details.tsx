@@ -12,11 +12,7 @@ import { useCheckout, CheckoutRequest } from "@/hooks/use-checkout"
 import { Loader2 } from "lucide-react"
 import PaystackPayment from "@/components/checkout/paystack-payment"
 import { useAuth } from "@/api/use-auth"
-
-const getToken = (): string | null => {
-  if (typeof window === "undefined") return null
-  return localStorage.getItem("token")
-}
+import { authApiClient } from "@/api/api-client-with-auth"
 
 interface PaymentDetailsFormProps {
   onSubmit: (data: { checkoutResponse: Record<string, unknown>; deliveryFee: string }) => void
@@ -53,7 +49,7 @@ export default function PaymentDetailsForm({
   cartSummary,
 }: PaymentDetailsFormProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const { toast, ToastVariant } = useToast()
+  const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutComplete, setCheckoutComplete] = useState(false)
   const [checkoutData, setCheckoutData] = useState<Record<string, unknown> | null>(null)
@@ -127,47 +123,35 @@ export default function PaymentDetailsForm({
   })
 
   const handleCheckout = async () => {
+    if (!auth.user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "Please log in to continue with checkout",
+      })
+      return
+    }
+
     setIsProcessing(true)
 
     try {
-      const token = getToken()
-      if (!token) {
-        throw new Error("Authentication required. Please log in.")
-      }
-
-      // Get cart data to calculate totals
-      const testResponse = await apiClient.get<{ items: CartItem[] }>("/cart/get-cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      console.log("Cart data for checkout:", testResponse)
-
-      // Calculate totals from cart data
-      const cartItems = testResponse?.items || []
-      const subtotal = cartItems.reduce((sum: number, item: CartItem) => sum + (item.amount * parseInt(item.quantity)), 0)
-      const deliveryFee = Number(deliveryFeeAmount) || 0
-      const discount = appliedCoupon?.discount || 0
-      const totalAmount = subtotal + deliveryFee - discount
-
-      console.log("Calculated totals:", {
-        subtotal,
-        deliveryFee,
-        discount,
-        totalAmount,
-        appliedCoupon: appliedCoupon
-      })
-
-      console.log("Auth user data:", {
+      console.log("Starting checkout process...")
+      console.log("Auth context:", {
         user: auth.user,
-        userId: auth.user?.id,
-        userIdString: auth.user?.id?.toString()
+        userId: auth.user.id,
+        isAuthenticated: !!auth.user
       })
+
+      // Test the checkout endpoint first to see the response structure
+      try {
+        const testResponse = await authApiClient.get("/cart/check-out")
+        console.log("Test checkout endpoint response:", testResponse)
+      } catch (testError) {
+        console.log("Test checkout endpoint error (expected):", testError)
+      }
 
       // Create checkout request data
       const checkoutRequest: CheckoutRequest = {
-        user_id: auth.user?.id?.toString() || "1",
+        user_id: auth.user.id.toString(),
         name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
         phone_number: shippingDetails.phoneNumber,
         email: shippingDetails.email || "customer@example.com",
@@ -177,14 +161,15 @@ export default function PaymentDetailsForm({
         town: shippingDetails.townCity,
         postal_code: shippingDetails.postalCode,
         items: cartItems,
-        subtotal: subtotal,
+        subtotal: cartSummary.subtotal,
         delivery_fee: selectedDeliveryOption ? selectedDeliveryOption.id : 0,
         total_amount: totalAmount,
         coupon_code: appliedCoupon?.code,
-        discount: discount
+        discount: appliedCoupon?.discount || 0
       }
 
       console.log("Creating checkout with data:", checkoutRequest)
+      console.log("User ID being sent to checkout:", checkoutRequest.user_id)
 
       // Use the checkout hook to create checkout
       const checkoutResponse = await checkoutMutation.mutateAsync(checkoutRequest)
@@ -192,19 +177,25 @@ export default function PaymentDetailsForm({
       console.log("Checkout created successfully:", checkoutResponse)
       console.log("Checkout response structure:", JSON.stringify(checkoutResponse, null, 2))
       console.log("Checkout response ID:", checkoutResponse?.id)
+      console.log("Checkout response user_id:", checkoutResponse?.user_id)
       
+      if (!checkoutResponse?.id) {
+        console.error("Checkout response missing ID. Full response:", checkoutResponse)
+        throw new Error(`Checkout response missing ID. Response: ${JSON.stringify(checkoutResponse)}`)
+      }
+
       // Create checkout response data for Paystack
       const checkoutResponseData = {
         amount: totalAmount.toString(),
         reference: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         email: shippingDetails.email,
-        check_out_id: checkoutResponse?.id?.toString() || "1",
+        check_out_id: checkoutResponse.id.toString(),
         delivery_fee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
         tax: "0",
         order_code: `ORD_${Date.now()}`,
-        user_id: auth.user?.id?.toString() || "1",
-        subtotal: subtotal.toString(),
-        discount: discount.toString(),
+        user_id: auth.user.id.toString(),
+        subtotal: cartSummary.subtotal.toString(),
+        discount: (appliedCoupon?.discount || 0).toString(),
         coupon_code: appliedCoupon?.code || null,
         shipping_address: shippingDetails.houseAddress,
         shipping_city: shippingDetails.townCity,
@@ -216,6 +207,8 @@ export default function PaymentDetailsForm({
       }
 
       console.log("Created checkout response data:", checkoutResponseData)
+      console.log("Final user_id for Paystack:", checkoutResponseData.user_id)
+      console.log("Final check_out_id for Paystack:", checkoutResponseData.check_out_id)
       localStorage.setItem("checkoutResponse", JSON.stringify(checkoutResponseData))
 
       // Update state with checkout data
@@ -225,7 +218,6 @@ export default function PaymentDetailsForm({
       toast({
         title: "Checkout Complete",
         description: "Your order has been prepared. Please proceed with payment.",
-        variant: ToastVariant.Success,
       })
     } catch (error) {
       console.error("Checkout error:", error)
@@ -237,7 +229,6 @@ export default function PaymentDetailsForm({
       toast({
         title: "Checkout Error",
         description: error instanceof Error ? error.message : "Failed to process checkout",
-        variant: ToastVariant.Error,
       })
     } finally {
       setIsProcessing(false)
@@ -253,7 +244,6 @@ export default function PaymentDetailsForm({
     toast({
       title: "Payment Successful",
       description: `Your payment was successful. Reference: ${reference}`,
-      variant: ToastVariant.Success,
     })
 
     // Pass the checkout data to the parent component
@@ -273,7 +263,6 @@ export default function PaymentDetailsForm({
     toast({
       title: "Payment Cancelled",
       description: "You cancelled the payment process",
-      variant: ToastVariant.Error,
     })
   }
 

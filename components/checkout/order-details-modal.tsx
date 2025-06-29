@@ -368,21 +368,21 @@ export default function OrderDetailsModal({
           <div className="space-y-6">
             {/* Product info */}
             <div className="flex gap-4">
-              <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                 {selectedProduct?.images?.map((image: ProductImage) => (
-                  <div
-                    key={image.id}
-                    className="relative aspect-square w-20 overflow-hidden rounded-lg"
-                  >
-                    <Image
-                      src={image.image}
+                    <div
+                      key={image.id}
+                      className="relative aspect-square w-20 overflow-hidden rounded-lg"
+                    >
+                      <Image
+                        src={image.image}
                       alt={selectedProduct.name}
-                      fill={true}
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
+                        fill={true}
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
               <div>
                 <h3 className="font-medium">{selectedProduct?.name || "Product"}</h3>
                 <p className="font-bold mt-1">
@@ -444,7 +444,7 @@ export default function OrderDetailsModal({
                               type="button"
                               className="focus:outline-none"
                               onClick={() => setRating(i + 1)}
-                              >
+                            >
                               <Star
                                 className={`h-5 w-5 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`}
                                 fill={i < rating ? '#facc15' : 'none'}

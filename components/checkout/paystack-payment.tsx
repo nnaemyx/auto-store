@@ -125,6 +125,13 @@ export default function PaystackPayment({
       // Use the provided checkout data or create a minimal one
       const paymentData: CheckoutData = checkoutData || {}
 
+      console.log("Paystack payment data received:", {
+        checkoutData: checkoutData,
+        paymentData: paymentData,
+        check_out_id: paymentData.check_out_id,
+        user_id: paymentData.user_id
+      })
+
       // Ensure we have the correct email and amount
       const paymentEmail: string = paymentData.email || email
       // Use the total from cartSummary directly and convert to kobo
@@ -136,6 +143,8 @@ export default function PaystackPayment({
         originalAmount: amount,
         reference: reference,
         key: PAYSTACK_PUBLIC_KEY.substring(0, 8) + "...", // Log partial key for security
+        check_out_id: paymentData.check_out_id,
+        user_id: paymentData.user_id
       })
 
       console.log("Auth user data for Paystack:", {
@@ -174,11 +183,11 @@ export default function PaystackPayment({
                 amount: (paymentAmount / 100).toString(),
                 reference: reference,
                 email: paymentEmail,
-                check_out_id: paymentData.check_out_id || "1",
+                check_out_id: paymentData.check_out_id,
                 delivery_fee: paymentData.delivery_fee?.toString() || "1000",
                 tax: paymentData.tax?.toString() || "0",
                 order_code: paymentData.order_code || "didhdd",
-                user_id: user?.id?.toString() || "1",
+                user_id: user?.id?.toString(),
               }),
             )
           } catch (err) {
@@ -220,12 +229,16 @@ export default function PaystackPayment({
         amount: (paymentAmount / 100).toString(), // Convert back to Naira as string
         reference: reference,
         email: paymentEmail,
-        check_out_id: paymentData.check_out_id || "1",
+        check_out_id: paymentData.check_out_id,
         delivery_fee: paymentData.delivery_fee?.toString() || "1000",
         tax: paymentData.tax?.toString() || "0",
         order_code: paymentData.order_code || "didhdd",
-        user_id: user?.id?.toString() || "1",
+        user_id: user?.id?.toString(),
       }
+
+      console.log("Paystack metadata fields:", metadataFields)
+      console.log("Checkout ID in metadata:", metadataFields.check_out_id)
+      console.log("User ID in metadata:", metadataFields.user_id)
 
       // Create the config object with the correct metadata structure
       const config: PaystackConfig = {

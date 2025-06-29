@@ -10,15 +10,18 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useOrders } from "@/hooks/use-orders"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import type { Order } from "@/hooks/use-orders"
+import type { Product } from "@/types/orders"
 
 export default function TrackOrderPage() {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const { data: orders, isLoading } = useOrders()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
-  const handleViewDetails = (order: Order) => {
+  const handleViewDetails = (order: Order, product?: Product | null) => {
     setSelectedOrder(order)
+    setSelectedProduct(product || (order.products && order.products.length > 0 ? { ...order.products[0], amount: String(order.products[0].amount) } as Product : null))
     setShowModal(true)
   }
 
@@ -49,26 +52,39 @@ export default function TrackOrderPage() {
               {orders.map((order) => (
                 <div key={order.id} className="bg-white border rounded-lg overflow-hidden">
                   <div className="p-4 border-b flex justify-between items-center">
-                    <h3 className="font-medium">{order.products?.[0]?.name || 'Name of item'}</h3>
+                    <h3 className="font-medium">Order #{order.order_code || order.id}</h3>
                     <ChevronRight className="h-5 w-5 text-gray-400" />
                   </div>
                   <div className="p-4">
-                    <div className="flex gap-4 mb-4">
-                      <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                    {/* Products summary */}
+                    <div className="flex gap-2 overflow-x-auto mb-4">
+                      {order.products && order.products.length > 0 ? (
+                        order.products.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex flex-col items-center cursor-pointer min-w-[80px]"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleViewDetails(order, { ...product, amount: String(product.amount) } as Product)
+                            }}
+                          >
+                            <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden mb-1">
                         <Image
-                          src={order.products?.[0]?.images?.[0]?.image || "/placeholder.svg?height=64&width=64"}
-                          alt={order.products?.[0]?.name || 'Product'}
+                                src={product.images && product.images.length > 0 ? product.images[0].image : "/placeholder.png"}
+                                alt={product.name}
                           fill
                           className="object-contain p-2"
                         />
                       </div>
-                      <div>
-                        <h4 className="font-medium">{order.products?.[0]?.name || 'Name of Product'}</h4>
-                        <p className="text-sm text-gray-500">{order.products?.[0]?.description || ''}</p>
-                        <p className="font-bold mt-1">₦{order.products?.[0]?.price?.toLocaleString() || order.amount}</p>
+                            <span className="text-xs font-medium truncate w-16">{product.name}</span>
+                            <span className="text-xs text-gray-500">Qty: {product.quantity}</span>
                       </div>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">No products</span>
+                      )}
                     </div>
-
+                    {/* Order details */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-gray-500">Date of order</p>
@@ -87,7 +103,6 @@ export default function TrackOrderPage() {
                         <p className="text-yellow-500">{order.status}</p>
                       </div>
                     </div>
-
                     <Button className="w-full mt-4 bg-black hover:bg-gray-800 text-white" onClick={() => handleViewDetails(order)}>
                       View details
                     </Button>
@@ -103,26 +118,39 @@ export default function TrackOrderPage() {
               {orders.map((order) => (
                 <div key={order.id} className="bg-white border rounded-lg overflow-hidden">
                   <div className="p-4 border-b flex justify-between items-center">
-                    <h3 className="font-medium">{order.products?.[0]?.name || 'Name of item'}</h3>
+                    <h3 className="font-medium">Order #{order.order_code || order.id}</h3>
                     <ChevronRight className="h-5 w-5 text-gray-400" />
                   </div>
                   <div className="p-4">
-                    <div className="flex gap-4 mb-4">
-                      <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                    {/* Products summary */}
+                    <div className="flex gap-2 overflow-x-auto mb-4">
+                      {order.products && order.products.length > 0 ? (
+                        order.products.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex flex-col items-center cursor-pointer min-w-[80px]"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleViewDetails(order, { ...product, amount: String(product.amount) } as Product)
+                            }}
+                          >
+                            <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden mb-1">
                         <Image
-                          src={order.products?.[0]?.images?.[0]?.image || "/placeholder.svg?height=64&width=64"}
-                          alt={order.products?.[0]?.name || 'Product'}
+                                src={product.images && product.images.length > 0 ? product.images[0].image : "/placeholder.png"}
+                                alt={product.name}
                           fill
                           className="object-contain p-2"
                         />
                       </div>
-                      <div>
-                        <h4 className="font-medium">{order.products?.[0]?.name || 'Name of Product'}</h4>
-                        <p className="text-sm text-gray-500">{order.products?.[0]?.description || ''}</p>
-                        <p className="font-bold mt-1">₦{order.products?.[0]?.price?.toLocaleString() || order.amount}</p>
+                            <span className="text-xs font-medium truncate w-16">{product.name}</span>
+                            <span className="text-xs text-gray-500">Qty: {product.quantity}</span>
                       </div>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">No products</span>
+                      )}
                     </div>
-
+                    {/* Order details */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-gray-500">Date of order</p>
@@ -141,7 +169,6 @@ export default function TrackOrderPage() {
                         <p className="text-yellow-500">{order.status}</p>
                       </div>
                     </div>
-
                     <Button className="w-full mt-4 bg-black hover:bg-gray-800 text-white" onClick={() => handleViewDetails(order)}>
                       View details
                     </Button>
@@ -157,28 +184,59 @@ export default function TrackOrderPage() {
               {selectedOrder && (
                 <div>
                   <h2 className="text-lg font-bold mb-2">Order #{selectedOrder.order_code || selectedOrder.id}</h2>
+                  {/* Product selector if more than one product */}
+                  {selectedOrder.products && selectedOrder.products.length > 1 && (
+                    <div className="flex gap-2 mb-4 overflow-x-auto">
+                      {selectedOrder.products.map((prod) => (
+                        <div
+                          key={prod.id}
+                          className={`flex flex-col items-center cursor-pointer min-w-[64px] ${selectedProduct?.id === prod.id ? 'border-2 border-black rounded' : ''}`}
+                          onClick={() => setSelectedProduct({ ...prod, amount: String(prod.amount) } as Product)}
+                        >
+                          <div className="relative w-12 h-12 bg-gray-100 rounded-md overflow-hidden mb-1">
+                            <Image
+                              src={prod.images && prod.images.length > 0 ? prod.images[0].image : "/placeholder.png"}
+                              alt={prod.name}
+                              fill
+                              className="object-contain p-1"
+                            />
+                          </div>
+                          <span className="text-xs font-medium truncate w-12">{prod.name}</span>
+                          <span className="text-xs text-gray-500">Qty: {prod.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Product details */}
                   <div className="flex gap-4 mb-4 items-center">
                     <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                      {selectedProduct?.images?.map((image: { id: number; product_id: string; image: string }) => (
+                        <div
+                          key={image.id}
+                          className="relative aspect-square w-16 overflow-hidden rounded-lg"
+                        >
                       <Image
-                        src={selectedOrder.products?.[0]?.images?.[0]?.image || "/placeholder.svg?height=64&width=64"}
-                        alt={selectedOrder.products?.[0]?.name || 'Product'}
-                        fill
-                        className="object-contain p-2"
-                      />
+                            src={image.image}
+                            alt={selectedProduct.name}
+                            fill={true}
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
                     </div>
                     <div>
-                      <h4 className="font-medium">{selectedOrder.products?.[0]?.name || 'Name of Product'}</h4>
-                      <p className="font-bold">₦{selectedOrder.products?.[0]?.price?.toLocaleString() || selectedOrder.amount}</p>
+                      <h4 className="font-medium">{selectedProduct?.name || selectedOrder.products?.[0]?.name || 'Name of Product'}</h4>
+                      <p className="font-bold">₦{selectedProduct?.price?.toLocaleString() || selectedOrder.products?.[0]?.price?.toLocaleString() || selectedOrder.amount}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
                       <p className="text-gray-500">Item</p>
-                      <p className="font-medium">{selectedOrder.products?.[0]?.name || 'Product'}</p>
+                      <p className="font-medium">{selectedProduct?.name || selectedOrder.products?.[0]?.name || 'Product'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Tracking ID</p>
-                      <p className="font-medium">{selectedOrder.order_code || selectedOrder.id}</p>
+                      <p className="font-medium">{selectedProduct?.code || selectedOrder.order_code || selectedOrder.id}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Date ordered</p>

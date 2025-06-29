@@ -85,6 +85,11 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
   const status = order.orderStatus?.name || order.status || "Processing"
   const statusColor = getOrderStatusColor(order.orderStatus?.name || order.status)
 
+  const orderNumber = order?.order_code
+    ? `#${order.order_code}`
+    : order?.id
+    ? `#${order.id}`
+    : "#N/A";
   // Format dates
   const orderDate = order.created_at ? formatDate(order.created_at) : "N/A"
   const deliveryDate = order.delivery_date ? formatDate(order.delivery_date) : "Pending"
@@ -96,7 +101,7 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
         className="p-4 border-b flex justify-between items-center cursor-pointer"
         onClick={() => onViewDetails(order.id)}
       >
-        <h3 className="font-medium">Order</h3>
+        <h3 className="font-medium">Order {orderNumber}</h3>
         <Link href={`/profile/orders/${order.id}`}>
           <ChevronRight className="h-5 w-5 text-gray-400" />
         </Link>
