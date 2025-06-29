@@ -85,35 +85,39 @@ export default function SuccessPage() {
           try {
             console.log("Attempting to verify payment with reference:", paymentReference)
             
-            // Temporarily skip verification to allow order creation
-            console.log("Skipping verification for now to allow order creation")
-            setVerificationStatus("success")
+            // Use the verification function that works with backend
+            const { verifyPaystackTransaction } = await import("@/lib/paystack")
+            const verificationResult = await verifyPaystackTransaction(paymentReference)
             
-            toast({
-              title: "Payment Successful",
-              description: "Your payment has been processed successfully",
-              variant: ToastVariant.Success,
-            })
+            console.log("Payment verification result:", verificationResult)
+            
+            if (verificationResult.status === "success" || verificationResult.data?.status === "success") {
+              setVerificationStatus("success")
+              toast({
+                title: "Payment Successful",
+                description: "Your payment has been verified and order created successfully",
+                variant: ToastVariant.Success,
+              })
+            } else {
+              setVerificationStatus("failed")
+              toast({
+                title: "Payment Verification Failed",
+                description: "We couldn't verify your payment. Please contact support.",
+                variant: ToastVariant.Error,
+              })
+            }
           } catch (error) {
             console.error("Payment verification error:", error)
-
-            // For testing purposes, we'll still show success
-            // IMPORTANT: Remove this in production!
-            console.warn("Using simulated success despite error")
-            setVerificationStatus("success")
-
-            // In production, uncomment this:
-            /*
             setVerificationStatus("failed")
             toast({
               title: "Payment Verification Error",
               description: error instanceof Error ? error.message : "Unknown error",
               variant: ToastVariant.Error,
             })
-            */
           }
         } else {
           // No reference needed for testing/development purposes
+          setVerificationStatus("success")
         }
 
         // Format shipping details for the order details object

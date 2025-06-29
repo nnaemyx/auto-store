@@ -42,10 +42,16 @@ const convertToExtendedOrder = (order: Order | null): ExtendedOrder => {
   // Check if the order has a details property (API response structure)
   const orderData = order.details || order;
 
+  // Use checkOut.user_id as fallback if user_id is '1' or falsy
+  let userId = orderData.user_id;
+  if (!userId || userId === "1") {
+    userId = orderData.checkOut?.user_id && orderData.checkOut.user_id !== "1" ? orderData.checkOut.user_id : "";
+  }
+
   // Ensure we have a valid order object with all required fields
   const extendedOrder = {
     id: orderData.id || 0,
-    user_id: orderData.user_id || "",
+    user_id: userId,
     amount: orderData.amount || "0",
     order_code: orderData.order_code || "",
     check_out_id: orderData.check_out_id || "",
@@ -225,7 +231,7 @@ export default function OrderHistoryPage() {
         order={selectedOrder ? convertToExtendedOrder(selectedOrder) : null}
         isOpen={isDetailsModalOpen}
         onClose={handleCloseDetailsModal}
-        product={selectedProduct || undefined}
+        product={selectedProduct || null}
         isLoadingProduct={isLoadingProduct}
         isLoading={isLoadingOrder}
       />

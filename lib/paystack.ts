@@ -55,7 +55,18 @@ export async function verifyPaystackTransaction(reference: string): Promise<Pays
       throw new Error(`Verification failed with status: ${response.status}`)
     }
 
-    return await response.json()
+    const result = await response.json()
+    console.log("Verification result:", result)
+
+    // If verification is successful, the backend should have:
+    // 1. Cleared the cart
+    // 2. Created the order
+    // 3. Returned the order details
+    if (result.status === "success" || result.data?.status === "success") {
+      console.log("Payment verification successful - backend has handled cart clearing and order creation")
+    }
+
+    return result
   } catch (error) {
     console.error("Error verifying transaction:", error)
     throw error

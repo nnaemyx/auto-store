@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast"
 import { apiClient } from "@/api/api-client"
 import { CartItem } from "@/hooks/use-cart"
 import { useCheckout, CheckoutRequest } from "@/hooks/use-checkout"
-import { useOrderCreation, OrderRequest } from "@/hooks/use-order-creation"
 import { Loader2 } from "lucide-react"
 import PaystackPayment from "@/components/checkout/paystack-payment"
 import { useAuth } from "@/api/use-auth"
@@ -63,11 +62,9 @@ export default function PaymentDetailsForm({
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([])
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<DeliveryOption | null>(null)
   const [isLoadingDeliveryOptions, setIsLoadingDeliveryOptions] = useState(false)
-  const [checkoutId, setCheckoutId] = useState<number | null>(null)
 
   // Initialize hooks
   const checkoutMutation = useCheckout()
-  const orderCreationMutation = useOrderCreation()
   const auth = useAuth()
 
   // Get applied coupon from localStorage
@@ -196,9 +193,6 @@ export default function PaymentDetailsForm({
       console.log("Checkout response structure:", JSON.stringify(checkoutResponse, null, 2))
       console.log("Checkout response ID:", checkoutResponse?.id)
       
-      // Store checkout ID for order creation
-      setCheckoutId(checkoutResponse?.id || null)
-
       // Create checkout response data for Paystack
       const checkoutResponseData = {
         amount: totalAmount.toString(),
@@ -263,63 +257,7 @@ export default function PaymentDetailsForm({
     })
 
     // Pass the checkout data to the parent component
-    if (checkoutData && checkoutId) {
-      // Send order to backend using the order creation hook
-      try {
-        console.log("Creating order after successful payment");
-        
-        // Prepare order data
-        const orderRequest: OrderRequest = {
-          check_out_id: checkoutId,
-          amount: totalAmount.toString(),
-          reference: reference,
-          email: shippingDetails.email || "customer@example.com",
-          delivery_fee: selectedDeliveryOption ? String(selectedDeliveryOption.id) : "",
-          payment_method: "paystack",
-          currency: "NGN",
-          total: totalAmount,
-          payment_reference: reference,
-          payment_verification: responseData?.verificationResult || null,
-          shipping_address: shippingDetails.houseAddress,
-          shipping_city: shippingDetails.townCity,
-          shipping_state: shippingDetails.stateOfResidence,
-          shipping_postal_code: shippingDetails.postalCode,
-          shipping_phone: shippingDetails.phoneNumber,
-          shipping_full_name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
-          items: cartItems.map(item => ({
-            product_id: item.id,
-            quantity: item.quantity,
-            price: item.price,
-            amount: item.amount
-          })),
-          coupon_code: appliedCoupon?.code,
-          discount: appliedCoupon?.discount
-        };
-        
-        console.log("Order request data:", orderRequest);
-        
-        // Use the order creation hook
-        const orderResponse = await orderCreationMutation.mutateAsync(orderRequest);
-        
-        console.log("Order created successfully:", orderResponse);
-        
-        toast({
-          title: "Order Created",
-          description: "Your order has been created successfully",
-          variant: ToastVariant.Success,
-        });
-      } catch (error) {
-        console.error("Error creating order:", error);
-        console.error("Error details:", {
-          message: error instanceof Error ? error.message : "Unknown error",
-          stack: error instanceof Error ? error.stack : undefined,
-        });
-        toast({
-          title: "Order Creation Failed",
-          description: "We could not save your order after payment. Please contact support.",
-          variant: ToastVariant.Error,
-        });
-      }
+    if (checkoutData) {
       onSubmit({
         checkoutResponse: {
           ...checkoutData,

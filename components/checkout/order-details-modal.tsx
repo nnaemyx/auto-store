@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
+import React, { useState, useEffect } from "react";
 
-import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +28,7 @@ interface OrderDetailsModalProps {
   order: ExtendedOrder | null;
   isOpen: boolean;
   onClose: () => void;
-  product?: Product;
+  product: Product | null;
   isLoadingProduct?: boolean;
   isLoading?: boolean;
 }
@@ -38,7 +37,7 @@ export default function OrderDetailsModal({
   order,
   isOpen,
   onClose,
-  product,
+  product: initialProduct,
   isLoadingProduct,
   isLoading,
 }: OrderDetailsModalProps) {
@@ -48,8 +47,9 @@ export default function OrderDetailsModal({
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(
-    product?.id?.toString() || null
+    selectedProduct?.id?.toString() || null
   );
   const { mutate: submitReview, isPending: isSubmittingReview } =
     useSubmitProductReview();
@@ -74,7 +74,7 @@ export default function OrderDetailsModal({
     Array.isArray(order.products) &&
     order.products.length > 0
       ? order.products[0]
-      : product || null;
+      : initialProduct || null;
 
   console.log("OrderDetailsModal - productReference:", productReference);
 
@@ -85,14 +85,35 @@ export default function OrderDetailsModal({
     ? `#${order.id}`
     : "#N/A";
 
+  // Calculate total amount if more than one product
+  const totalAmount = order?.products && order.products.length > 1
+    ? order.products.reduce((sum, p) => sum + (Number(p.amount) * Number(p.quantity || 1)), 0)
+    : null;
+
   // Format dates
   const orderDate = order?.created_at ? formatDate(order.created_at) : "N/A";
   const deliveryDate = order?.delivery_date
     ? formatDate(order.delivery_date)
     : "Pending";
 
-  // Get tracking ID
-  const trackingId = "N/A"; // This doesn't seem to be in the provided data structure
+  
+
+  // Reset selectedProduct when order changes or modal opens
+  useEffect(() => {
+    if (isOpen && order) {
+      // Set to initialProduct if provided, otherwise use first product from order
+      const newSelectedProduct = initialProduct || (order.products && order.products.length > 0 ? { ...order.products[0], amount: String(order.products[0].amount) } as Product : null);
+      setSelectedProduct(newSelectedProduct);
+    }
+  }, [isOpen, order, initialProduct]);
+
+  // Reset form states when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setRating(0);
+      setComment("");
+    }
+  }, [isOpen]);
 
   const handleRequestReturn = () => {
     // If the order is still loading, we can't proceed yet
@@ -173,8 +194,8 @@ export default function OrderDetailsModal({
       if (products && Array.isArray(products) && products.length > 0) {
         productId = products[0].id;
         console.log("Using product ID from orderDetails.products:", productId);
-      } else if (product && product.id) {
-        productId = product.id;
+      } else if (selectedProduct && selectedProduct.id) {
+        productId = selectedProduct.id;
         console.log("Using product ID from product prop:", productId);
       } else {
         console.log("Using fallback product ID:", productId);
@@ -233,7 +254,7 @@ export default function OrderDetailsModal({
 
     submitReview(
       {
-        product_id: product?.id?.toString() || "",
+        product_id: selectedProduct?.id?.toString() || "",
         user_id: user?.id?.toString() || "",
         comment: comment.trim(),
         rating,
@@ -307,40 +328,65 @@ export default function OrderDetailsModal({
       >
         <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Order {orderNumber}</DialogTitle>
+            <DialogTitle>
+              Order <span className="text-gray-500 ml-2">{orderNumber}</span>
+            </DialogTitle>
             <DialogClose className="absolute right-4 top-4">
               <X className="h-4 w-4" />
             </DialogClose>
           </DialogHeader>
 
+          {/* Product list selector */}
+          {order?.products && order.products.length > 1 && (
+            <>
+              <div className="flex gap-2 mb-4 overflow-x-auto">
+                {order.products.map((prod) => (
+                  <div
+                    key={prod.id}
+                    className={`flex flex-col items-center cursor-pointer min-w-[64px] ${selectedProduct?.id === prod.id ? 'border-2 border-black rounded' : ''}`}
+                    onClick={() => setSelectedProduct({ ...prod, amount: String(prod.amount) } as Product)}
+                  >
+                    <div className="relative w-12 h-12 bg-gray-100 rounded-md overflow-hidden mb-1">
+                      <Image
+                        src={prod.images && prod.images.length > 0 ? prod.images[0].image : "/placeholder.png"}
+                        alt={prod.name}
+                        fill
+                        className="object-contain p-1"
+                      />
+                    </div>
+                    <span className="text-xs font-medium truncate w-12">{prod.name}</span>
+                    <span className="text-xs text-gray-500">Qty: {prod.quantity}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mb-4 text-right font-bold text-lg">
+                Total: ₦{totalAmount?.toLocaleString()}
+              </div>
+            </>
+          )}
+
           <div className="space-y-6">
             {/* Product info */}
             <div className="flex gap-4">
-              {isLoadingProduct ? (
-                <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
-                </div>
-              ) : (
-                <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                  {product?.images?.map((image: ProductImage) => (
-                    <div
-                      key={image.id}
-                      className="relative aspect-square w-20 overflow-hidden rounded-lg"
-                    >
-                      <Image
-                        src={image.image}
-                        alt={product.name}
-                        fill={true}
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="relative w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                {selectedProduct?.images?.map((image: ProductImage) => (
+                  <div
+                    key={image.id}
+                    className="relative aspect-square w-20 overflow-hidden rounded-lg"
+                  >
+                    <Image
+                      src={image.image}
+                      alt={selectedProduct.name}
+                      fill={true}
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
               <div>
-                <h3 className="font-medium">{product?.name || "Product"}</h3>
+                <h3 className="font-medium">{selectedProduct?.name || "Product"}</h3>
                 <p className="font-bold mt-1">
-                  ₦{product?.amount || "Product"}
+                  ₦{selectedProduct?.amount || "Product"}
                 </p>
               </div>
             </div>
@@ -349,11 +395,11 @@ export default function OrderDetailsModal({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-500">Item</p>
-                <p className="font-medium">{product?.name || "Product"}</p>
+                <p className="font-medium">{selectedProduct?.name || "Product"}</p>
               </div>
               <div>
                 <p className="text-gray-500">Tracking ID</p>
-                <p className="font-medium">{trackingId}</p>
+                <p className="font-medium">{selectedProduct?.code || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-gray-500">Date ordered</p>
@@ -369,7 +415,7 @@ export default function OrderDetailsModal({
             <div>
               <h3 className="text-base font-medium mb-2">Product Reviews</h3>
 
-              {product?.id && Array.isArray(reviews) && (
+              {selectedProduct?.id && Array.isArray(reviews) && (
                 <>
                   <ProductReviews
                     reviews={reviews}
@@ -379,7 +425,7 @@ export default function OrderDetailsModal({
               )}
 
               {/* Review Form */}
-              {product?.id && (
+              {selectedProduct?.id && (
                 <div className="mt-6 border-t pt-4">
                   <h3 className="text-base font-medium mb-4">Write a Review</h3>
                   <form
@@ -398,30 +444,27 @@ export default function OrderDetailsModal({
                               type="button"
                               className="focus:outline-none"
                               onClick={() => setRating(i + 1)}
-                            >
+                              >
                               <Star
-                                className={`h-6 w-6 ${
-                                  i < rating
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "text-gray-300"
-                                }`}
+                                className={`h-5 w-5 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                fill={i < rating ? '#facc15' : 'none'}
                               />
                             </button>
                           ))}
                         </div>
                       </div>
                       <Textarea
-                        placeholder="Write your review here..."
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
-                        className="min-h-[100px]"
+                        placeholder="Write your review here..."
+                        className="w-full"
                       />
                       <Button
                         type="submit"
+                        className="bg-black hover:bg-gray-800 text-white"
                         disabled={isSubmittingReview}
-                        className="w-full"
                       >
-                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                        {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
                       </Button>
                     </div>
                   </form>
@@ -470,14 +513,14 @@ export default function OrderDetailsModal({
                 </div>
               ) : (
                 <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                  {product?.images?.map((image: ProductImage) => (
+                  {selectedProduct?.images?.map((image: ProductImage) => (
                     <div
                       key={image.id}
                       className="relative aspect-square w-16 overflow-hidden rounded-lg"
                     >
                       <Image
                         src={image.image}
-                        alt={product.name}
+                        alt={selectedProduct.name}
                         fill={true}
                         className="object-cover"
                       />
@@ -486,13 +529,13 @@ export default function OrderDetailsModal({
                 </div>
               )}
               <div>
-                <h3 className="font-medium">{product?.name || "Product"}</h3>
+                <h3 className="font-medium">{selectedProduct?.name || "Product"}</h3>
                 <p className="text-sm">
                   {deliveryDate !== "Pending"
                     ? `Delivered · ${deliveryDate}`
                     : "Not delivered yet"}
                 </p>
-                <p className="font-bold">{product?.amount}</p>
+                <p className="font-bold">{selectedProduct?.amount}</p>
               </div>
             </div>
 
@@ -500,11 +543,11 @@ export default function OrderDetailsModal({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-500">Item</p>
-                <p className="font-medium">{product?.name || "Product"}</p>
+                <p className="font-medium">{selectedProduct?.name || "Product"}</p>
               </div>
               <div>
                 <p className="text-gray-500">Tracking ID</p>
-                <p className="font-medium">{trackingId}</p>
+                <p className="font-medium">{selectedProduct?.code || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-gray-500">Date ordered</p>
