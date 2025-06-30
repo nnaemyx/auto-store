@@ -106,6 +106,9 @@ export default function PaymentDetailsForm({
   // Calculate total amount with delivery fee and discount
   const totalAmount = subtotalWithDiscount + deliveryFeeAmount
 
+  // Calculate total weight of products in cart
+  const totalWeight = cartItems.reduce((sum, item) => sum + (Number(item.weight) || 0), 0)
+
   // Log the amounts for debugging
   console.log("Amount breakdown:", {
     subtotal: cartSummary.subtotal,
@@ -447,6 +450,12 @@ export default function PaymentDetailsForm({
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium">₦{cartSummary.subtotal.toLocaleString()}</span>
+              </div>
+
+              {/* Total Weight */}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Weight</span>
+                <span className="font-medium">{totalWeight} kg</span>
               </div>
 
               {appliedCoupon && (

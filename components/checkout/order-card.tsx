@@ -2,11 +2,10 @@
 
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { formatDate, getOrderStatusColor } from "@/hooks/use-orders"
-import Link from "next/link"
 import { Product } from "@/types/orders"
+import { useDeliveryFees } from "@/hooks/use-delivery-fees"
 
 // Define the OrderStatus type
 interface OrderStatus {
@@ -78,6 +77,15 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
   // Get all products from the order
   const products = order.products || []
 
+  // Fetch delivery fees
+  const { data: deliveryFees } = useDeliveryFees()
+
+  // Match delivery fee by amount (since order.delivery_fee is likely the amount)
+  const deliveryFeeObj = deliveryFees?.find(
+    (fee) => Number(fee.amount) === Number(order.delivery_fee)
+  )
+  const deliveryLocationName = deliveryFeeObj?.name || ""
+
   // Get delivery fee (formatted)
   const deliveryFee = order.delivery_fee ? `₦${Number(order.delivery_fee).toLocaleString()}` : "₦0"
 
@@ -102,9 +110,6 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
         onClick={() => onViewDetails(order.id)}
       >
         <h3 className="font-medium">Order {orderNumber}</h3>
-        <Link href={`/profile/orders/${order.id}`}>
-          <ChevronRight className="h-5 w-5 text-gray-400" />
-        </Link>
       </div>
 
       {/* Products summary */}
@@ -144,7 +149,11 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
         </div>
         <div>
           <p className="text-sm text-gray-500">Delivery fee</p>
-          <p className="font-medium">{deliveryFee}</p>
+          <p className="font-medium">
+            {deliveryLocationName
+              ? `${deliveryLocationName} (${deliveryFee})`
+              : deliveryFee}
+          </p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Date delivered</p>
@@ -158,7 +167,7 @@ export default function OrderCard({ order, onViewDetails }: OrderCardProps) {
           <>
             <div>
               <p className="text-sm text-gray-500">Delivery address</p>
-              <p className="font-medium truncate">{order.checkOut.address}, {order.checkOut.town}, {order.checkOut.state}</p>
+              <p className="font-medium truncate">{order.checkOut.address}, {order.checkOut.state}</p>
             </div>
           </>
         )}

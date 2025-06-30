@@ -32,7 +32,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
   };
 
   return (
-    <div className="flex flex-col max-h-screen">
+    <div className="flex flex-col h-full">
       {/* Fixed Header */}
       <div className="bg-white sticky top-0 z-10">
         <SheetHeader className="sr-only">
@@ -54,29 +54,36 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {/* User Info (if logged in) */}
-        {user && (
-          <Link href="/profile" onClick={onClose}>
-            <div className="px-4 py-3 bg-gray-50">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                  <Image
-                    src={user.image}
-                    alt="user profile"
-                    width={40}
-                    height={40}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-base font-medium">{user.username}</h3>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+        {user ? (
+          <>
+            <Link href="/profile" onClick={onClose}>
+              <div className="px-4 py-3 bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <Image
+                      src={user.image}
+                      alt="user profile"
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-medium">{user.username}</h3>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        )}
+            </Link>
+            <Link href="/profile/orders" onClick={onClose}>
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center gap-3 hover:bg-gray-100 transition">
+                <span className="text-base font-medium">My Orders</span>
+              </div>
+            </Link>
+          </>
+        ) : null}
 
         {/* Categories */}
         <div className="px-4 py-4">
@@ -114,9 +121,9 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         </div>
 
         {/* Main Menu */}
-        <div className="px-4 mt-[38px]">
+        <div>
           <Collapsible defaultOpen>
-            <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+            <CollapsibleTrigger className="flex px-3 items-center justify-between w-full text-left">
               <span className="text-base font-medium">Main menu</span>
               <ChevronDown className="h-5 w-5 transition-transform duration-200 transform ui-open:rotate-180" />
             </CollapsibleTrigger>
@@ -129,8 +136,6 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
                 <ShoppingCart className="h-5 w-5" />
                 <span>My cart</span>
               </Link>
-  
-
               {!user && (
                 <Link
                   href="/auth/signup"
@@ -141,7 +146,6 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
                   <span>Register</span>
                 </Link>
               )}
-
               <Link
                 href="/profile/support"
                 className="flex items-center gap-3 py-4 text-gray-700 hover:text-brand-red"
@@ -153,11 +157,9 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
             </CollapsibleContent>
           </Collapsible>
         </div>
-
         {/* Additional space at bottom to ensure logout is visible */}
         <div className="h-24"></div>
       </div>
-
       {/* Fixed Logout Footer */}
       <div className="bg-white sticky bottom-0 left-0 right-0 z-10">
         <Separator />

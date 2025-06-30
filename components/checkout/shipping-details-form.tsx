@@ -55,34 +55,34 @@ export default function ShippingDetailsForm({
     saveDetails: false,
     deliveryType: "pickup", // default to pickup
   });
-  const [lgas, setLgas] = useState<string[]>([]);
-  const [isLoadingLgas, setIsLoadingLgas] = useState(false);
+  // const [lgas, setLgas] = useState<string[]>([]);
+  // const [isLoadingLgas, setIsLoadingLgas] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState("");
 
   // Fetch Lagos LGAs
-  useEffect(() => {
-    const fetchLGAs = async () => {
-      setIsLoadingLgas(true);
-      try {
-        const response = await fetch(
-          `https://nga-states-lga.onrender.com/?state=Lagos`
-        );
-        if (!response.ok) throw new Error("Failed to fetch LGAs");
-        const data = await response.json();
-        setLgas(data || []);
-      } catch (error) {
-        console.error("Error fetching LGAs:", error);
-        setLgas([]);
-      } finally {
-        setIsLoadingLgas(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchLGAs = async () => {
+  //     setIsLoadingLgas(true);
+  //     try {
+  //       const response = await fetch(
+  //         `https://nga-states-lga.onrender.com/?state=Lagos`
+  //       );
+  //       if (!response.ok) throw new Error("Failed to fetch LGAs");
+  //       const data = await response.json();
+  //       setLgas(data || []);
+  //     } catch (error) {
+  //       console.error("Error fetching LGAs:", error);
+  //       setLgas([]);
+  //     } finally {
+  //       setIsLoadingLgas(false);
+  //     }
+  //   };
 
-    fetchLGAs();
-  }, []);
+  //   fetchLGAs();
+  // }, []);
 
   // Check if we have saved shipping details
   useEffect(() => {
@@ -263,7 +263,7 @@ export default function ShippingDetailsForm({
               </div>
               </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="townCity"
@@ -293,7 +293,7 @@ export default function ShippingDetailsForm({
                   </p>
                 )}
               </div>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

@@ -39,8 +39,16 @@ export default function Home() {
 
       <div className="flex justify-center px-8">
         <Link href="/custom-order">
-          <Button className="bg-brand-red w-[300px] text-black px-10 py-4 text-[14px] md:text-lg">
-            Can&apos;t find what you need? Make a Custom Order
+          <Button
+            className="w-[350px] text-white bg-black hover:bg-brand-red/90 px-10 py-4 text-[14px] md:text-lg font-semibold shadow-lg transition-transform duration-150 hover:scale-105 focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
+            aria-label="Make a Custom Order"
+          >
+            <span className="flex items-center text-[13px] justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Can&apos;t find what you need? Make a Custom Order
+            </span>
           </Button>
         </Link>
       </div>

@@ -7,6 +7,7 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useRouter } from "next/navigation"
 import { useCategories } from "@/hooks/use-categories"
 import { useManufacturers } from "@/hooks/use-manufacturers"
+import { useCarModelsFromProducts } from "@/hooks/use-car-models-from-products"
 
 export default function CarSearch() {
   const router = useRouter()
@@ -26,6 +27,9 @@ export default function CarSearch() {
 
   // Fetch categories (parts)
   const { data: categories, isLoading: isLoadingCategories } = useCategories()
+
+  // Fetch car models (makes) based on selected brand
+  const { data: carModels, isLoading: isLoadingCarModels } = useCarModelsFromProducts(brandId)
 
   const handleSearch = () => {
     // Build query parameters
@@ -115,9 +119,9 @@ export default function CarSearch() {
                 id="make"
                 className="w-full px-4 py-2 text-left border bg-[#00000003] border-[#0000000F] rounded-[4px] flex justify-between items-center"
                 onClick={() => setIsMakeOpen(!isMakeOpen)}
-                disabled={isLoadingBrands}
+                disabled={isLoadingCarModels || !brandId}
               >
-                {isLoadingBrands ? (
+                {isLoadingCarModels ? (
                   <span className="flex items-center text-gray-500 text-sm">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Loading makes...
@@ -128,19 +132,19 @@ export default function CarSearch() {
                 <ChevronDown className="h-4 w-4 text-gray-500" />
               </button>
 
-              {isMakeOpen && brands && brands.length > 0 && (
+              {isMakeOpen && carModels && carModels.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                  {brands.map((b) => (
+                  {carModels.map((m) => (
                     <button
-                      key={b.id}
+                      key={m.id}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
                       onClick={() => {
-                        setMake(b.name)
-                        setMakeId(b.id.toString())
+                        setMake(m.name)
+                        setMakeId(m.id.toString())
                         setIsMakeOpen(false)
                       }}
                     >
-                      {b.name}
+                      {m.name}
                     </button>
                   ))}
                 </div>

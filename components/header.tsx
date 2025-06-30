@@ -66,6 +66,14 @@ const Header = () => {
 
         </div>
         <nav className="hidden lg:flex items-center justify-center gap-6">
+        <Link
+            href="/"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname.includes("/") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Home
+          </Link>
           <Link
             href="/brands"
             className={`text-sm font-medium transition-colors hover:text-primary ${

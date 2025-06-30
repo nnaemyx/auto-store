@@ -18,14 +18,23 @@ const DesktopNavMenu = () => {
         </Link>
 
         {user ? (
-          <Link href="/profile">
-            <div className="flex items-center gap-2 px-3 py-2.5">
-              <User className="h-4.5 w-4.5" />
-              <span className="text-[15px] font-[450] tracking-[-3%]">
-                {user.username}
-              </span>
-            </div>
-          </Link>
+          <>
+            <Link href="/profile">
+              <div className="flex items-center gap-2 px-3 py-2.5">
+                <User className="h-4.5 w-4.5" />
+                <span className="text-[15px] font-[450] tracking-[-3%]">
+                  {user.username}
+                </span>
+              </div>
+            </Link>
+            <Link href="/profile/orders">
+              <div className="flex items-center gap-2 px-3 py-2.5 hover:bg-gray-100 rounded transition">
+                <span className="text-[15px] font-[450] tracking-[-3%]">
+                  My Orders
+                </span>
+              </div>
+            </Link>
+          </>
         ) : (
           <Link
             href="/auth/signup"
