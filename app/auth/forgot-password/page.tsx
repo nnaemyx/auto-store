@@ -4,9 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useAuth } from "@/api/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { Loader2} from "lucide-react"
 import { authApiClient } from "@/api/api-client-with-auth"
 
 export default function ForgotPasswordPage() {
@@ -58,7 +57,7 @@ export default function ForgotPasswordPage() {
               Check Your Email
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              We've sent password reset instructions to {email}
+              We&apos;ve sent password reset instructions to {email}
             </p>
           </div>
           
@@ -85,7 +84,7 @@ export default function ForgotPasswordPage() {
             Forgot Password
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
         
@@ -113,7 +112,7 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-red hover:bg-brand-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red"
             >
               {isLoading ? (
                 <>
