@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import ProfileLayout from "@/components/profile/profile-layout"
-import { useToast } from "@/hooks/use-toast"
+import { useToast, ToastVariant } from "@/hooks/use-toast"
 import { HelpCircle } from "lucide-react"
+import { useContact } from '@/hooks/use-contact'
 
 export default function SupportPage() {
   const { toast } = useToast()
+  const contactMutation = useContact()
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    orderNumber: "",
+    phone: "",
     subject: "",
     message: "",
   })
@@ -26,15 +28,28 @@ export default function SupportPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    toast({
-      title: "Message Sent",
-      description: "Your message has been sent. We'll get back to you soon.",
-    })
-    // Reset form
-    setFormData({ name: "", email: "", orderNumber: "", subject: "", message: "" })
+    try {
+      await contactMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+      })
+      toast({
+        title: "Message Sent",
+        description: "Your message has been sent. We'll get back to you soon.",
+      })
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send message",
+        variant: ToastVariant.Error,
+      })
+    }
   }
 
   // Breadcrumb
@@ -88,15 +103,16 @@ export default function SupportPage() {
           </div>
 
           <div>
-            <label htmlFor="orderNumber" className="block text-sm font-medium mb-1">
-              Order Number (Optional)
+            <label htmlFor="phone" className="block text-sm font-medium mb-1">
+              Phone Number
             </label>
             <Input
-              id="orderNumber"
-              name="orderNumber"
-              value={formData.orderNumber}
+              id="phone"
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
-              placeholder="Enter order number if applicable"
+              placeholder="Enter your phone number"
+              required
             />
           </div>
 
@@ -134,8 +150,8 @@ export default function SupportPage() {
             <p>Our support team typically responds within 24 hours.</p>
           </div>
 
-          <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white">
-            Send message
+          <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white" disabled={contactMutation.isPending}>
+            {contactMutation.isPending ? "Sending..." : "Send message"}
           </Button>
         </form>
       </div>
