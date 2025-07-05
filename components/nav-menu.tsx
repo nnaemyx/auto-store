@@ -54,7 +54,7 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-20">
         {/* User Info (if logged in) */}
         {user ? (
           <>
@@ -121,9 +121,9 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
         </div>
 
         {/* Main Menu */}
-        <div>
+        <div className="px-4">
           <Collapsible defaultOpen>
-            <CollapsibleTrigger className="flex px-3 items-center justify-between w-full text-left">
+            <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
               <span className="text-base font-medium">Main menu</span>
               <ChevronDown className="h-5 w-5 transition-transform duration-200 transform ui-open:rotate-180" />
             </CollapsibleTrigger>
@@ -157,13 +157,10 @@ const NavMenu = ({ onClose }: { onClose?: () => void }) => {
             </CollapsibleContent>
           </Collapsible>
         </div>
-        {/* Additional space at bottom to ensure logout is visible */}
-        <div className="h-24"></div>
-      </div>
-      {/* Fixed Logout Footer */}
-      <div className="bg-white sticky bottom-0 left-0 right-0 z-10">
-        <Separator />
-        <div className="px-4 py-4">
+
+        {/* Logout Section */}
+        <div className="px-4 py-4 mt-4">
+          <Separator className="mb-4" />
           {user ? (
             <Button
               variant="ghost"
