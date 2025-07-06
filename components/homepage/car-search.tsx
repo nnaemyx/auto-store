@@ -7,7 +7,7 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useRouter } from "next/navigation"
 import { useCategories } from "@/hooks/use-categories"
 import { useManufacturers } from "@/hooks/use-manufacturers"
-import { useCarModelsFromProducts } from "@/hooks/use-car-models-from-products"
+import { useCarModels } from "@/hooks/use-car-models"
 
 export default function CarSearch() {
   const router = useRouter()
@@ -28,8 +28,14 @@ export default function CarSearch() {
   // Fetch categories (parts)
   const { data: categories, isLoading: isLoadingCategories } = useCategories()
 
-  // Fetch car models (makes) based on selected brand
-  const { data: carModels, isLoading: isLoadingCarModels } = useCarModelsFromProducts(brandId)
+  // Fetch car models (makes) based on selected brand using the new endpoint
+  const { data: carModels, isLoading: isLoadingCarModels, error: carModelsError } = useCarModels(brandId)
+
+  // Debug logging
+  console.log("CarSearch - brandId:", brandId)
+  console.log("CarSearch - carModels:", carModels)
+  console.log("CarSearch - isLoadingCarModels:", isLoadingCarModels)
+  console.log("CarSearch - carModelsError:", carModelsError)
 
   const handleSearch = () => {
     // Build query parameters
