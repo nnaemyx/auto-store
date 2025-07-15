@@ -16,6 +16,9 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Auto Store - Quality Auto Parts",
   description: "Find the best auto parts for your vehicle",
+  icons: {
+    icon: '/favicon.jpg',
+  },
 }
 
 export default function RootLayout({
