@@ -30,7 +30,11 @@ const { toast, ToastVariant } = useToast();
       });
     } catch (err) {
       console.log(err)
-      toast({ title: "Error", variant: ToastVariant.Error});
+      toast({ 
+        title: "Login Failed", 
+        description: "Invalid email or password. Please check your credentials and try again.",
+        variant: ToastVariant.Error
+      });
     } finally {
       setIsLoading(false)
     }

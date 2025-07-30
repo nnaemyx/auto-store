@@ -34,9 +34,7 @@ const submitCustomOrder = async (data: CustomOrderData) => {
     if (data.additional) formData.append('additional', data.additional);
     
     // Add images
-    Array.from(data.images).forEach((file) => {
-      formData.append('images', file);
-    });
+    formData.append('image', data.images[0]);
 
     const headers: Record<string, string> = {};
     if (token) {

@@ -56,8 +56,27 @@ export default function SignupPage() {
     }
 
     // Password validation
-    if (formData.password.length < 6) {
-      errors.push("Password must be at least 6 characters long");
+    // Enhanced password validation
+    if (formData.password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    } else {
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
+      const hasNumbers = /\d/.test(formData.password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+      
+      if (!hasUpperCase) {
+        errors.push("Password must contain at least one uppercase letter");
+      }
+      if (!hasLowerCase) {
+        errors.push("Password must contain at least one lowercase letter");
+      }
+      if (!hasNumbers) {
+        errors.push("Password must contain at least one number");
+      }
+      if (!hasSpecialChar) {
+        errors.push("Password must contain at least one special character (!@#$%^&*)");
+      }
     }
 
     // Password match validation
@@ -158,7 +177,7 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={8}
                 showPasswordToggle
               />
             </div>
@@ -178,7 +197,7 @@ export default function SignupPage() {
                 value={formData.confirm_password}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={8}
                 showPasswordToggle
               />
             </div>
